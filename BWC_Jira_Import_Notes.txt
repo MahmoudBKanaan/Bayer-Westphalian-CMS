@@ -1,0 +1,25 @@
+Bayer-Westphalian Campaign Management Platform — Jira CSV Import Notes
+
+Generated file:
+- BWC_Jira_Import_Agile_Project_Plan.csv
+
+Row counts:
+- Epics: 27
+- High-level user stories: 17
+- Scrum ceremony tasks: 19
+- Detailed sprint backlog tasks: 423
+- Critical test cases: 15
+- Total rows: 501
+
+Important Jira import notes:
+1. Jira CSV imports cannot reliably create Jira sprints from sprint names alone in all Jira configurations.
+   The CSV includes Sprint, Planned Sprint Name, and Sprint Number columns.
+   If Jira rejects the Sprint field, map Planned Sprint Name and Sprint Number as custom fields,
+   then manually/bulk assign work items to Jira sprints after import.
+2. The CSV uses Work Item ID, Parent ID, and Epic Link with internal IDs such as E01, US-001, S1-001.
+   Depending on Jira project type/importer, map Parent ID or Epic Link carefully.
+   For best hierarchy support, use Jira admin External System Import where available.
+3. Assignee and Reporter are left blank because Jira Cloud usually requires valid account IDs/emails.
+   Fill these with your Jira user account email if your import wizard requires them.
+4. If your Jira project uses 'Issue Type' instead of 'Work Type', map the Work Type column to Issue Type.
+5. Map Component to Components, Fix Version to Fix Version/s, and Requirement ID/User Story/etc. to custom fields if desired.
