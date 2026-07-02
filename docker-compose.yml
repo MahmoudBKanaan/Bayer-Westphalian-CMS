@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: bwc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bwc_campaign}
+      POSTGRES_USER: ${POSTGRES_USER:-bwc_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-bwc_app}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - bwc_postgres_data:/var/lib/postgresql/data
+    networks:
+      - bwc_local
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-bwc_app} -d ${POSTGRES_DB:-bwc_campaign}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+volumes:
+  bwc_postgres_data:
+    name: bwc_postgres_data
+    driver: local
+
+networks:
+  bwc_local:
+    name: bwc_local
+    driver: bridge

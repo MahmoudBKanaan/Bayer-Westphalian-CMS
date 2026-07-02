@@ -1,0 +1,20 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+server:
+  forward-headers-strategy: framework
+
+logging:
+  level:
+    root: INFO
+
+app:
+  security:
+    jwt:
+      secret: ${JWT_SECRET}

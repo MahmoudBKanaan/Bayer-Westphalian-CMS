@@ -1,0 +1,82 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor and IDE files
+.idea/
+.vscode/
+*.iml
+*.swp
+*.swo
+
+# Word/Office temporary lock files
+~$*
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.jks
+secrets/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Frontend: Node, Vite, React, TypeScript
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.vite/
+frontend/coverage/
+frontend/playwright-report/
+frontend/test-results/
+frontend/.eslintcache
+frontend/*.tsbuildinfo
+
+# Backend: Java, Spring Boot, Maven, Gradle
+backend/target/
+backend/build/
+backend/out/
+backend/.gradle/
+backend/HELP.md
+backend/*.log
+
+# Test and coverage output
+coverage/
+.nyc_output/
+surefire-reports/
+failsafe-reports/
+
+# Docker and local runtime data
+docker/postgres/data/
+docker/postgres/backups/
+docker/volumes/
+*.pid
+
+# Database dumps and local data exports
+*.dump
+*.sql.gz
+*.backup
+*.sqlite
+*.sqlite3
+
+# Generated packages and archives
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+
+# Temporary files
+tmp/
+temp/
+.cache/
