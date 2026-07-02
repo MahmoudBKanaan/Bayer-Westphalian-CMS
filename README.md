@@ -96,44 +96,53 @@ Replace these placeholders with live GitHub Project and Jira board URLs once the
 
 Run commands from the project root unless noted.
 
+### Prerequisites
+
+- Node.js 22 or later
+- npm
+- Java 21
+- Maven 3.9 or later
+- Docker Desktop
+
 ### Git
 
 ```bash
 git status
-git add .
-git commit -m "chore: initialize project foundation"
 ```
 
 ### Frontend
 
-After the Vite app is generated:
+Install dependencies and run the frontend checks:
 
 ```bash
 cd frontend
 npm install
-npm run dev
-npm run build
 npm run test
+npm run build
+```
+
+Run the local Vite development server:
+
+```bash
+cd frontend
+npm run dev
 ```
 
 ### Backend
 
-After the Spring Boot app is generated:
+Install Maven locally or add a Maven wrapper before replacing these commands with `./mvnw`.
 
 ```bash
 cd backend
-./mvnw spring-boot:run
-./mvnw test
-./mvnw package
+mvn test
+mvn package
 ```
 
-On Windows PowerShell:
+Run the local Spring Boot development server:
 
 ```powershell
 cd backend
-.\mvnw.cmd spring-boot:run
-.\mvnw.cmd test
-.\mvnw.cmd package
+mvn spring-boot:run
 ```
 
 ### Docker
@@ -143,6 +152,13 @@ docker compose up -d
 docker compose ps
 docker compose logs -f
 docker compose down
+```
+
+Run Docker verification scripts on Windows PowerShell:
+
+```powershell
+.\scripts\test-docker-compose-config.ps1
+.\scripts\test-docker-compose-postgres.ps1
 ```
 
 The local PostgreSQL service uses `docker-compose.yml` and defaults to:

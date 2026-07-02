@@ -1,0 +1,240 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3400" height="2300" viewBox="0 0 3400 2300">
+  <defs>
+    <style>
+      .title { font-family: Arial, Helvetica, sans-serif; font-size: 38px; font-weight: 700; fill: #222; }
+      .subtitle { font-family: Arial, Helvetica, sans-serif; font-size: 22px; fill: #555; }
+      .actor-label { font-family: Arial, Helvetica, sans-serif; font-size: 26px; font-weight: 600; fill: #222; }
+      .usecase-label { font-family: Arial, Helvetica, sans-serif; font-size: 24px; fill: #111; text-anchor: middle; dominant-baseline: middle; }
+      .section-label { font-family: Arial, Helvetica, sans-serif; font-size: 22px; font-weight: 700; fill: #454545; text-anchor: middle; }
+      .small-label { font-family: Arial, Helvetica, sans-serif; font-size: 18px; fill: #666; }
+      .assoc { fill: none; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2.2; opacity: 0.47; }
+      .boundary { fill: #fbfbfb; stroke: #222; stroke-width: 3; }
+      .usecase { fill: #ffffff; stroke: #111; stroke-width: 2.4; }
+      .actor-stroke { stroke: #111; stroke-width: 3.2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+  </defs>
+  <rect width="100%" height="100%" fill="#ffffff"/>
+
+<rect class="boundary" x="650" y="110" width="2100" height="2050" rx="8"/>
+<text class="title" x="1700.0" y="165" text-anchor="middle">Bayer-Westphalian Campaign Management Platform</text>
+<text class="subtitle" x="1700.0" y="202" text-anchor="middle">UML Use-Case Diagram</text>
+<text class="section-label" x="1050" y="235">Administration &amp; Data</text>
+<text class="section-label" x="1700" y="235">Campaign Workflow</text>
+<text class="section-label" x="2350" y="235">Reporting &amp; Compliance</text>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,244 819.4784882870858,316.6797814928236"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,248 934.0598366110943,532.2009214963863"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,252 977.6711654209823,768.3391351229023"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,256 997.9486204758151,1007.2005480076944"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,260 1021.9395150104081,1726.346569448389"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,244 2215.7337498004854,1014.4743212016162"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,248 2240.608223525323,1251.4881195600565"/>
+<polyline class="assoc" stroke="#4d4d4d" points="372,252 625,252 2258.272277978242,1489.8065807966423"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,634 919.8128392995823,406.06880667333627"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,638 1433.6102124528325,600.4309254160036"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,642 1468.1943845782562,797.1841448047531"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,646 1540.028421128612,1018.4428947613297"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,650 1584.9054287097688,1252.1060439594319"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,634 1628.6006780679766,1728.278297004546"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,638 2120.8129175894064,383.83348233766094"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,642 2081.6453994750254,597.0548226629417"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,646 2099.395481502123,806.1811681104141"/>
+<polyline class="assoc" stroke="#5a5a5a" points="372,642 625,650 2150.5900930467906,1026.8516480404583"/>
+<polyline class="assoc" stroke="#666666" points="372,1022 625,1014 987.1995183641305,412.24472516121574"/>
+<polyline class="assoc" stroke="#666666" points="372,1022 625,1018 2081.403892004211,1063.4819953570284"/>
+<polyline class="assoc" stroke="#666666" points="372,1022 625,1022 2119.936519527606,1276.5023850474977"/>
+<polyline class="assoc" stroke="#666666" points="372,1022 625,1026 1540.9943682758874,641.7247235729042"/>
+<polyline class="assoc" stroke="#666666" points="372,1022 625,1030 1433.0852734422897,1060.3524797629743"/>
+<polyline class="assoc" stroke="#737373" points="372,1412 625,1404 1009.6011985955195,413.2795384831244"/>
+<polyline class="assoc" stroke="#737373" points="372,1412 625,1408 944.3580030366459,1731.102249480608"/>
+<polyline class="assoc" stroke="#737373" points="372,1412 625,1412 1623.2695934846383,411.3612136440619"/>
+<polyline class="assoc" stroke="#737373" points="372,1412 625,1416 2131.8653136106427,1107.7159063423458"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1794 1020.2970884006116,413.61154519515026"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1798 904.8202679966026,1603.960608355245"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1802 1593.335305089268,1128.794093881518"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1806 1489.2215653492572,1589.997112599388"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1810 2112.1749058272703,1580.2992536559798"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1794 2080.088388948106,1791.6374819679588"/>
+<polyline class="assoc" stroke="#808080" points="372,1802 625,1798 2163.7331506674245,1356.3312891160906"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,484 1308.4086037301868,368.55107266414893"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,488 1220.0926237377607,1020.2964931645977"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,492 1184.2662501995148,1254.4743212016162"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,496 1159.391776474677,1491.4881195600565"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,500 2552.3337035123495,392.37667536689327"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,484 2580.521511712914,556.6797814928236"/>
+<polyline class="assoc" stroke="#4d4d4d" points="3028,492 2775,488 2465.9401633889056,772.2009214963863"/>
+<polyline class="assoc" stroke="#5f5f5f" points="3028,942 2775,934 1217.6321205509507,400.17098855721076"/>
+<polyline class="assoc" stroke="#5f5f5f" points="3028,942 2775,938 2420.737081879268,411.76453167039335"/>
+<polyline class="assoc" stroke="#5f5f5f" points="3028,942 2775,942 2462.1378606038925,648.2190662722273"/>
+<polyline class="assoc" stroke="#707070" points="3028,1392 2775,1384 1160.790457039444,408.3638302503036"/>
+<polyline class="assoc" stroke="#707070" points="3028,1392 2775,1388 2470.5742474912918,1127.2638756522065"/>
+<polyline class="assoc" stroke="#707070" points="3028,1392 2775,1392 2590.502957290117,1339.0873783153238"/>
+<polyline class="assoc" stroke="#828282" points="3028,1822 2775,1814 1131.9436415261714,410.9813146241276"/>
+<polyline class="assoc" stroke="#828282" points="3028,1822 2775,1818 2487.3466767516406,1605.1007316761745"/>
+<polyline class="assoc" stroke="#828282" points="3028,1822 2775,1822 2614.8017515215793,1802.49801777093"/>
+<polyline class="assoc" stroke="#828282" points="3028,1822 2775,1826 2430.8601402665377,1371.0625248030492"/>
+<ellipse class="usecase" cx="1050" cy="350" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="350">
+<tspan x="1050" dy="0">Log in / Log out</tspan>
+</text>
+<ellipse class="usecase" cx="1050" cy="590" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="590">
+<tspan x="1050" dy="0">Manage users and roles</tspan>
+</text>
+<ellipse class="usecase" cx="1050" cy="830" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="830">
+<tspan x="1050" dy="0">Configure system settings</tspan>
+</text>
+<ellipse class="usecase" cx="1050" cy="1070" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="1055">
+<tspan x="1050" dy="0">Manage customers and</tspan>
+<tspan x="1050" dy="30">prospects</tspan>
+</text>
+<ellipse class="usecase" cx="1050" cy="1310" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="1310">
+<tspan x="1050" dy="0">Manage beneficiaries</tspan>
+</text>
+<ellipse class="usecase" cx="1050" cy="1550" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="1535">
+<tspan x="1050" dy="0">Record consent and</tspan>
+<tspan x="1050" dy="30">opt-outs</tspan>
+</text>
+<ellipse class="usecase" cx="1050" cy="1790" rx="270" ry="64"/>
+<text class="usecase-label" x="1050" y="1790">
+<tspan x="1050" dy="0">Manage products</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="350" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="335">
+<tspan x="1700" dy="0">Manage product change</tspan>
+<tspan x="1700" dy="30">requests</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="590" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="575">
+<tspan x="1700" dy="0">Create and manage</tspan>
+<tspan x="1700" dy="30">segments</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="830" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="830">
+<tspan x="1700" dy="0">Create campaign</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="1070" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="1070">
+<tspan x="1700" dy="0">Preview recipients</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="1310" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="1295">
+<tspan x="1700" dy="0">Submit campaign for</tspan>
+<tspan x="1700" dy="30">approval</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="1550" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="1535">
+<tspan x="1700" dy="0">Approve or reject</tspan>
+<tspan x="1700" dy="30">campaign</tspan>
+</text>
+<ellipse class="usecase" cx="1700" cy="1790" rx="270" ry="64"/>
+<text class="usecase-label" x="1700" y="1790">
+<tspan x="1700" dy="0">Launch approved campaign</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="350" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="335">
+<tspan x="2350" dy="0">Track communication</tspan>
+<tspan x="2350" dy="30">history</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="590" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="590">
+<tspan x="2350" dy="0">Manage follow-up tasks</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="830" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="830">
+<tspan x="2350" dy="0">Generate reminders</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="1070" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="1070">
+<tspan x="2350" dy="0">View analytics dashboard</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="1310" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="1310">
+<tspan x="2350" dy="0">Export reports</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="1550" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="1550">
+<tspan x="2350" dy="0">View audit logs</tspan>
+</text>
+<ellipse class="usecase" cx="2350" cy="1790" rx="270" ry="64"/>
+<text class="usecase-label" x="2350" y="1790">
+<tspan x="2350" dy="0">Review consent history</tspan>
+</text>
+<circle cx="300" cy="202" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="300" y1="232" x2="300" y2="298"/>
+<line class="actor-stroke" x1="250" y1="255" x2="350" y2="255"/>
+<line class="actor-stroke" x1="300" y1="298" x2="255" y2="348"/>
+<line class="actor-stroke" x1="300" y1="298" x2="345" y2="348"/>
+<text class="actor-label" x="300" y="388" text-anchor="middle">
+<tspan x="300" dy="0">Admin</tspan>
+</text>
+<circle cx="300" cy="592" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="300" y1="622" x2="300" y2="688"/>
+<line class="actor-stroke" x1="250" y1="645" x2="350" y2="645"/>
+<line class="actor-stroke" x1="300" y1="688" x2="255" y2="738"/>
+<line class="actor-stroke" x1="300" y1="688" x2="345" y2="738"/>
+<text class="actor-label" x="300" y="778" text-anchor="middle">
+<tspan x="300" dy="0">Campaign Manager</tspan>
+</text>
+<circle cx="300" cy="972" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="300" y1="1002" x2="300" y2="1068"/>
+<line class="actor-stroke" x1="250" y1="1025" x2="350" y2="1025"/>
+<line class="actor-stroke" x1="300" y1="1068" x2="255" y2="1118"/>
+<line class="actor-stroke" x1="300" y1="1068" x2="345" y2="1118"/>
+<text class="actor-label" x="300" y="1158" text-anchor="middle">
+<tspan x="300" dy="0">BI Analyst</tspan>
+</text>
+<circle cx="300" cy="1362" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="300" y1="1392" x2="300" y2="1458"/>
+<line class="actor-stroke" x1="250" y1="1415" x2="350" y2="1415"/>
+<line class="actor-stroke" x1="300" y1="1458" x2="255" y2="1508"/>
+<line class="actor-stroke" x1="300" y1="1458" x2="345" y2="1508"/>
+<text class="actor-label" x="300" y="1548" text-anchor="middle">
+<tspan x="300" dy="0">Product Manager</tspan>
+</text>
+<circle cx="300" cy="1752" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="300" y1="1782" x2="300" y2="1848"/>
+<line class="actor-stroke" x1="250" y1="1805" x2="350" y2="1805"/>
+<line class="actor-stroke" x1="300" y1="1848" x2="255" y2="1898"/>
+<line class="actor-stroke" x1="300" y1="1848" x2="345" y2="1898"/>
+<text class="actor-label" x="300" y="1938" text-anchor="middle">
+<tspan x="300" dy="0">Compliance Officer</tspan>
+</text>
+<circle cx="3100" cy="442" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="3100" y1="472" x2="3100" y2="538"/>
+<line class="actor-stroke" x1="3050" y1="495" x2="3150" y2="495"/>
+<line class="actor-stroke" x1="3100" y1="538" x2="3055" y2="588"/>
+<line class="actor-stroke" x1="3100" y1="538" x2="3145" y2="588"/>
+<text class="actor-label" x="3100" y="628" text-anchor="middle">
+<tspan x="3100" dy="0">Customer Service</tspan>
+<tspan x="3100" dy="30">Agent</tspan>
+</text>
+<circle cx="3100" cy="892" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="3100" y1="922" x2="3100" y2="988"/>
+<line class="actor-stroke" x1="3050" y1="945" x2="3150" y2="945"/>
+<line class="actor-stroke" x1="3100" y1="988" x2="3055" y2="1038"/>
+<line class="actor-stroke" x1="3100" y1="988" x2="3145" y2="1038"/>
+<text class="actor-label" x="3100" y="1078" text-anchor="middle">
+<tspan x="3100" dy="0">Sales Agent</tspan>
+</text>
+<circle cx="3100" cy="1342" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="3100" y1="1372" x2="3100" y2="1438"/>
+<line class="actor-stroke" x1="3050" y1="1395" x2="3150" y2="1395"/>
+<line class="actor-stroke" x1="3100" y1="1438" x2="3055" y2="1488"/>
+<line class="actor-stroke" x1="3100" y1="1438" x2="3145" y2="1488"/>
+<text class="actor-label" x="3100" y="1528" text-anchor="middle">
+<tspan x="3100" dy="0">Executive Viewer</tspan>
+</text>
+<circle cx="3100" cy="1772" r="28" fill="#ffffff" stroke="#111" stroke-width="3.2"/>
+<line class="actor-stroke" x1="3100" y1="1802" x2="3100" y2="1868"/>
+<line class="actor-stroke" x1="3050" y1="1825" x2="3150" y2="1825"/>
+<line class="actor-stroke" x1="3100" y1="1868" x2="3055" y2="1918"/>
+<line class="actor-stroke" x1="3100" y1="1868" x2="3145" y2="1918"/>
+<text class="actor-label" x="3100" y="1958" text-anchor="middle">
+<tspan x="3100" dy="0">System Auditor</tspan>
+</text>
+<text class="small-label" x="650" y="2240">Associations are simple UML actor-to-use-case communication lines; arrowheads are intentionally omitted.</text>
+</svg>

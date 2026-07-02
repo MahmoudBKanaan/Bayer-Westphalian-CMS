@@ -32,3 +32,12 @@ Docker resources:
 
 - network: `bwc_local`
 - volume: `bwc_postgres_data`
+
+## Verification
+
+Docker Compose checks are available in `scripts/`:
+
+```powershell
+.\scripts\test-docker-compose-config.ps1
+.\scripts\test-docker-compose-postgres.ps1
+```

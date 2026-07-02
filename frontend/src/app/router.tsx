@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate } from "react-router-dom";
+import { createBrowserRouter, Navigate, type RouteObject } from "react-router-dom";
 import { AppLayout } from "@/components/AppLayout";
 import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import { AuditPage } from "@/pages/AuditPage";
@@ -13,7 +13,7 @@ import { ReportsPage } from "@/pages/ReportsPage";
 import { SegmentsPage } from "@/pages/SegmentsPage";
 import { UsersPage } from "@/pages/UsersPage";
 
-export const router = createBrowserRouter([
+export const routes: RouteObject[] = [
   {
     path: "/login",
     element: <LoginPage />,
@@ -39,4 +39,10 @@ export const router = createBrowserRouter([
     path: "*",
     element: <NotFoundPage />,
   },
-]);
+];
+
+export function createAppRouter() {
+  return createBrowserRouter(routes);
+}
+
+export const router = createAppRouter();

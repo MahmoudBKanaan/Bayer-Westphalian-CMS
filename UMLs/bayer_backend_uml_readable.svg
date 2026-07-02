@@ -1,0 +1,1122 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="5250" height="3340" viewBox="0 0 5250 3340">
+<defs>
+
+  <marker id="arrow-open" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto" markerUnits="strokeWidth">
+    <path d="M2,2 L10,6 L2,10" fill="none" stroke="#475569" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+  </marker>
+  <marker id="arrow-inherit" markerWidth="14" markerHeight="14" refX="12" refY="7" orient="auto" markerUnits="strokeWidth">
+    <path d="M2,2 L12,7 L2,12 Z" fill="#ffffff" stroke="#111827" stroke-width="1.5" />
+  </marker>
+
+</defs>
+<rect x="0" y="0" width="5250" height="3340" rx="0" ry="0" fill="#ffffff" stroke="#ffffff" stroke-width="0" opacity="1"/>
+<text x="2625.0" y="45" font-family="Arial" font-size="28" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2625.0" dy="0">Bayer-Westphalian Campaign Management Platform — Backend UML Class Diagram</tspan>
+</text>
+<text x="2625.0" y="78" font-family="Arial" font-size="18" font-weight="400" fill="#4b5563" text-anchor="middle">
+<tspan x="2625.0" dy="0">Java 21 Spring Boot modular monolith: REST Controllers → Services → Repositories → JPA Entities</tspan>
+</text>
+<rect x="100" y="110" width="5050" height="430" rx="18" ry="18" fill="#f9fafb" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="125" y="145" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="125" dy="0">common</tspan>
+</text>
+<rect x="135" y="170" width="510" height="180" rx="6" ry="6" fill="#ffffff" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="135" y="170" width="510" height="54" rx="6" ry="6" fill="#e5e7eb" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="136" y="216" width="508" height="8" fill="#e5e7eb" stroke="none"/>
+<text x="390.0" y="190" font-family="Arial" font-size="12" font-weight="400" fill="#374151" text-anchor="middle">
+<tspan x="390.0" dy="0">&lt;&lt;MappedSuperclass&gt;&gt;</tspan>
+</text>
+<text x="390.0" y="212" font-family="Arial" font-size="18" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="390.0" dy="0">BaseEntity</tspan>
+</text>
+<text x="151" y="246" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="151" dy="0">+ id: Long</tspan>
+</text>
+<text x="151" y="268" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="151" dy="0">+ createdAt: Instant</tspan>
+</text>
+<text x="151" y="290" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="151" dy="0">+ updatedAt: Instant</tspan>
+</text>
+<line x1="135" y1="300" x2="645" y2="300" stroke="#9ca3af" stroke-width="1"/>
+<text x="151" y="312" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="151" dy="0">+ markCreated()</tspan>
+</text>
+<text x="151" y="334" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="151" dy="0">+ markUpdated()</tspan>
+</text>
+<rect x="720" y="180" width="540" height="158" rx="6" ry="6" fill="#ffffff" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="720" y="180" width="540" height="54" rx="6" ry="6" fill="#e5e7eb" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="721" y="226" width="538" height="8" fill="#e5e7eb" stroke="none"/>
+<text x="990.0" y="200" font-family="Arial" font-size="12" font-weight="400" fill="#374151" text-anchor="middle">
+<tspan x="990.0" dy="0">&lt;&lt;MappedSuperclass&gt;&gt;</tspan>
+</text>
+<text x="990.0" y="222" font-family="Arial" font-size="18" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="990.0" dy="0">SoftDeletableEntity</tspan>
+</text>
+<text x="736" y="256" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736" dy="0">+ deletedAt: Instant</tspan>
+</text>
+<line x1="720" y1="266" x2="1260" y2="266" stroke="#9ca3af" stroke-width="1"/>
+<text x="736" y="278" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736" dy="0">+ softDelete()</tspan>
+</text>
+<text x="736" y="300" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736" dy="0">+ restore()</tspan>
+</text>
+<text x="736" y="322" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736" dy="0">+ isDeleted(): boolean</tspan>
+</text>
+<rect x="1370" y="170" width="560" height="202" rx="6" ry="6" fill="#ffffff" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="1370" y="170" width="560" height="54" rx="6" ry="6" fill="#dbeafe" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="1371" y="216" width="558" height="8" fill="#dbeafe" stroke="none"/>
+<text x="1650.0" y="190" font-family="Arial" font-size="12" font-weight="400" fill="#374151" text-anchor="middle">
+<tspan x="1650.0" dy="0">&lt;&lt;DTO&gt;&gt;</tspan>
+</text>
+<text x="1650.0" y="212" font-family="Arial" font-size="18" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1650.0" dy="0">ApiResponse&lt;T&gt;</tspan>
+</text>
+<text x="1386" y="246" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1386" dy="0">+ success: boolean</tspan>
+</text>
+<text x="1386" y="268" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1386" dy="0">+ message: String</tspan>
+</text>
+<text x="1386" y="290" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1386" dy="0">+ data: T</tspan>
+</text>
+<text x="1386" y="312" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1386" dy="0">+ timestamp: Instant</tspan>
+</text>
+<line x1="1370" y1="322" x2="1930" y2="322" stroke="#9ca3af" stroke-width="1"/>
+<text x="1386" y="334" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1386" dy="0">+ success(data)</tspan>
+</text>
+<text x="1386" y="356" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1386" dy="0">+ error(message)</tspan>
+</text>
+<rect x="2015" y="170" width="580" height="202" rx="6" ry="6" fill="#ffffff" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="2015" y="170" width="580" height="54" rx="6" ry="6" fill="#dbeafe" stroke="#374151" stroke-width="1.4" opacity="1"/>
+<rect x="2016" y="216" width="578" height="8" fill="#dbeafe" stroke="none"/>
+<text x="2305.0" y="190" font-family="Arial" font-size="12" font-weight="400" fill="#374151" text-anchor="middle">
+<tspan x="2305.0" dy="0">&lt;&lt;DTO&gt;&gt;</tspan>
+</text>
+<text x="2305.0" y="212" font-family="Arial" font-size="18" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2305.0" dy="0">PageResponse&lt;T&gt;</tspan>
+</text>
+<text x="2031" y="246" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2031" dy="0">+ items: List&lt;T&gt;</tspan>
+</text>
+<text x="2031" y="268" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2031" dy="0">+ page: int</tspan>
+</text>
+<text x="2031" y="290" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2031" dy="0">+ size: int</tspan>
+</text>
+<text x="2031" y="312" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2031" dy="0">+ totalElements: long</tspan>
+</text>
+<text x="2031" y="334" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2031" dy="0">+ totalPages: int</tspan>
+</text>
+<line x1="2015" y1="344" x2="2595" y2="344" stroke="#9ca3af" stroke-width="1"/>
+<text x="2031" y="356" font-family="Arial" font-size="15" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2031" dy="0">+ fromPage(page)</tspan>
+</text>
+<rect x="2710" y="170" width="2380" height="290" rx="10" ry="10" fill="#fff7ed" stroke="#fb923c" stroke-width="1.4" opacity="1"/>
+<text x="2730" y="200" font-family="Arial" font-size="18" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="2730" dy="0">Architecture constraints</tspan>
+</text>
+<text x="2730" y="232" font-family="Arial" font-size="16" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2730" dy="0">• Controllers depend on services; services depend on repositories; repositories manage entities.</tspan>
+<tspan x="2730" dy="28">• CampaignService must validate recipients through EligibilityService before dispatch.</tspan>
+<tspan x="2730" dy="28">• AI recommendations are advisory and cannot bypass eligibility checks or compliance approval.</tspan>
+<tspan x="2730" dy="28">• CommunicationService uses EmailProvider and SmsProvider interfaces for external adapters.</tspan>
+<tspan x="2730" dy="28">• AuditService records sensitive user, role, consent, product, campaign, report, and AI actions.</tspan>
+</text>
+<line x1="720" y1="259.0" x2="645" y2="260.0" stroke="#111827" stroke-width="2.2"  marker-end="url(#arrow-inherit)" opacity="0.95"/>
+<rect x="650.0" y="241.5" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="682.5" y="257.5" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="682.5" dy="0">extends</tspan>
+</text>
+<rect x="100" y="620" width="880" height="620" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="120" y="652" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="120" dy="0">auth</tspan>
+</text>
+<rect x="120" y="672" width="840" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="672" width="840" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="697" width="838" height="7" fill="#fee2e2" stroke="none"/>
+<text x="540.0" y="694" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="540.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="134" y="726" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">AuthController</tspan>
+</text>
+<rect x="120" y="755" width="840" height="119" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="755" width="840" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="780" width="838" height="7" fill="#ede9fe" stroke="none"/>
+<text x="540.0" y="777" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="540.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="134" y="809" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">AuthService</tspan>
+</text>
+<text x="134" y="834" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">JwtService</tspan>
+</text>
+<text x="134" y="859" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">SessionService (optional)</tspan>
+</text>
+<rect x="120" y="888" width="413.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="888" width="413.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="913" width="411.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="326.5" y="910" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="326.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="134" y="943" font-family="Arial" font-size="14" font-weight="400" fill="#4b5563" text-anchor="start">
+<tspan x="134" dy="0">—</tspan>
+</text>
+<rect x="547.0" y="888" width="413.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="547.0" y="888" width="413.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="548.0" y="913" width="411.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="753.5" y="910" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="753.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="561.0" y="943" font-family="Arial" font-size="14" font-weight="400" fill="#4b5563" text-anchor="start">
+<tspan x="561.0" dy="0">—</tspan>
+</text>
+<line x1="540.0" y1="741" x2="540.0" y2="755" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="497.0" y="730.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="540.0" y="746.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="540.0" dy="0">depends on</tspan>
+</text>
+<line x1="470.0" y1="874" x2="326.5" y2="888" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="374.25" y="863.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="398.25" y="879.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="398.25" dy="0">uses</tspan>
+</text>
+<line x1="610.0" y1="874" x2="753.5" y2="888" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="649.25" y="863.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="681.75" y="879.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="681.75" dy="0">manages</tspan>
+</text>
+<rect x="1030" y="620" width="900" height="620" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="1050" y="652" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="1050" dy="0">user</tspan>
+</text>
+<rect x="1050" y="672" width="860" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1050" y="672" width="860" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1051" y="697" width="858" height="7" fill="#fee2e2" stroke="none"/>
+<text x="1480.0" y="694" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1480.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="1064" y="726" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1064" dy="0">UserController</tspan>
+</text>
+<rect x="1050" y="755" width="860" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1050" y="755" width="860" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1051" y="780" width="858" height="7" fill="#ede9fe" stroke="none"/>
+<text x="1480.0" y="777" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1480.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="1064" y="809" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1064" dy="0">UserService</tspan>
+</text>
+<rect x="1050" y="838" width="423.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1050" y="838" width="423.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1051" y="863" width="421.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="1261.5" y="860" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1261.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="1064" y="892" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1064" dy="0">UserRepository</tspan>
+</text>
+<text x="1064" y="917" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1064" dy="0">RoleRepository</tspan>
+</text>
+<rect x="1487.0" y="838" width="423.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1487.0" y="838" width="423.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1488.0" y="863" width="421.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="1698.5" y="860" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1698.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="1501.0" y="892" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1501.0" dy="0">User extends BaseEntity</tspan>
+</text>
+<text x="1501.0" y="917" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1501.0" dy="0">Role extends BaseEntity</tspan>
+</text>
+<line x1="1480.0" y1="741" x2="1480.0" y2="755" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1437.0" y="730.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1480.0" y="746.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1480.0" dy="0">depends on</tspan>
+</text>
+<line x1="1410.0" y1="824" x2="1261.5" y2="838" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1311.75" y="813.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1335.75" y="829.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1335.75" dy="0">uses</tspan>
+</text>
+<line x1="1550.0" y1="824" x2="1698.5" y2="838" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1591.75" y="813.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1624.25" y="829.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1624.25" dy="0">manages</tspan>
+</text>
+<rect x="1980" y="620" width="900" height="620" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="2000" y="652" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="2000" dy="0">customer</tspan>
+</text>
+<rect x="2000" y="672" width="860" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2000" y="672" width="860" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2001" y="697" width="858" height="7" fill="#fee2e2" stroke="none"/>
+<text x="2430.0" y="694" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2430.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="2014" y="726" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2014" dy="0">CustomerController</tspan>
+</text>
+<rect x="2000" y="755" width="860" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2000" y="755" width="860" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2001" y="780" width="858" height="7" fill="#ede9fe" stroke="none"/>
+<text x="2430.0" y="777" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2430.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="2014" y="809" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2014" dy="0">CustomerService</tspan>
+</text>
+<rect x="2000" y="838" width="423.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2000" y="838" width="423.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2001" y="863" width="421.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="2211.5" y="860" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2211.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="2014" y="892" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2014" dy="0">CustomerRepository</tspan>
+</text>
+<rect x="2437.0" y="838" width="423.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2437.0" y="838" width="423.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2438.0" y="863" width="421.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="2648.5" y="860" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2648.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="2451.0" y="892" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2451.0" dy="0">Customer extends SoftDeletableEntity</tspan>
+</text>
+<line x1="2430.0" y1="741" x2="2430.0" y2="755" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2387.0" y="730.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2430.0" y="746.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2430.0" dy="0">depends on</tspan>
+</text>
+<line x1="2360.0" y1="824" x2="2211.5" y2="838" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2261.75" y="813.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2285.75" y="829.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2285.75" dy="0">uses</tspan>
+</text>
+<line x1="2500.0" y1="824" x2="2648.5" y2="838" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2541.75" y="813.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2574.25" y="829.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2574.25" dy="0">manages</tspan>
+</text>
+<rect x="2930" y="620" width="930" height="620" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="2950" y="652" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="2950" dy="0">beneficiary</tspan>
+</text>
+<rect x="2950" y="672" width="890" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2950" y="672" width="890" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2951" y="697" width="888" height="7" fill="#fee2e2" stroke="none"/>
+<text x="3395.0" y="694" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3395.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="2964" y="726" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2964" dy="0">BeneficiaryController</tspan>
+</text>
+<rect x="2950" y="755" width="890" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2950" y="755" width="890" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2951" y="780" width="888" height="7" fill="#ede9fe" stroke="none"/>
+<text x="3395.0" y="777" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3395.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="2964" y="809" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2964" dy="0">BeneficiaryService</tspan>
+</text>
+<rect x="2950" y="838" width="438.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2950" y="838" width="438.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2951" y="863" width="436.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="3169.0" y="860" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3169.0" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="2964" y="892" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2964" dy="0">BeneficiaryRepository</tspan>
+</text>
+<rect x="3402.0" y="838" width="438.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3402.0" y="838" width="438.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3403.0" y="863" width="436.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="3621.0" y="860" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3621.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="3416.0" y="892" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3416.0" dy="0">Beneficiary extends BaseEntity</tspan>
+</text>
+<line x1="3395.0" y1="741" x2="3395.0" y2="755" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3352.0" y="730.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3395.0" y="746.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3395.0" dy="0">depends on</tspan>
+</text>
+<line x1="3325.0" y1="824" x2="3169.0" y2="838" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3223.0" y="813.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3247.0" y="829.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3247.0" dy="0">uses</tspan>
+</text>
+<line x1="3465.0" y1="824" x2="3621.0" y2="838" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3510.5" y="813.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3543.0" y="829.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3543.0" dy="0">manages</tspan>
+</text>
+<rect x="3910" y="620" width="1240" height="620" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="3930" y="652" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="3930" dy="0">consent</tspan>
+</text>
+<rect x="3930" y="672" width="1200" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3930" y="672" width="1200" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3931" y="697" width="1198" height="7" fill="#fee2e2" stroke="none"/>
+<text x="4530.0" y="694" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4530.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="3944" y="726" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3944" dy="0">ConsentController</tspan>
+</text>
+<rect x="3930" y="755" width="1200" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3930" y="755" width="1200" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3931" y="780" width="1198" height="7" fill="#ede9fe" stroke="none"/>
+<text x="4530.0" y="777" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4530.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="3944" y="809" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3944" dy="0">ConsentService</tspan>
+</text>
+<text x="3944" y="834" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3944" dy="0">EligibilityService</tspan>
+</text>
+<rect x="3930" y="863" width="593.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3930" y="863" width="593.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3931" y="888" width="591.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="4226.5" y="885" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4226.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="3944" y="917" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3944" dy="0">ConsentRepository</tspan>
+</text>
+<rect x="4537.0" y="863" width="593.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4537.0" y="863" width="593.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4538.0" y="888" width="591.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="4833.5" y="885" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4833.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="4551.0" y="917" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4551.0" dy="0">ConsentRecord extends BaseEntity</tspan>
+</text>
+<line x1="4530.0" y1="741" x2="4530.0" y2="755" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4487.0" y="730.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4530.0" y="746.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4530.0" dy="0">depends on</tspan>
+</text>
+<line x1="4460.0" y1="849" x2="4226.5" y2="863" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4319.25" y="838.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4343.25" y="854.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4343.25" dy="0">uses</tspan>
+</text>
+<line x1="4600.0" y1="849" x2="4833.5" y2="863" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4684.25" y="838.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4716.75" y="854.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4716.75" dy="0">manages</tspan>
+</text>
+<rect x="100" y="1360" width="1230" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="120" y="1392" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="120" dy="0">product</tspan>
+</text>
+<rect x="120" y="1412" width="1190" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="1412" width="1190" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="1437" width="1188" height="7" fill="#fee2e2" stroke="none"/>
+<text x="715.0" y="1434" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="715.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="134" y="1466" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductController</tspan>
+</text>
+<rect x="120" y="1495" width="1190" height="144" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="1495" width="1190" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="1520" width="1188" height="7" fill="#ede9fe" stroke="none"/>
+<text x="715.0" y="1517" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="715.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="134" y="1549" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductService</tspan>
+</text>
+<text x="134" y="1574" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductOwnershipService</tspan>
+</text>
+<text x="134" y="1599" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductChangeRequestService</tspan>
+</text>
+<text x="134" y="1624" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">PaymentRecordService</tspan>
+</text>
+<rect x="120" y="1653" width="588.0" height="144" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="1653" width="588.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="1678" width="586.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="414.0" y="1675" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="414.0" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="134" y="1707" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductRepository</tspan>
+</text>
+<text x="134" y="1732" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductOwnershipRepository</tspan>
+</text>
+<text x="134" y="1757" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ProductChangeRequestRepository</tspan>
+</text>
+<text x="134" y="1782" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">PaymentRecordRepository</tspan>
+</text>
+<rect x="722.0" y="1653" width="588.0" height="144" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="722.0" y="1653" width="588.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="723.0" y="1678" width="586.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="1016.0" y="1675" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1016.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="736.0" y="1707" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736.0" dy="0">Product extends SoftDeletableEntity</tspan>
+</text>
+<text x="736.0" y="1732" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736.0" dy="0">ProductOwnership extends BaseEntity</tspan>
+</text>
+<text x="736.0" y="1757" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736.0" dy="0">ProductChangeRequest extends BaseEntity</tspan>
+</text>
+<text x="736.0" y="1782" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="736.0" dy="0">PaymentRecord extends BaseEntity</tspan>
+</text>
+<line x1="715.0" y1="1481" x2="715.0" y2="1495" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="672.0" y="1470.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="715.0" y="1486.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="715.0" dy="0">depends on</tspan>
+</text>
+<line x1="645.0" y1="1639" x2="414.0" y2="1653" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="505.5" y="1628.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="529.5" y="1644.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="529.5" dy="0">uses</tspan>
+</text>
+<line x1="785.0" y1="1639" x2="1016.0" y2="1653" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="868.0" y="1628.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="900.5" y="1644.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="900.5" dy="0">manages</tspan>
+</text>
+<rect x="1380" y="1360" width="850" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="1400" y="1392" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="1400" dy="0">segment</tspan>
+</text>
+<rect x="1400" y="1412" width="810" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1400" y="1412" width="810" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1401" y="1437" width="808" height="7" fill="#fee2e2" stroke="none"/>
+<text x="1805.0" y="1434" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1805.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="1414" y="1466" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1414" dy="0">SegmentController</tspan>
+</text>
+<rect x="1400" y="1495" width="810" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1400" y="1495" width="810" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1401" y="1520" width="808" height="7" fill="#ede9fe" stroke="none"/>
+<text x="1805.0" y="1517" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1805.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="1414" y="1549" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1414" dy="0">SegmentService</tspan>
+</text>
+<rect x="1400" y="1578" width="398.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1400" y="1578" width="398.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1401" y="1603" width="396.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="1599.0" y="1600" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1599.0" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="1414" y="1632" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1414" dy="0">SegmentRepository</tspan>
+</text>
+<text x="1414" y="1657" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1414" dy="0">SegmentCriteriaRepository</tspan>
+</text>
+<rect x="1812.0" y="1578" width="398.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1812.0" y="1578" width="398.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1813.0" y="1603" width="396.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="2011.0" y="1600" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2011.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="1826.0" y="1632" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1826.0" dy="0">Segment extends BaseEntity</tspan>
+</text>
+<text x="1826.0" y="1657" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1826.0" dy="0">SegmentCriteria extends BaseEntity</tspan>
+</text>
+<line x1="1805.0" y1="1481" x2="1805.0" y2="1495" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1762.0" y="1470.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1805.0" y="1486.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1805.0" dy="0">depends on</tspan>
+</text>
+<line x1="1735.0" y1="1564" x2="1599.0" y2="1578" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1643.0" y="1553.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1667.0" y="1569.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1667.0" dy="0">uses</tspan>
+</text>
+<line x1="1875.0" y1="1564" x2="2011.0" y2="1578" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1910.5" y="1553.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1943.0" y="1569.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1943.0" dy="0">manages</tspan>
+</text>
+<rect x="2280" y="1360" width="1020" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="2300" y="1392" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="2300" dy="0">campaign</tspan>
+</text>
+<rect x="2300" y="1412" width="980" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2300" y="1412" width="980" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2301" y="1437" width="978" height="7" fill="#fee2e2" stroke="none"/>
+<text x="2790.0" y="1434" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2790.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="2314" y="1466" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2314" dy="0">CampaignController</tspan>
+</text>
+<rect x="2300" y="1495" width="980" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2300" y="1495" width="980" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2301" y="1520" width="978" height="7" fill="#ede9fe" stroke="none"/>
+<text x="2790.0" y="1517" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2790.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="2314" y="1549" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2314" dy="0">CampaignService</tspan>
+</text>
+<text x="2314" y="1574" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2314" dy="0">CampaignCopyService</tspan>
+</text>
+<rect x="2300" y="1603" width="483.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2300" y="1603" width="483.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2301" y="1628" width="481.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="2541.5" y="1625" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2541.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="2314" y="1657" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2314" dy="0">CampaignRepository</tspan>
+</text>
+<text x="2314" y="1682" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2314" dy="0">CampaignRecipientRepository</tspan>
+</text>
+<rect x="2797.0" y="1603" width="483.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2797.0" y="1603" width="483.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2798.0" y="1628" width="481.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="3038.5" y="1625" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3038.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="2811.0" y="1657" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2811.0" dy="0">Campaign extends BaseEntity</tspan>
+</text>
+<text x="2811.0" y="1682" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2811.0" dy="0">CampaignRecipient extends BaseEntity</tspan>
+</text>
+<line x1="2790.0" y1="1481" x2="2790.0" y2="1495" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2747.0" y="1470.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2790.0" y="1486.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2790.0" dy="0">depends on</tspan>
+</text>
+<line x1="2720.0" y1="1589" x2="2541.5" y2="1603" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2606.75" y="1578.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2630.75" y="1594.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2630.75" dy="0">uses</tspan>
+</text>
+<line x1="2860.0" y1="1589" x2="3038.5" y2="1603" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2916.75" y="1578.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2949.25" y="1594.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2949.25" dy="0">manages</tspan>
+</text>
+<rect x="3350" y="1360" width="1800" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="3370" y="1392" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="3370" dy="0">communication</tspan>
+</text>
+<rect x="3370" y="1412" width="1760" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3370" y="1412" width="1760" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3371" y="1437" width="1758" height="7" fill="#fee2e2" stroke="none"/>
+<text x="4250.0" y="1434" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4250.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="3384" y="1466" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3384" dy="0">CommunicationController</tspan>
+</text>
+<rect x="3370" y="1495" width="1760" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3370" y="1495" width="1760" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3371" y="1520" width="1758" height="7" fill="#ede9fe" stroke="none"/>
+<text x="4250.0" y="1517" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4250.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="3384" y="1549" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3384" dy="0">CommunicationService</tspan>
+</text>
+<rect x="3370" y="1578" width="577.3333333333334" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3370" y="1578" width="577.3333333333334" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3371" y="1603" width="575.3333333333334" height="7" fill="#fef3c7" stroke="none"/>
+<text x="3658.6666666666665" y="1600" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3658.6666666666665" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="3384" y="1632" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3384" dy="0">ContactEventRepository</tspan>
+</text>
+<rect x="3961.3333333333335" y="1578" width="577.3333333333334" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3961.3333333333335" y="1578" width="577.3333333333334" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3962.3333333333335" y="1603" width="575.3333333333334" height="7" fill="#dcfce7" stroke="none"/>
+<text x="4250.0" y="1600" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4250.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="3975.3333333333335" y="1632" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3975.3333333333335" dy="0">ContactEvent extends BaseEntity</tspan>
+</text>
+<rect x="4552.666666666667" y="1578" width="577.3333333333334" height="169" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4552.666666666667" y="1578" width="577.3333333333334" height="32" rx="7" ry="7" fill="#cffafe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4553.666666666667" y="1603" width="575.3333333333334" height="7" fill="#cffafe" stroke="none"/>
+<text x="4841.333333333334" y="1600" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4841.333333333334" dy="0">&lt;&lt;Provider&gt;&gt; Interfaces / Adapters</tspan>
+</text>
+<text x="4566.666666666667" y="1632" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4566.666666666667" dy="0">EmailProvider</tspan>
+</text>
+<text x="4566.666666666667" y="1657" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4566.666666666667" dy="0">SmsProvider</tspan>
+</text>
+<text x="4566.666666666667" y="1682" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4566.666666666667" dy="0">MockEmailProvider</tspan>
+</text>
+<text x="4566.666666666667" y="1707" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4566.666666666667" dy="0">ProviderReadyEmailAdapter</tspan>
+</text>
+<text x="4566.666666666667" y="1732" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4566.666666666667" dy="0">ProviderReadySmsAdapter</tspan>
+</text>
+<line x1="4250.0" y1="1481" x2="4250.0" y2="1495" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4207.0" y="1470.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4250.0" y="1486.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4250.0" dy="0">depends on</tspan>
+</text>
+<line x1="4180.0" y1="1564" x2="3658.6666666666665" y2="1578" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3895.333333333333" y="1553.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3919.333333333333" y="1569.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3919.333333333333" dy="0">uses</tspan>
+</text>
+<line x1="4320.0" y1="1564" x2="4250.0" y2="1578" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4252.5" y="1553.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4285.0" y="1569.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4285.0" dy="0">manages</tspan>
+</text>
+<rect x="100" y="2270" width="1050" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="120" y="2302" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="120" dy="0">schedule</tspan>
+</text>
+<rect x="120" y="2322" width="1010" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="2322" width="1010" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="2347" width="1008" height="7" fill="#fee2e2" stroke="none"/>
+<text x="625.0" y="2344" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="625.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="134" y="2376" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">FollowUpController</tspan>
+</text>
+<text x="134" y="2401" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ReminderController</tspan>
+</text>
+<rect x="120" y="2430" width="1010" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="2430" width="1010" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="2455" width="1008" height="7" fill="#ede9fe" stroke="none"/>
+<text x="625.0" y="2452" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="625.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="134" y="2484" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">FollowUpService</tspan>
+</text>
+<text x="134" y="2509" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ReminderService</tspan>
+</text>
+<rect x="120" y="2538" width="498.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="120" y="2538" width="498.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="121" y="2563" width="496.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="369.0" y="2560" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="369.0" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="134" y="2592" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">FollowUpRepository</tspan>
+</text>
+<text x="134" y="2617" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="134" dy="0">ReminderRepository</tspan>
+</text>
+<rect x="632.0" y="2538" width="498.0" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="632.0" y="2538" width="498.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="633.0" y="2563" width="496.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="881.0" y="2560" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="881.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="646.0" y="2592" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="646.0" dy="0">FollowUpTask extends BaseEntity</tspan>
+</text>
+<text x="646.0" y="2617" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="646.0" dy="0">ReminderSchedule extends BaseEntity</tspan>
+</text>
+<line x1="625.0" y1="2416" x2="625.0" y2="2430" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="582.0" y="2405.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="625.0" y="2421.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="625.0" dy="0">depends on</tspan>
+</text>
+<line x1="555.0" y1="2524" x2="369.0" y2="2538" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="438.0" y="2513.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="462.0" y="2529.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="462.0" dy="0">uses</tspan>
+</text>
+<line x1="695.0" y1="2524" x2="881.0" y2="2538" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="755.5" y="2513.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="788.0" y="2529.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="788.0" dy="0">manages</tspan>
+</text>
+<rect x="1200" y="2270" width="830" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="1220" y="2302" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="1220" dy="0">analytics</tspan>
+</text>
+<rect x="1220" y="2322" width="790" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1220" y="2322" width="790" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1221" y="2347" width="788" height="7" fill="#fee2e2" stroke="none"/>
+<text x="1615.0" y="2344" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1615.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="1234" y="2376" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1234" dy="0">AnalyticsController</tspan>
+</text>
+<rect x="1220" y="2405" width="790" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1220" y="2405" width="790" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1221" y="2430" width="788" height="7" fill="#ede9fe" stroke="none"/>
+<text x="1615.0" y="2427" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1615.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="1234" y="2459" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1234" dy="0">AnalyticsService</tspan>
+</text>
+<rect x="1220" y="2488" width="388.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1220" y="2488" width="388.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1221" y="2513" width="386.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="1414.0" y="2510" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1414.0" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="1234" y="2542" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1234" dy="0">CampaignMetricRepository</tspan>
+</text>
+<rect x="1622.0" y="2488" width="388.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1622.0" y="2488" width="388.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="1623.0" y="2513" width="386.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="1816.0" y="2510" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="1816.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="1636.0" y="2542" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="1636.0" dy="0">CampaignMetric extends BaseEntity</tspan>
+</text>
+<line x1="1615.0" y1="2391" x2="1615.0" y2="2405" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1572.0" y="2380.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1615.0" y="2396.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1615.0" dy="0">depends on</tspan>
+</text>
+<line x1="1545.0" y1="2474" x2="1414.0" y2="2488" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1455.5" y="2463.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1479.5" y="2479.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1479.5" dy="0">uses</tspan>
+</text>
+<line x1="1685.0" y1="2474" x2="1816.0" y2="2488" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="1718.0" y="2463.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1750.5" y="2479.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1750.5" dy="0">manages</tspan>
+</text>
+<rect x="2080" y="2270" width="820" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="2100" y="2302" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="2100" dy="0">audit</tspan>
+</text>
+<rect x="2100" y="2322" width="780" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2100" y="2322" width="780" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2101" y="2347" width="778" height="7" fill="#fee2e2" stroke="none"/>
+<text x="2490.0" y="2344" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2490.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="2114" y="2376" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2114" dy="0">AuditController</tspan>
+</text>
+<rect x="2100" y="2405" width="780" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2100" y="2405" width="780" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2101" y="2430" width="778" height="7" fill="#ede9fe" stroke="none"/>
+<text x="2490.0" y="2427" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2490.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="2114" y="2459" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2114" dy="0">AuditService</tspan>
+</text>
+<rect x="2100" y="2488" width="383.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2100" y="2488" width="383.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2101" y="2513" width="381.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="2291.5" y="2510" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2291.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="2114" y="2542" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2114" dy="0">AuditLogRepository</tspan>
+</text>
+<rect x="2497.0" y="2488" width="383.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2497.0" y="2488" width="383.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2498.0" y="2513" width="381.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="2688.5" y="2510" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="2688.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="2511.0" y="2542" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2511.0" dy="0">AuditLog extends BaseEntity</tspan>
+</text>
+<line x1="2490.0" y1="2391" x2="2490.0" y2="2405" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2447.0" y="2380.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2490.0" y="2396.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2490.0" dy="0">depends on</tspan>
+</text>
+<line x1="2420.0" y1="2474" x2="2291.5" y2="2488" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2331.75" y="2463.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2355.75" y="2479.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2355.75" dy="0">uses</tspan>
+</text>
+<line x1="2560.0" y1="2474" x2="2688.5" y2="2488" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="2591.75" y="2463.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2624.25" y="2479.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2624.25" dy="0">manages</tspan>
+</text>
+<rect x="2950" y="2270" width="1000" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="2970" y="2302" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="2970" dy="0">ai</tspan>
+</text>
+<rect x="2970" y="2322" width="960" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2970" y="2322" width="960" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2971" y="2347" width="958" height="7" fill="#fee2e2" stroke="none"/>
+<text x="3450.0" y="2344" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3450.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="2984" y="2376" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2984" dy="0">AiController</tspan>
+</text>
+<rect x="2970" y="2405" width="960" height="94" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2970" y="2405" width="960" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2971" y="2430" width="958" height="7" fill="#ede9fe" stroke="none"/>
+<text x="3450.0" y="2427" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3450.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="2984" y="2459" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2984" dy="0">AiSearchService</tspan>
+</text>
+<text x="2984" y="2484" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2984" dy="0">AiRecommendationService</tspan>
+</text>
+<rect x="2970" y="2513" width="473.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2970" y="2513" width="473.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="2971" y="2538" width="471.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="3206.5" y="2535" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3206.5" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="2984" y="2567" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="2984" dy="0">AiRecommendationRepository</tspan>
+</text>
+<rect x="3457.0" y="2513" width="473.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3457.0" y="2513" width="473.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="3458.0" y="2538" width="471.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="3693.5" y="2535" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="3693.5" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="3471.0" y="2567" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="3471.0" dy="0">AiRecommendation extends BaseEntity</tspan>
+</text>
+<line x1="3450.0" y1="2391" x2="3450.0" y2="2405" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3407.0" y="2380.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3450.0" y="2396.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3450.0" dy="0">depends on</tspan>
+</text>
+<line x1="3380.0" y1="2499" x2="3206.5" y2="2513" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3269.25" y="2488.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3293.25" y="2504.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3293.25" dy="0">uses</tspan>
+</text>
+<line x1="3520.0" y1="2499" x2="3693.5" y2="2513" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="3574.25" y="2488.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3606.75" y="2504.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3606.75" dy="0">manages</tspan>
+</text>
+<rect x="4000" y="2270" width="1150" height="790" rx="18" ry="18" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.8" opacity="1"/>
+<text x="4020" y="2302" font-family="Arial" font-size="21" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="4020" dy="0">report</tspan>
+</text>
+<rect x="4020" y="2322" width="1110" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4020" y="2322" width="1110" height="32" rx="7" ry="7" fill="#fee2e2" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4021" y="2347" width="1108" height="7" fill="#fee2e2" stroke="none"/>
+<text x="4575.0" y="2344" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4575.0" dy="0">&lt;&lt;RestController&gt;&gt; Controllers</tspan>
+</text>
+<text x="4034" y="2376" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4034" dy="0">ReportController</tspan>
+</text>
+<rect x="4020" y="2405" width="1110" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4020" y="2405" width="1110" height="32" rx="7" ry="7" fill="#ede9fe" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4021" y="2430" width="1108" height="7" fill="#ede9fe" stroke="none"/>
+<text x="4575.0" y="2427" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4575.0" dy="0">&lt;&lt;Service&gt;&gt; Services</tspan>
+</text>
+<text x="4034" y="2459" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4034" dy="0">ReportService</tspan>
+</text>
+<rect x="4020" y="2488" width="548.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4020" y="2488" width="548.0" height="32" rx="7" ry="7" fill="#fef3c7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4021" y="2513" width="546.0" height="7" fill="#fef3c7" stroke="none"/>
+<text x="4294.0" y="2510" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4294.0" dy="0">&lt;&lt;Repository&gt;&gt; Repositories</tspan>
+</text>
+<text x="4034" y="2542" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4034" dy="0">ReportExportRepository</tspan>
+</text>
+<rect x="4582.0" y="2488" width="548.0" height="69" rx="7" ry="7" fill="#ffffff" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4582.0" y="2488" width="548.0" height="32" rx="7" ry="7" fill="#dcfce7" stroke="#475569" stroke-width="1.3" opacity="1"/>
+<rect x="4583.0" y="2513" width="546.0" height="7" fill="#dcfce7" stroke="none"/>
+<text x="4856.0" y="2510" font-family="Arial" font-size="15" font-weight="700" fill="#111827" text-anchor="middle">
+<tspan x="4856.0" dy="0">&lt;&lt;Entity&gt;&gt; Entities</tspan>
+</text>
+<text x="4596.0" y="2542" font-family="Arial" font-size="14" font-weight="400" fill="#111827" text-anchor="start">
+<tspan x="4596.0" dy="0">ReportExport extends BaseEntity</tspan>
+</text>
+<line x1="4575.0" y1="2391" x2="4575.0" y2="2405" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4532.0" y="2380.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4575.0" y="2396.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4575.0" dy="0">depends on</tspan>
+</text>
+<line x1="4505.0" y1="2474" x2="4294.0" y2="2488" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4375.5" y="2463.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4399.5" y="2479.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4399.5" dy="0">uses</tspan>
+</text>
+<line x1="4645.0" y1="2474" x2="4856.0" y2="2488" stroke="#64748b" stroke-width="1.4" stroke-dasharray="7 6" marker-end="url(#arrow-open)" opacity="0.65"/>
+<rect x="4718.0" y="2463.0" width="65" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4750.5" y="2479.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4750.5" dy="0">manages</tspan>
+</text>
+<polyline points="3280,1544 3335,1544 3335,1525 3370,1544" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="3311.0" y="1506.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3335" y="1522" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3335" dy="0">uses</tspan>
+</text>
+<polyline points="2790.0,1556 2790,2205 1615,2205 1615.0,2442" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="1554.5" y="2186.0" width="121" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1615" y="2202" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1615" dy="0">updates metrics</tspan>
+</text>
+<polyline points="2790.0,1556 2850,2235 2490,2235 2490.0,2442" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="2436.5" y="2216.0" width="107" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2490" y="2232" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2490" dy="0">records audit</tspan>
+</text>
+<polyline points="3280,1544 3545,1640 3545,1290 4530,1290 4530.0,841" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="3467.0" y="1271.0" width="156" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="3545" y="1287" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="3545" dy="0">validates recipients</tspan>
+</text>
+<polyline points="2210,1544 2290,1544 2290,1275 4510,1275 4530.0,841" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="2215.5" y="1256.0" width="149" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2290" y="1272" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2290" dy="0">preview eligibility</tspan>
+</text>
+<polyline points="3930,829 4450,804 5130,804" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="4347.5" y="785.0" width="205" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4450" y="801" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4450" dy="0">supported by ConsentService</tspan>
+</text>
+<polyline points="625.0,2492 655,2210 655,2180 414.0,1789" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="601.5" y="2161.0" width="107" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="655" y="2177" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="655" dy="0">uses payments</tspan>
+</text>
+<polyline points="625.0,2492 585,2200 585,2185 414.0,1739" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="528.0" y="2166.0" width="114" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="585" y="2182" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="585" dy="0">uses ownership</tspan>
+</text>
+<polyline points="3450.0,2467 3405,2195 4665,2195 4665,1270 4530.0,841" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="4611.5" y="2176.0" width="107" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4665" y="2192" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4665" dy="0">must validate</tspan>
+</text>
+<polyline points="2970,2479 2895,2479 2895,2215 2880,2454" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="2859.0" y="2196.0" width="72" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2895" y="2212" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2895" dy="0">AI audit</tspan>
+</text>
+<polyline points="960,804 1020,804 1050,887" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="973.5" y="785.0" width="93" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1020" y="801" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1020" dy="0">loads users</tspan>
+</text>
+<polyline points="960,804 1015,904 1260,912 1050,912" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="1213.5" y="893.0" width="93" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1260" y="909" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1260" dy="0">loads roles</tspan>
+</text>
+<polyline points="540.0,816 540,1265 2490,1265 2490.0,2442" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="2433.0" y="1246.0" width="114" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2490" y="1262" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2490" dy="0">security audit</tspan>
+</text>
+<polyline points="1480.0,816 1490,1250 2490,1250 2490.0,2442" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="2429.5" y="1231.0" width="121" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="2490" y="1247" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="2490" dy="0">user/role audit</tspan>
+</text>
+<polyline points="1310,1544 1360,1544 1360,2210 2490.0,2442" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="1306.5" y="2191.0" width="107" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="1360" y="2207" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="1360" dy="0">product audit</tspan>
+</text>
+<polyline points="4530.0,816 4520,1300 4520,2240 2880,2454" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="4466.5" y="2221.0" width="107" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4520" y="2237" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4520" dy="0">consent audit</tspan>
+</text>
+<polyline points="5130,1544 4830,1544 4552.666666666667,1627" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="4806.0" y="1525.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4830" y="1541" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4830" dy="0">uses</tspan>
+</text>
+<polyline points="5130,1544 4830,1652 4552.666666666667,1652" fill="none" stroke="#475569" stroke-width="1.8" stroke-dasharray="8 7" marker-end="url(#arrow-open)" opacity="0.82"/>
+<rect x="4806.0" y="1633.0" width="48" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4830" y="1649" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4830" dy="0">uses</tspan>
+</text>
+<line x1="4552.666666666667" y1="1677" x2="4552.666666666667" y2="1627" stroke="#0369a1" stroke-width="1.7" stroke-dasharray="7 6" marker-end="url(#arrow-inherit)" opacity="0.95"/>
+<rect x="4509.666666666667" y="1634.0" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4552.666666666667" y="1650.0" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4552.666666666667" dy="0">implements</tspan>
+</text>
+<line x1="4552.666666666667" y1="1702" x2="4552.666666666667" y2="1627" stroke="#0369a1" stroke-width="1.7" stroke-dasharray="7 6" marker-end="url(#arrow-inherit)" opacity="0.95"/>
+<rect x="4509.666666666667" y="1646.5" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4552.666666666667" y="1662.5" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4552.666666666667" dy="0">implements</tspan>
+</text>
+<line x1="4552.666666666667" y1="1727" x2="4552.666666666667" y2="1652" stroke="#0369a1" stroke-width="1.7" stroke-dasharray="7 6" marker-end="url(#arrow-inherit)" opacity="0.95"/>
+<rect x="4509.666666666667" y="1671.5" width="86" height="22" rx="5" ry="5" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="0.95"/>
+<text x="4552.666666666667" y="1687.5" font-family="Arial" font-size="13" font-weight="400" fill="#334155" text-anchor="middle">
+<tspan x="4552.666666666667" dy="0">implements</tspan>
+</text>
+<rect x="100" y="3140" width="5050" height="130" rx="14" ry="14" fill="#f8fafc" stroke="#94a3b8" stroke-width="1.5" opacity="1"/>
+<text x="125" y="3172" font-family="Arial" font-size="18" font-weight="700" fill="#111827" text-anchor="start">
+<tspan x="125" dy="0">Key entity associations shown conceptually</tspan>
+</text>
+<text x="125" y="3206" font-family="Arial" font-size="15" font-weight="400" fill="#4b5563" text-anchor="start">
+<tspan x="125" dy="0">User ↔ Role many-to-many • Customer ↔ ConsentRecord • Beneficiary links policyholder Customer to beneficiary Customer • ProductOwnership links Customer to Product • PaymentRecord links to ProductOwnership</tspan>
+<tspan x="125" dy="24">Segment has SegmentCriteria • Campaign targets Segment, promotes Product, has CampaignRecipients • ContactEvent belongs to Customer/Campaign • CampaignMetric belongs to Campaign • ReportExport requested by User</tspan>
+</text>
+<rect x="3960" y="3095" width="1190" height="40" rx="7" ry="7" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" opacity="1"/>
+<text x="3978" y="3121" font-family="Arial" font-size="14" font-weight="400" fill="#4b5563" text-anchor="start">
+<tspan x="3978" dy="0">Legend: dashed open arrow = dependency / uses; empty triangle = inheritance / implementation; entity rows state their superclass.</tspan>
+</text>
+</svg>
