@@ -23,10 +23,6 @@ if ($postgres.image -ne "postgres:16-alpine") {
     throw "Expected postgres image postgres:16-alpine, found $($postgres.image)"
 }
 
-if ($postgres.container_name -ne "bwc-postgres") {
-    throw "Expected container name bwc-postgres, found $($postgres.container_name)"
-}
-
 if (-not ($postgres.networks.PSObject.Properties.Name -contains "bwc_local")) {
     throw "Expected postgres service to join bwc_local network"
 }

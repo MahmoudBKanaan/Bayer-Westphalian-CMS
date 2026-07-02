@@ -8,9 +8,14 @@ if ($LASTEXITCODE -ne 0) {
     throw "docker compose up -d postgres failed"
 }
 
+$containerId = docker compose -f $composeFile ps -q postgres
+if ([string]::IsNullOrWhiteSpace($containerId)) {
+    throw "Could not resolve the Docker Compose postgres container ID"
+}
+
 $healthy = $false
 for ($attempt = 1; $attempt -le 30; $attempt++) {
-    $status = docker inspect --format="{{.State.Health.Status}}" bwc-postgres 2>$null
+    $status = docker inspect --format="{{.State.Health.Status}}" $containerId 2>$null
     if ($status -eq "healthy") {
         $healthy = $true
         break
@@ -20,17 +25,17 @@ for ($attempt = 1; $attempt -le 30; $attempt++) {
 }
 
 if (-not $healthy) {
-    docker logs --tail 80 bwc-postgres
-    throw "bwc-postgres did not become healthy"
+    docker logs --tail 80 $containerId
+    throw "Docker Compose postgres service did not become healthy"
 }
 
-docker exec bwc-postgres pg_isready -U bwc_app -d bwc_campaign
+docker exec $containerId pg_isready -U bwc_app -d bwc_campaign
 if ($LASTEXITCODE -ne 0) {
     throw "pg_isready failed for bwc_campaign"
 }
 
 $query = "select current_database() as database, current_user as username;"
-$result = docker exec bwc-postgres psql -U bwc_app -d bwc_campaign -t -A -F "," -c $query
+$result = docker exec $containerId psql -U bwc_app -d bwc_campaign -t -A -F "," -c $query
 if ($LASTEXITCODE -ne 0) {
     throw "PostgreSQL smoke query failed"
 }
