@@ -4,6 +4,7 @@ spring:
       on-profile: test
   flyway:
     enabled: false
+    locations: classpath:db/migration,classpath:db/demo
 
 logging:
   level:
