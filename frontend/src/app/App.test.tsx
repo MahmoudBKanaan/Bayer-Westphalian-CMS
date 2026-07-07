@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import { App } from "./App";
 
 describe("App", () => {
-  it("renders the project title and health placeholder", async () => {
+  it("renders the login screen before an employee is authenticated", async () => {
     render(<App />);
 
     expect(
-      await screen.findByText("Bayer-Westphalian Campaign Management Platform"),
+      await screen.findByRole("heading", {
+        name: "Bayer-Westphalian Campaign Management",
+      }),
     ).toBeInTheDocument();
-    expect(screen.getByText("API health: backend not connected yet")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
   });
 });

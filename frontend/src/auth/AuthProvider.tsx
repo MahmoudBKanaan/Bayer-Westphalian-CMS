@@ -1,0 +1,75 @@
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import { login, type AuthenticatedUser } from "@/api/auth";
+import {
+  clearAuthSession,
+  loadAuthSession,
+  saveAuthSession,
+  extractRolesFromAccessToken,
+  type SystemRoleName,
+} from "@/auth/sessionStorageStrategy";
+
+type AuthState = {
+  accessToken: string | null;
+  refreshToken: string | null;
+  user: AuthenticatedUser | null;
+  roles: SystemRoleName[];
+};
+
+type AuthContextValue = AuthState & {
+  isAuthenticated: boolean;
+  hasAnyRole: (roles: SystemRoleName[]) => boolean;
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => void;
+};
+
+const AuthContext = createContext<AuthContextValue | null>(null);
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [authState, setAuthState] = useState<AuthState>(() => loadStoredAuthState());
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    const session = await login(email, password);
+    saveAuthSession(session);
+    setAuthState({
+      accessToken: session.tokens.accessToken,
+      refreshToken: session.tokens.refreshToken,
+      user: session.user,
+      roles: extractRolesFromAccessToken(session.tokens.accessToken),
+    });
+  }, []);
+
+  const signOut = useCallback(() => {
+    clearAuthSession();
+    setAuthState({ accessToken: null, refreshToken: null, user: null, roles: [] });
+  }, []);
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      ...authState,
+      isAuthenticated: Boolean(authState.accessToken && authState.user),
+      hasAnyRole: (roles) => roles.some((role) => authState.roles.includes(role)),
+      signIn,
+      signOut,
+    }),
+    [authState, signIn, signOut],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const auth = useContext(AuthContext);
+  if (auth == null) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return auth;
+}
+
+function loadStoredAuthState(): AuthState {
+  const session = loadAuthSession();
+  if (session == null) {
+    return { accessToken: null, refreshToken: null, user: null, roles: [] };
+  }
+
+  return session;
+}

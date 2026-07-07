@@ -9,15 +9,22 @@ import java.net.Socket;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.output.MigrateResult;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
+import org.junit.jupiter.api.parallel.ResourceLock;
 
+@Execution(ExecutionMode.SAME_THREAD)
+@ResourceLock("bwc_flyway_test_schema")
 class FlywayMigrationIntegrationTests {
 
     private static final String DB_URL =
@@ -74,6 +81,7 @@ class FlywayMigrationIntegrationTests {
                         .schemas(TEST_SCHEMA)
                         .defaultSchema(TEST_SCHEMA)
                         .createSchemas(true)
+                        .initSql("set search_path to " + TEST_SCHEMA)
                         .load();
 
         flyway.migrate();
@@ -103,7 +111,12 @@ class FlywayMigrationIntegrationTests {
             assertThat(resultSet.getBoolean("empty")).isTrue();
         }
 
-        migrate();
+        MigrateResult migrationResult = migrate();
+
+        assertThat(migrationResult.success).isTrue();
+        assertThat(migrationResult.migrationsExecuted).isEqualTo(18);
+        assertThat(migrationResult.schemaName).isEqualTo(TEST_SCHEMA);
+        assertThat(migrationResult.targetSchemaVersion).isEqualTo("18");
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
                 Statement statement = connection.createStatement()) {
@@ -118,8 +131,8 @@ class FlywayMigrationIntegrationTests {
                                     + ".flyway_schema_history"
                                     + " where type = 'SQL'")) {
                 assertThat(resultSet.next()).isTrue();
-                assertThat(resultSet.getInt("migration_count")).isEqualTo(17);
-                assertThat(resultSet.getInt("latest_version")).isEqualTo(17);
+                assertThat(resultSet.getInt("migration_count")).isEqualTo(18);
+                assertThat(resultSet.getInt("latest_version")).isEqualTo(18);
                 assertThat(resultSet.getInt("failed_count")).isZero();
                 assertThat(resultSet.getInt("repeatable_count")).isZero();
             }
@@ -173,6 +186,43 @@ class FlywayMigrationIntegrationTests {
                             "select count(*) as role_count from " + TEST_SCHEMA + ".roles")) {
                 assertThat(resultSet.next()).isTrue();
                 assertThat(resultSet.getInt("role_count")).isEqualTo(10);
+            }
+        }
+    }
+
+    @Test
+    void migrationCreatesAllKbRequiredTables() throws Exception {
+        migrate();
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+                Statement statement = connection.createStatement()) {
+            try (ResultSet resultSet =
+                    statement.executeQuery(
+                            "select count(*) as required_table_count from information_schema.tables"
+                                    + " where table_schema = '"
+                                    + TEST_SCHEMA
+                                    + "' and table_type = 'BASE TABLE'"
+                                    + " and table_name in ("
+                                    + kbRequiredTableNamesSql()
+                                    + ")")) {
+                assertThat(resultSet.next()).isTrue();
+                assertThat(resultSet.getInt("required_table_count"))
+                        .isEqualTo(KB_INITIAL_SCHEMA_TABLES.size());
+            }
+
+            for (String tableName : KB_INITIAL_SCHEMA_TABLES) {
+                try (ResultSet resultSet =
+                        statement.executeQuery(
+                                "select exists (select 1 from information_schema.tables"
+                                        + " where table_schema = '"
+                                        + TEST_SCHEMA
+                                        + "' and table_type = 'BASE TABLE'"
+                                        + " and table_name = '"
+                                        + tableName
+                                        + "') as exists")) {
+                    assertThat(resultSet.next()).isTrue();
+                    assertThat(resultSet.getBoolean("exists")).as(tableName).isTrue();
+                }
             }
         }
     }
@@ -281,11 +331,7 @@ class FlywayMigrationIntegrationTests {
             assertForeignKeyExists(
                     statement, "campaigns", "campaigns_owner_user_id_fkey", "users", "SET NULL");
             assertForeignKeyExists(
-                    statement,
-                    "campaigns",
-                    "campaigns_segment_id_fkey",
-                    "segments",
-                    "SET NULL");
+                    statement, "campaigns", "campaigns_segment_id_fkey", "segments", "SET NULL");
             assertForeignKeyExists(
                     statement, "campaigns", "campaigns_approved_by_fkey", "users", "SET NULL");
             assertForeignKeyExists(
@@ -373,17 +419,89 @@ class FlywayMigrationIntegrationTests {
                     "users",
                     "SET NULL");
             assertForeignKeyExists(
-                    statement,
-                    "audit_logs",
-                    "audit_logs_actor_user_id_fkey",
-                    "users",
-                    "SET NULL");
+                    statement, "audit_logs", "audit_logs_actor_user_id_fkey", "users", "SET NULL");
             assertForeignKeyExists(
                     statement,
                     "ai_recommendations",
                     "ai_recommendations_approved_by_user_id_fkey",
                     "users",
                     "SET NULL");
+        }
+    }
+
+    @Test
+    void enforcesKbForeignKeyConstraintsOnInvalidReferences() throws Exception {
+        migrate();
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+                Statement statement = connection.createStatement()) {
+            statement.executeUpdate(
+                    "insert into "
+                            + TEST_SCHEMA
+                            + ".customers (id, customer_type, first_name, last_name, status)"
+                            + " values ('20000000-0000-0000-0000-000000009901', 'CUSTOMER',"
+                            + " 'Foreign', 'Key', 'ACTIVE')");
+            statement.executeUpdate(
+                    "insert into "
+                            + TEST_SCHEMA
+                            + ".products (id, name, product_type, active)"
+                            + " values ('30000000-0000-0000-0000-000000009901',"
+                            + " 'FK Enforcement Product', 'OTHER', true)");
+            statement.executeUpdate(
+                    "insert into "
+                            + TEST_SCHEMA
+                            + ".campaigns (id, name, objective, channel)"
+                            + " values ('50000000-0000-0000-0000-000000009901',"
+                            + " 'FK Enforcement Campaign', 'Verify FK enforcement', 'EMAIL')");
+
+            assertForeignKeyViolation(
+                    () ->
+                            statement.executeUpdate(
+                                    "insert into "
+                                            + TEST_SCHEMA
+                                            + ".user_roles (user_id, role_id)"
+                                            + " values ("
+                                            + "'10000000-0000-0000-0000-000000009999',"
+                                            + " '00000000-0000-0000-0000-000000000001')"),
+                    "user_roles_user_id_fkey");
+            assertForeignKeyViolation(
+                    () ->
+                            statement.executeUpdate(
+                                    "insert into "
+                                            + TEST_SCHEMA
+                                            + ".consent_records"
+                                            + " (id, customer_id, consent_type, status, purpose)"
+                                            + " values ("
+                                            + "'21000000-0000-0000-0000-000000009901',"
+                                            + " '20000000-0000-0000-0000-000000009999',"
+                                            + " 'MARKETING_EMAIL', 'GIVEN', 'FK test')"),
+                    "consent_records_customer_id_fkey");
+            assertForeignKeyViolation(
+                    () ->
+                            statement.executeUpdate(
+                                    "insert into "
+                                            + TEST_SCHEMA
+                                            + ".product_ownerships"
+                                            + " (id, customer_id, product_id, start_date)"
+                                            + " values ("
+                                            + "'31000000-0000-0000-0000-000000009901',"
+                                            + " '20000000-0000-0000-0000-000000009901',"
+                                            + " '30000000-0000-0000-0000-000000009999',"
+                                            + " current_date)"),
+                    "product_ownerships_product_id_fkey");
+            assertForeignKeyViolation(
+                    () ->
+                            statement.executeUpdate(
+                                    "insert into "
+                                            + TEST_SCHEMA
+                                            + ".campaign_recipients"
+                                            + " (id, campaign_id, customer_id, eligibility_status)"
+                                            + " values ("
+                                            + "'51000000-0000-0000-0000-000000009901',"
+                                            + " '50000000-0000-0000-0000-000000009999',"
+                                            + " '20000000-0000-0000-0000-000000009901',"
+                                            + " 'ELIGIBLE')"),
+                    "campaign_recipients_campaign_id_fkey");
         }
     }
 
@@ -563,7 +681,8 @@ class FlywayMigrationIntegrationTests {
             }
 
             assertConstraintExists(statement, "consent_records", "consent_records_pkey");
-            assertConstraintExists(statement, "consent_records", "consent_records_customer_id_fkey");
+            assertConstraintExists(
+                    statement, "consent_records", "consent_records_customer_id_fkey");
             assertConstraintExists(statement, "consent_records", "consent_records_created_by_fkey");
             assertConstraintExists(
                     statement, "consent_records", "consent_records_expiration_after_grant");
@@ -645,13 +764,9 @@ class FlywayMigrationIntegrationTests {
             assertConstraintExists(
                     statement, "product_ownerships", "product_ownerships_product_id_fkey");
             assertConstraintExists(
-                    statement,
-                    "product_ownerships",
-                    "product_ownerships_policy_number_unique");
+                    statement, "product_ownerships", "product_ownerships_policy_number_unique");
             assertConstraintExists(
-                    statement,
-                    "product_ownerships",
-                    "product_ownerships_expiration_after_start");
+                    statement, "product_ownerships", "product_ownerships_expiration_after_start");
             assertIndexExists(statement, "product_ownerships_customer_idx");
             assertIndexExists(statement, "idx_product_ownership_expiration");
             assertIndexExists(statement, "idx_product_ownerships_product");
@@ -688,9 +803,13 @@ class FlywayMigrationIntegrationTests {
             assertConstraintExists(
                     statement, "product_change_requests", "product_change_requests_pkey");
             assertConstraintExists(
-                    statement, "product_change_requests", "product_change_requests_product_id_fkey");
+                    statement,
+                    "product_change_requests",
+                    "product_change_requests_product_id_fkey");
             assertConstraintExists(
-                    statement, "product_change_requests", "product_change_requests_requested_by_fkey");
+                    statement,
+                    "product_change_requests",
+                    "product_change_requests_requested_by_fkey");
             assertConstraintExists(
                     statement,
                     "product_change_requests",
@@ -729,7 +848,8 @@ class FlywayMigrationIntegrationTests {
             }
 
             assertConstraintExists(statement, "payment_records", "payment_records_pkey");
-            assertConstraintExists(statement, "payment_records", "payment_records_customer_id_fkey");
+            assertConstraintExists(
+                    statement, "payment_records", "payment_records_customer_id_fkey");
             assertConstraintExists(
                     statement, "payment_records", "payment_records_product_ownership_id_fkey");
             assertConstraintExists(
@@ -1135,19 +1255,13 @@ class FlywayMigrationIntegrationTests {
                     "ai_recommendations",
                     "ai_recommendations_target_entity_type_not_blank");
             assertConstraintExists(
-                    statement,
-                    "ai_recommendations",
-                    "ai_recommendations_input_summary_not_blank");
+                    statement, "ai_recommendations", "ai_recommendations_input_summary_not_blank");
             assertConstraintExists(
-                    statement,
-                    "ai_recommendations",
-                    "ai_recommendations_recommendation_not_blank");
+                    statement, "ai_recommendations", "ai_recommendations_recommendation_not_blank");
             assertConstraintExists(
                     statement, "ai_recommendations", "ai_recommendations_explanation_not_blank");
             assertConstraintExists(
-                    statement,
-                    "ai_recommendations",
-                    "ai_recommendations_confidence_score_range");
+                    statement, "ai_recommendations", "ai_recommendations_confidence_score_range");
             assertIndexExists(statement, "idx_ai_recommendations_type");
             assertIndexExists(statement, "idx_ai_recommendations_target");
             assertIndexExists(statement, "idx_ai_recommendations_approved_by");
@@ -1222,6 +1336,20 @@ class FlywayMigrationIntegrationTests {
                 assertThat(resultSet.getInt("mvp_role_count")).isEqualTo(6);
                 assertThat(resultSet.getInt("extended_role_count")).isEqualTo(4);
             }
+
+            assertRoleSeedId(statement, "ADMIN", "00000000-0000-0000-0000-000000000001");
+            assertRoleSeedId(statement, "CAMPAIGN_MANAGER", "00000000-0000-0000-0000-000000000002");
+            assertRoleSeedId(statement, "BI_ANALYST", "00000000-0000-0000-0000-000000000003");
+            assertRoleSeedId(statement, "PRODUCT_MANAGER", "00000000-0000-0000-0000-000000000004");
+            assertRoleSeedId(
+                    statement, "COMPLIANCE_OFFICER", "00000000-0000-0000-0000-000000000005");
+            assertRoleSeedId(
+                    statement, "CUSTOMER_SERVICE_AGENT", "00000000-0000-0000-0000-000000000006");
+            assertRoleSeedId(statement, "SALES_AGENT", "00000000-0000-0000-0000-000000000007");
+            assertRoleSeedId(
+                    statement, "MARKETING_ANALYST", "00000000-0000-0000-0000-000000000008");
+            assertRoleSeedId(statement, "EXECUTIVE_VIEWER", "00000000-0000-0000-0000-000000000009");
+            assertRoleSeedId(statement, "SYSTEM_AUDITOR", "00000000-0000-0000-0000-000000000010");
 
             assertRoleSeed(
                     statement,
@@ -1812,15 +1940,15 @@ class FlywayMigrationIntegrationTests {
                                     + customerWithConsentId
                                     + "'")) {
                 assertThat(resultSet.next()).isTrue();
-                assertThat(resultSet.getString("evidence_file_url")).isEqualTo("evidence://grant-1");
+                assertThat(resultSet.getString("evidence_file_url"))
+                        .isEqualTo("evidence://grant-1");
                 assertThat(resultSet.getBoolean("has_created_at")).isTrue();
             }
         }
     }
 
     @Test
-    void consentRecordsRetainHistoryWhenCreatorIsDeletedAndCascadeWithCustomer()
-            throws Exception {
+    void consentRecordsRetainHistoryWhenCreatorIsDeletedAndCascadeWithCustomer() throws Exception {
         migrate();
 
         String customerId = "40000000-0000-0000-0000-000000000011";
@@ -2261,11 +2389,7 @@ class FlywayMigrationIntegrationTests {
                             + "')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".users where id = '"
-                            + ownerUserId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".users where id = '" + ownerUserId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -2392,11 +2516,7 @@ class FlywayMigrationIntegrationTests {
                             + "', 'policy_status', 'IN', 'ACTIVE,LAPSED')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".segments where id = '"
-                            + segmentId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".segments where id = '" + segmentId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -2513,6 +2633,12 @@ class FlywayMigrationIntegrationTests {
                                                     + "', '"
                                                     + customerId
                                                     + "', 'EXCLUDED')"))
+                    .isInstanceOf(SQLException.class)
+                    .satisfies(
+                            error ->
+                                    assertThat(((SQLException) error).getSQLState())
+                                            .as("campaign recipient unique constraint")
+                                            .isEqualTo("23505"))
                     .hasMessageContaining("campaign_recipients_campaign_customer_unique");
         }
     }
@@ -2646,11 +2772,7 @@ class FlywayMigrationIntegrationTests {
                     .hasMessageContaining("campaign_products_product_id_fkey");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".campaigns where id = '"
-                            + campaignId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".campaigns where id = '" + campaignId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -2760,11 +2882,7 @@ class FlywayMigrationIntegrationTests {
                             + "', now(), 'APPROVED')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".segments where id = '"
-                            + segmentId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".segments where id = '" + segmentId + "'");
             statement.executeUpdate(
                     "delete from "
                             + TEST_SCHEMA
@@ -2868,8 +2986,7 @@ class FlywayMigrationIntegrationTests {
     }
 
     @Test
-    void followUpTasksCascadeWithCustomerAndRetainWhenCampaignOrAssigneeDeleted()
-            throws Exception {
+    void followUpTasksCascadeWithCustomerAndRetainWhenCampaignOrAssigneeDeleted() throws Exception {
         migrate();
 
         String customerId = "95000000-0000-0000-0000-000000000111";
@@ -2914,17 +3031,9 @@ class FlywayMigrationIntegrationTests {
                             + "', 'Retain task after nullable references are deleted')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".campaigns where id = '"
-                            + campaignId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".campaigns where id = '" + campaignId + "'");
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".users where id = '"
-                            + assigneeId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".users where id = '" + assigneeId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -2940,11 +3049,7 @@ class FlywayMigrationIntegrationTests {
             }
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".customers where id = '"
-                            + customerId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".customers where id = '" + customerId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -3054,11 +3159,7 @@ class FlywayMigrationIntegrationTests {
                     .hasMessageContaining("reminder_schedules_product_id_fkey");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".customers where id = '"
-                            + customerId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".customers where id = '" + customerId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -3164,11 +3265,7 @@ class FlywayMigrationIntegrationTests {
                             + "', 10)");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".campaigns where id = '"
-                            + campaignId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".campaigns where id = '" + campaignId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -3267,11 +3364,7 @@ class FlywayMigrationIntegrationTests {
                             + "', 'DELETE_USER', 'user', '127.0.0.1')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".users where id = '"
-                            + actorUserId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".users where id = '" + actorUserId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -3399,11 +3492,7 @@ class FlywayMigrationIntegrationTests {
                             + "', 'Retained export request', 'PDF')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".users where id = '"
-                            + requesterId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".users where id = '" + requesterId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -3559,11 +3648,7 @@ class FlywayMigrationIntegrationTests {
                             + "')");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".users where id = '"
-                            + approverId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".users where id = '" + approverId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -3754,8 +3839,7 @@ class FlywayMigrationIntegrationTests {
     }
 
     @Test
-    void supportsProductOwnershipDefaultsStatusFilteringAndExpirationQueries()
-            throws Exception {
+    void supportsProductOwnershipDefaultsStatusFilteringAndExpirationQueries() throws Exception {
         migrate();
 
         String customerId = "60000000-0000-0000-0000-000000000001";
@@ -4048,8 +4132,8 @@ class FlywayMigrationIntegrationTests {
     void supportsUserInsertDefaultsAndRoleAssignment() throws Exception {
         migrate();
 
-        String assigneeUserId = "10000000-0000-0000-0000-000000000001";
-        String assigningAdminId = "10000000-0000-0000-0000-000000000002";
+        String assigneeUserId = "10000000-0000-0000-0000-000000009901";
+        String assigningAdminId = "10000000-0000-0000-0000-000000009902";
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
                 Statement statement = connection.createStatement()) {
@@ -4106,8 +4190,8 @@ class FlywayMigrationIntegrationTests {
             throws Exception {
         migrate();
 
-        String assigneeUserId = "10000000-0000-0000-0000-000000000003";
-        String assigningAdminId = "10000000-0000-0000-0000-000000000004";
+        String assigneeUserId = "10000000-0000-0000-0000-000000009903";
+        String assigningAdminId = "10000000-0000-0000-0000-000000009904";
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
                 Statement statement = connection.createStatement()) {
@@ -4149,11 +4233,7 @@ class FlywayMigrationIntegrationTests {
                     .hasMessageContaining("user_roles_pkey");
 
             statement.executeUpdate(
-                    "delete from "
-                            + TEST_SCHEMA
-                            + ".users where id = '"
-                            + assigningAdminId
-                            + "'");
+                    "delete from " + TEST_SCHEMA + ".users where id = '" + assigningAdminId + "'");
 
             try (ResultSet resultSet =
                     statement.executeQuery(
@@ -4187,7 +4267,7 @@ class FlywayMigrationIntegrationTests {
         }
     }
 
-    private static void migrate() {
+    private static MigrateResult migrate() {
         Flyway flyway =
                 Flyway.configure()
                         .dataSource(DB_URL, DB_USERNAME, DB_PASSWORD)
@@ -4195,12 +4275,13 @@ class FlywayMigrationIntegrationTests {
                         .schemas(TEST_SCHEMA)
                         .defaultSchema(TEST_SCHEMA)
                         .createSchemas(true)
+                        .initSql("set search_path to " + TEST_SCHEMA)
                         .load();
 
-        flyway.migrate();
+        return flyway.migrate();
     }
 
-    private static void migrateWithDemoData() {
+    private static MigrateResult migrateWithDemoData() {
         Flyway flyway =
                 Flyway.configure()
                         .dataSource(DB_URL, DB_USERNAME, DB_PASSWORD)
@@ -4208,9 +4289,10 @@ class FlywayMigrationIntegrationTests {
                         .schemas(TEST_SCHEMA)
                         .defaultSchema(TEST_SCHEMA)
                         .createSchemas(true)
+                        .initSql("set search_path to " + TEST_SCHEMA)
                         .load();
 
-        flyway.migrate();
+        return flyway.migrate();
     }
 
     private static void assertLocalRebuildState(Statement statement) throws Exception {
@@ -4225,8 +4307,8 @@ class FlywayMigrationIntegrationTests {
                                 + TEST_SCHEMA
                                 + ".flyway_schema_history")) {
             assertThat(resultSet.next()).isTrue();
-            assertThat(resultSet.getInt("versioned_count")).isEqualTo(17);
-            assertThat(resultSet.getInt("latest_version")).isEqualTo(17);
+            assertThat(resultSet.getInt("versioned_count")).isEqualTo(18);
+            assertThat(resultSet.getInt("latest_version")).isEqualTo(18);
             assertThat(resultSet.getInt("demo_repeatable_count")).isEqualTo(1);
             assertThat(resultSet.getInt("failed_count")).isZero();
         }
@@ -4260,6 +4342,25 @@ class FlywayMigrationIntegrationTests {
             assertThat(resultSet.getInt("demo_campaign_count")).isEqualTo(1);
             assertThat(resultSet.getInt("demo_audit_count")).isEqualTo(1);
         }
+    }
+
+    private static String kbRequiredTableNamesSql() {
+        return KB_INITIAL_SCHEMA_TABLES.stream()
+                .map(tableName -> "'" + tableName + "'")
+                .reduce((left, right) -> left + ", " + right)
+                .orElseThrow();
+    }
+
+    private static void assertForeignKeyViolation(
+            ThrowingSqlOperation operation, String constraintName) {
+        assertThatThrownBy(operation::execute)
+                .isInstanceOf(SQLException.class)
+                .satisfies(
+                        error ->
+                                assertThat(((SQLException) error).getSQLState())
+                                        .as(constraintName)
+                                        .isEqualTo("23503"))
+                .hasMessageContaining(constraintName);
     }
 
     private static void assertConstraintExists(
@@ -4381,8 +4482,8 @@ class FlywayMigrationIntegrationTests {
                         + "', current_date)");
     }
 
-    private static void insertCampaignProduct(Statement statement, String campaignId, String productId)
-            throws Exception {
+    private static void insertCampaignProduct(
+            Statement statement, String campaignId, String productId) throws Exception {
         statement.executeUpdate(
                 "insert into "
                         + TEST_SCHEMA
@@ -4459,6 +4560,20 @@ class FlywayMigrationIntegrationTests {
         }
     }
 
+    private static void assertRoleSeedId(Statement statement, String roleName, String expectedId)
+            throws Exception {
+        try (ResultSet resultSet =
+                statement.executeQuery(
+                        "select id::text as role_id from "
+                                + TEST_SCHEMA
+                                + ".roles where name = '"
+                                + roleName
+                                + "'")) {
+            assertThat(resultSet.next()).as(roleName).isTrue();
+            assertThat(resultSet.getString("role_id")).isEqualTo(expectedId);
+        }
+    }
+
     private static void assertSeedUserRole(
             Statement statement,
             String email,
@@ -4506,5 +4621,10 @@ class FlywayMigrationIntegrationTests {
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    @FunctionalInterface
+    private interface ThrowingSqlOperation {
+        void execute() throws SQLException;
     }
 }

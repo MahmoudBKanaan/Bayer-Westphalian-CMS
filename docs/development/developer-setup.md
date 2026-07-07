@@ -61,6 +61,13 @@ docker compose up -d postgres
 docker compose ps
 ```
 
+Validate the Docker Compose configuration and PostgreSQL startup:
+
+```powershell
+.\scripts\test-docker-compose-config.ps1
+.\scripts\test-docker-compose-postgres.ps1
+```
+
 Default local database settings:
 
 | Setting | Value |
@@ -144,6 +151,30 @@ Use this command to apply backend formatting:
 ```powershell
 mvn spotless:apply
 ```
+
+The PostgreSQL integration test connects to the local Docker Compose database on port `5432`. Start PostgreSQL before running the complete backend test suite when you want that integration check to execute.
+
+## Unit and Integration Tests
+
+Use this matrix during local development and before commits:
+
+| Area | Command | Coverage |
+| --- | --- | --- |
+| Frontend unit tests | `cd frontend; npm run test` | Format helpers and API request behavior |
+| Frontend integration tests | `cd frontend; npm run test` | App routing, dashboard redirect, campaigns page, and login shell |
+| Frontend full gate | `cd frontend; npm run verify` | ESLint, Prettier, Vitest, and production build |
+| Backend unit tests | `cd backend; mvn test` | Spring context and OpenAPI metadata |
+| Backend integration tests | `cd backend; mvn test` | Actuator health and PostgreSQL connectivity |
+| Backend full gate | `cd backend; mvn verify` | Tests, package, Spotless, and Checkstyle |
+| Docker config test | `.\scripts\test-docker-compose-config.ps1` | Compose service, network, volume, and health check model |
+| Docker integration test | `.\scripts\test-docker-compose-postgres.ps1` | PostgreSQL startup, readiness, and SQL smoke query |
+
+Current test files:
+
+| Area | Files |
+| --- | --- |
+| Frontend | `src/app/App.test.tsx`, `src/app/router.integration.test.tsx`, `src/api/client.test.ts`, `src/utils/format.test.ts` |
+| Backend | `CampaignApplicationTests.java`, `OpenApiConfigurationTests.java`, `HealthEndpointIntegrationTests.java`, `PostgreSqlConnectionIntegrationTests.java` |
 
 ## API Documentation
 

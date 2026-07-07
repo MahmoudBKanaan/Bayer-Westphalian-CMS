@@ -4,6 +4,7 @@ import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [react()],
+  cacheDir: process.env.VITE_CACHE_DIR ?? "../.vite-cache-local",
   resolve: {
     alias: {
       "@": fileURLToPath(new URL("./src", import.meta.url)),

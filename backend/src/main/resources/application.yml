@@ -63,3 +63,7 @@ app:
       secret: ${JWT_SECRET:dev-only-change-me}
       access-token-minutes: ${JWT_ACCESS_TOKEN_MINUTES:15}
       refresh-token-days: ${JWT_REFRESH_TOKEN_DAYS:7}
+    login-rate-limit:
+      max-failures: ${LOGIN_RATE_LIMIT_MAX_FAILURES:5}
+      failure-window-minutes: ${LOGIN_RATE_LIMIT_FAILURE_WINDOW_MINUTES:15}
+      lockout-minutes: ${LOGIN_RATE_LIMIT_LOCKOUT_MINUTES:15}

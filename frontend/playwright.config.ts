@@ -15,7 +15,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev -- --host 127.0.0.1",
+    command: "node scripts/start-vite-e2e.mjs",
     url: "http://127.0.0.1:5173",
     reuseExistingServer: true,
   },

@@ -30,6 +30,20 @@ Database migrations belong in:
 src/main/resources/db/migration
 ```
 
+Migration files follow this convention:
+
+```text
+V<positive-integer>__<lower_snake_case_description>.sql
+```
+
+Example:
+
+```text
+V1__create_foundation_schema.sql
+```
+
+Full migration strategy notes are documented in `docs/database/migration-strategy.md`.
+
 ## API Documentation
 
 OpenAPI/Swagger is configured with Springdoc.

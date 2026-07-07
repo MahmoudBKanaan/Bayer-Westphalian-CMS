@@ -3,6 +3,8 @@ package com.bayerwestphalian.campaign.database;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -15,6 +17,8 @@ class FlywayMigrationResourceTests {
 
     private static final Pattern VERSIONED_MIGRATION_NAME =
             Pattern.compile("V([1-9][0-9]*)__[a-z][a-z0-9]*(?:_[a-z0-9]+)*\\.sql");
+    private static final Pattern BCRYPT_PASSWORD_HASH =
+            Pattern.compile("\\$2[aby]\\$\\d{2}\\$[./A-Za-z0-9]{53}");
     private static final List<String> KB_INITIAL_SCHEMA_TABLES =
             List.of(
                     "users",
@@ -98,7 +102,8 @@ class FlywayMigrationResourceTests {
         String sql = migration.getContentAsString(StandardCharsets.UTF_8);
 
         assertThat(sql)
-                .contains("create type customer_type as enum ('CUSTOMER', 'PROSPECT', 'BENEFICIARY')")
+                .contains(
+                        "create type customer_type as enum ('CUSTOMER', 'PROSPECT', 'BENEFICIARY')")
                 .contains("create type customer_age_group as enum")
                 .contains("create type customer_status as enum")
                 .contains("create table customers")
@@ -146,8 +151,10 @@ class FlywayMigrationResourceTests {
         assertThat(sql)
                 .contains("create table beneficiaries")
                 .contains("id uuid primary key")
-                .contains("policyholder_customer_id uuid not null references customers (id) on delete cascade")
-                .contains("beneficiary_customer_id uuid not null references customers (id) on delete cascade")
+                .contains(
+                        "policyholder_customer_id uuid not null references customers (id) on delete cascade")
+                .contains(
+                        "beneficiary_customer_id uuid not null references customers (id) on delete cascade")
                 .contains("relationship varchar(100) not null")
                 .contains("guardian_name varchar(255)")
                 .contains("guardian_email varchar(255)")
@@ -220,9 +227,11 @@ class FlywayMigrationResourceTests {
         assertThat(sql)
                 .contains("alter table consent_records")
                 .contains("add constraint consent_records_expiration_after_grant")
-                .contains("check (expires_at is null or granted_at is null or expires_at > granted_at)")
+                .contains(
+                        "check (expires_at is null or granted_at is null or expires_at > granted_at)")
                 .contains("add constraint consent_records_withdrawal_after_grant")
-                .contains("check (withdrawn_at is null or granted_at is null or withdrawn_at >= granted_at)")
+                .contains(
+                        "check (withdrawn_at is null or granted_at is null or withdrawn_at >= granted_at)")
                 .contains("create index if not exists idx_consent_records_customer")
                 .contains("on consent_records (customer_id)")
                 .contains("create index if not exists idx_consent_records_customer_type_status")
@@ -280,7 +289,8 @@ class FlywayMigrationResourceTests {
                 .contains("create index if not exists idx_products_type on products (product_type)")
                 .contains("create index if not exists idx_products_active on products (active)")
                 .contains("create index if not exists idx_products_name on products (name)")
-                .contains("create index if not exists idx_products_deleted_at on products (deleted_at)");
+                .contains(
+                        "create index if not exists idx_products_deleted_at on products (deleted_at)");
     }
 
     @Test
@@ -301,8 +311,10 @@ class FlywayMigrationResourceTests {
                 .contains("expiration_date date")
                 .contains("status ownership_status not null default 'ACTIVE'")
                 .contains("created_at timestamptz not null default now()")
-                .contains("constraint product_ownerships_policy_number_unique unique (policy_number)")
-                .contains("create index product_ownerships_customer_idx on product_ownerships (customer_id)");
+                .contains(
+                        "constraint product_ownerships_policy_number_unique unique (policy_number)")
+                .contains(
+                        "create index product_ownerships_customer_idx on product_ownerships (customer_id)");
     }
 
     @Test
@@ -384,7 +396,8 @@ class FlywayMigrationResourceTests {
         String sql = migration.getContentAsString(StandardCharsets.UTF_8);
 
         assertThat(sql)
-                .contains("create type payment_status as enum ('DUE', 'PAID', 'OVERDUE', 'DEFAULT_RISK')")
+                .contains(
+                        "create type payment_status as enum ('DUE', 'PAID', 'OVERDUE', 'DEFAULT_RISK')")
                 .contains("create table payment_records")
                 .contains("id uuid primary key")
                 .contains("customer_id uuid not null references customers (id) on delete cascade")
@@ -396,7 +409,8 @@ class FlywayMigrationResourceTests {
                 .contains("amount_paid numeric(12, 2)")
                 .contains("status payment_status not null default 'DUE'")
                 .contains("reminder_count integer not null default 0")
-                .contains("create index payment_records_due_status_idx on payment_records (due_date, status)");
+                .contains(
+                        "create index payment_records_due_status_idx on payment_records (due_date, status)");
     }
 
     @Test
@@ -530,6 +544,20 @@ class FlywayMigrationResourceTests {
     }
 
     @Test
+    void campaignRecipientsTableStoresExclusionReasonAndExplanation() throws Exception {
+        ClassPathResource migration =
+                new ClassPathResource("db/migration/V1__create_initial_schema.sql");
+
+        String sql = migration.getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(sql)
+                .contains("create table campaign_recipients")
+                .contains("eligibility_status campaign_recipient_status not null")
+                .contains("exclusion_reason text")
+                .contains("eligibility_explanation text");
+    }
+
+    @Test
     void initialSchemaMigrationDefinesKbCampaignProductsTable() throws Exception {
         ClassPathResource migration =
                 new ClassPathResource("db/migration/V1__create_initial_schema.sql");
@@ -589,7 +617,8 @@ class FlywayMigrationResourceTests {
         String sql = migration.getContentAsString(StandardCharsets.UTF_8);
 
         assertThat(sql)
-                .contains("create type follow_up_status as enum ('OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED')")
+                .contains(
+                        "create type follow_up_status as enum ('OPEN', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED')")
                 .contains("create type work_priority as enum ('LOW', 'MEDIUM', 'HIGH')")
                 .contains("create table follow_up_tasks")
                 .contains("id uuid primary key")
@@ -618,7 +647,8 @@ class FlywayMigrationResourceTests {
         assertThat(sql)
                 .contains("create type reminder_type as enum ('PAYMENT_DUE', 'PRODUCT_EXPIRATION')")
                 .contains("create type reminder_level as enum ('GREEN', 'YELLOW', 'RED')")
-                .contains("create type reminder_status as enum ('PENDING', 'SENT', 'FAILED', 'CANCELLED')")
+                .contains(
+                        "create type reminder_status as enum ('PENDING', 'SENT', 'FAILED', 'CANCELLED')")
                 .contains("create table reminder_schedules")
                 .contains("id uuid primary key")
                 .contains("customer_id uuid not null references customers (id) on delete cascade")
@@ -644,7 +674,8 @@ class FlywayMigrationResourceTests {
         assertThat(sql)
                 .contains("create table campaign_metrics")
                 .contains("id uuid primary key")
-                .contains("campaign_id uuid not null unique references campaigns (id) on delete cascade")
+                .contains(
+                        "campaign_id uuid not null unique references campaigns (id) on delete cascade")
                 .contains("audience_size integer not null default 0")
                 .contains("eligible_count integer not null default 0")
                 .contains("excluded_count integer not null default 0")
@@ -677,7 +708,8 @@ class FlywayMigrationResourceTests {
                 .contains("new_value jsonb")
                 .contains("ip_address varchar(100)")
                 .contains("created_at timestamptz not null default now()")
-                .contains("create index audit_logs_entity_idx on audit_logs (entity_type, entity_id)")
+                .contains(
+                        "create index audit_logs_entity_idx on audit_logs (entity_type, entity_id)")
                 .contains(
                         "create index audit_logs_actor_created_idx"
                                 + " on audit_logs (actor_user_id, created_at)");
@@ -692,7 +724,8 @@ class FlywayMigrationResourceTests {
 
         assertThat(sql)
                 .contains("create type report_export_type as enum ('CSV', 'PDF')")
-                .contains("create type report_export_status as enum ('REQUESTED', 'COMPLETED', 'FAILED')")
+                .contains(
+                        "create type report_export_status as enum ('REQUESTED', 'COMPLETED', 'FAILED')")
                 .contains("create table report_exports")
                 .contains("id uuid primary key")
                 .contains("requested_by uuid references users (id) on delete set null")
@@ -925,13 +958,13 @@ class FlywayMigrationResourceTests {
                 .contains("where name = 'EXECUTIVE_VIEWER'")
                 .contains("where name = 'SYSTEM_AUDITOR'")
                 .contains("Manages users, roles, settings, and full system configuration")
-                .contains("View read-only dashboards, ROI, campaign summaries, and product performance reports");
+                .contains(
+                        "View read-only dashboards, ROI, campaign summaries, and product performance reports");
     }
 
     @Test
     void roleSeedMigrationUpsertsKbRoles() throws Exception {
-        ClassPathResource migration =
-                new ClassPathResource("db/migration/V16__seed_kb_roles.sql");
+        ClassPathResource migration = new ClassPathResource("db/migration/V16__seed_kb_roles.sql");
 
         String sql = migration.getContentAsString(StandardCharsets.UTF_8);
 
@@ -981,6 +1014,8 @@ class FlywayMigrationResourceTests {
                 .contains("'CUSTOMER_SERVICE_AGENT'::system_role_name")
                 .contains("status = excluded.status")
                 .contains("assigned_by = excluded.assigned_by");
+        assertThat(BCRYPT_PASSWORD_HASH.matcher(sql).results()).hasSize(6);
+        assertThat(sql).doesNotContain("StrongPassword").doesNotContain("password123");
     }
 
     @Test
@@ -1004,9 +1039,30 @@ class FlywayMigrationResourceTests {
     }
 
     @Test
+    void testProfileUsesIsolatedDatabaseAndProjectSupportsTestcontainers() throws Exception {
+        String testConfig =
+                new ClassPathResource("application-test.yml")
+                        .getContentAsString(StandardCharsets.UTF_8);
+        String pom = Files.readString(Path.of("pom.xml"), StandardCharsets.UTF_8);
+
+        assertThat(testConfig)
+                .contains("url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/bwc_campaign_test}")
+                .contains("username: ${TEST_DB_USERNAME:bwc_app}")
+                .contains("password: ${TEST_DB_PASSWORD:bwc_app}")
+                .contains("driver-class-name: org.postgresql.Driver")
+                .doesNotContain("url: ${DB_URL:jdbc:postgresql://localhost:5432/bwc_campaign}")
+                .doesNotContain("jdbc:postgresql://localhost:5432/bwc_campaign}");
+
+        assertThat(pom)
+                .contains("<groupId>org.testcontainers</groupId>")
+                .contains("<artifactId>junit-jupiter</artifactId>")
+                .contains("<artifactId>postgresql</artifactId>")
+                .contains("<scope>test</scope>");
+    }
+
+    @Test
     void controlledDemoDataCoversKbDevTestWorkflows() throws Exception {
-        ClassPathResource migration =
-                new ClassPathResource("db/demo/R__controlled_demo_data.sql");
+        ClassPathResource migration = new ClassPathResource("db/demo/R__controlled_demo_data.sql");
 
         String sql = migration.getContentAsString(StandardCharsets.UTF_8);
 
@@ -1048,7 +1104,8 @@ class FlywayMigrationResourceTests {
                 .contains(
                         "V1__create_initial_schema.sql",
                         "V16__seed_kb_roles.sql",
-                        "V17__seed_mvp_role_users.sql")
+                        "V17__seed_mvp_role_users.sql",
+                        "V18__reset_admin_password.sql")
                 .doesNotContain("R__controlled_demo_data.sql");
 
         assertThat(Arrays.stream(demoMigrations).map(Resource::getFilename))
@@ -1101,7 +1158,8 @@ class FlywayMigrationResourceTests {
                         "V14__add_kb_foreign_key_constraints.sql",
                         "V15__add_kb_search_filter_indexes.sql",
                         "V16__seed_kb_roles.sql",
-                        "V17__seed_mvp_role_users.sql")
+                        "V17__seed_mvp_role_users.sql",
+                        "V18__reset_admin_password.sql")
                 .doesNotContain("R__controlled_demo_data.sql");
 
         assertThat(
@@ -1110,7 +1168,27 @@ class FlywayMigrationResourceTests {
                                 .map(this::versionFrom)
                                 .mapToInt(Integer::parseInt)
                                 .max())
-                .hasValue(17);
+                .hasValue(18);
+    }
+
+    @Test
+    void productionMigrationVersionsAreContiguousForEmptyDatabaseBootstrap() throws Exception {
+        Resource[] migrations =
+                new PathMatchingResourcePatternResolver()
+                        .getResources("classpath*:db/migration/*.sql");
+
+        assertThat(
+                        Arrays.stream(migrations)
+                                .map(Resource::getFilename)
+                                .map(this::versionFrom)
+                                .sorted(
+                                        (left, right) ->
+                                                Integer.compare(
+                                                        Integer.parseInt(left),
+                                                        Integer.parseInt(right))))
+                .containsExactly(
+                        "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
+                        "15", "16", "17", "18");
     }
 
     @Test

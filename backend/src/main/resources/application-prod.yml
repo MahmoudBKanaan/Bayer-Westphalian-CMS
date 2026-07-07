@@ -18,3 +18,7 @@ app:
   security:
     jwt:
       secret: ${JWT_SECRET}
+    login-rate-limit:
+      max-failures: ${LOGIN_RATE_LIMIT_MAX_FAILURES}
+      failure-window-minutes: ${LOGIN_RATE_LIMIT_FAILURE_WINDOW_MINUTES}
+      lockout-minutes: ${LOGIN_RATE_LIMIT_LOCKOUT_MINUTES}

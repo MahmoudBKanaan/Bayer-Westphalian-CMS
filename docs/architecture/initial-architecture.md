@@ -91,3 +91,19 @@ flowchart LR
 - Consent, campaign eligibility, approval, audit, and customer data rules remain backend-owned.
 - Frontend validation improves user experience, but backend validation remains authoritative.
 - Audit logging is required for sensitive actions and production evidence.
+
+## Verification Baseline
+
+The architecture is verified through the initial unit and integration test baseline:
+
+| Layer | Test Command | Coverage |
+| --- | --- | --- |
+| Frontend unit tests | `cd frontend; npm run test` | Format helpers and API request behavior |
+| Frontend integration tests | `cd frontend; npm run test` | App routing, dashboard redirect, campaigns page, and login shell |
+| Backend unit tests | `cd backend; mvn test` | Spring context and OpenAPI metadata |
+| Backend integration tests | `cd backend; mvn test` | Actuator health and PostgreSQL connectivity |
+| Docker config test | `.\scripts\test-docker-compose-config.ps1` | Compose service, network, volume, and health check model |
+| Docker integration test | `.\scripts\test-docker-compose-postgres.ps1` | PostgreSQL startup, readiness, and SQL smoke query |
+| Architecture documentation test | `.\scripts\test-architecture-docs.ps1` | Required architecture components and docs index link |
+
+The PostgreSQL backend integration test requires the local Docker Compose database on port `5432` when full connectivity verification is needed.

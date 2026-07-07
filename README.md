@@ -112,13 +112,20 @@ git status
 
 ### Frontend
 
-Install dependencies and run the frontend checks:
+Install dependencies and run the frontend unit and integration tests:
 
 ```bash
 cd frontend
 npm install
 npm run test
 npm run build
+```
+
+Run the full frontend quality gate:
+
+```bash
+cd frontend
+npm run verify
 ```
 
 Run the local Vite development server:
@@ -136,6 +143,13 @@ Install Maven locally or add a Maven wrapper before replacing these commands wit
 cd backend
 mvn test
 mvn package
+```
+
+Run the full backend quality gate:
+
+```bash
+cd backend
+mvn verify
 ```
 
 Run the local Spring Boot development server:
@@ -166,6 +180,21 @@ The local PostgreSQL service uses `docker-compose.yml` and defaults to:
 - database: `bwc_campaign`
 - user: `bwc_app`
 - port: `5432`
+
+## Test Coverage
+
+The foundation includes the initial unit and integration test baseline required by the KB.
+
+| Area | Command | Coverage |
+| --- | --- | --- |
+| Frontend unit tests | `cd frontend && npm run test` | Formatting helpers and API request behavior |
+| Frontend integration tests | `cd frontend && npm run test` | App routing, dashboard redirect, campaigns page, login shell |
+| Frontend full gate | `cd frontend && npm run verify` | ESLint, Prettier, Vitest, production build |
+| Backend unit tests | `cd backend && mvn test` | Spring context and OpenAPI metadata |
+| Backend integration tests | `cd backend && mvn test` | Actuator health and PostgreSQL connectivity |
+| Backend full gate | `cd backend && mvn verify` | Tests, package, Spotless, Checkstyle |
+| Docker config test | `.\scripts\test-docker-compose-config.ps1` | Compose service, network, volume, and healthcheck model |
+| Docker integration test | `.\scripts\test-docker-compose-postgres.ps1` | PostgreSQL startup, readiness, and SQL smoke query |
 
 ## Environments
 
