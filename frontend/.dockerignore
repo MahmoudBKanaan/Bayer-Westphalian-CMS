@@ -1,0 +1,14 @@
+# Keep Docker build context small for item 686 frontend image builds.
+node_modules/
+dist/
+.vite-cache/
+coverage/
+playwright-report/
+test-results/
+*.log
+.env
+.env.*
+.git/
+.gitignore
+README.md
+vitest-results.json

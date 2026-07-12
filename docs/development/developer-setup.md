@@ -2,6 +2,11 @@
 
 This guide prepares a local development environment for the Bayer-Westphalian Campaign Management Platform.
 
+Frontend visual conventions (shell, colors, badges, forms, responsive layout) are documented in
+[UI Style Notes](ui-style-notes.md) (Sprint 15 item **610**). Accessibility baseline guidance
+(landmarks, keyboard, labels, contrast, testing map) is documented in
+[Accessibility Notes](accessibility-notes.md) (Sprint 15 item **611**).
+
 ## Prerequisites
 
 Install these tools before starting:
@@ -16,6 +21,22 @@ Install these tools before starting:
 | Docker Desktop | Local PostgreSQL database |
 
 The backend currently supports a local Maven installation. A Maven wrapper can be added later for fully pinned build execution.
+
+Continuous integration runs the same major build/test steps via GitHub Actions (Sprint 17 items
+**677–687**, **690–697**: workflow, backend package/tests/integration, frontend
+install/lint/test/build, Docker images, Compose validation, production config static checks,
+release artifact uploads for the backend JAR and frontend `dist/`, a **CI** status badge on the
+root README, fail-on-red / pass-on-green contracts, **branch protection** for releasable **`main`**,
+a **release tagging** process for KB versions `v0.1`…`v1.0`, and a **deployment workflow
+placeholder** that does not update hosts). Environment variable templates are item **688**
+([environment-variables.md](../deployment/environment-variables.md)); secrets ops guide is item
+**689** ([secrets.md](../deployment/secrets.md)); branch protection is item **695**
+([branch-protection.md](../deployment/branch-protection.md)); release tagging is item **696**
+([release-tagging.md](../deployment/release-tagging.md)); deploy placeholder is item **697**
+([ci-cd.md](../deployment/ci-cd.md#deployment-workflow-placeholder-item-697) /
+[`.github/workflows/deploy-placeholder.yml`](../../.github/workflows/deploy-placeholder.yml)). See
+[CI/CD — GitHub Actions](../deployment/ci-cd.md) and
+[`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 
 ## Repository Setup
 
@@ -38,6 +59,16 @@ scripts/
 
 ## Environment Files
 
+Sprint 17 item **688** provides checked-in **environment variable templates** (no real secrets):
+
+| Template | Purpose |
+| --- | --- |
+| [`.env.example`](../../.env.example) | Full-stack reference checklist |
+| [`backend/.env.example`](../../backend/.env.example) | Spring Boot backend |
+| [`frontend/.env.example`](../../frontend/.env.example) | Vite frontend |
+
+Catalog: [Environment Variable Template](../deployment/environment-variables.md).
+
 Frontend:
 
 ```powershell
@@ -50,7 +81,9 @@ Backend:
 Copy-Item backend\.env.example backend\.env
 ```
 
-Do not commit real `.env` files. The KB requires production secrets to be supplied by the deployment environment or a secret manager.
+Do not commit real `.env` files. The KB requires production secrets to be supplied by the deployment
+environment or a secret manager — see [Secrets Documentation](../deployment/secrets.md) (item
+**689**).
 
 ## Local Database
 

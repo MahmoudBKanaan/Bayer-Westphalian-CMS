@@ -1,0 +1,88 @@
+# Sprint 17 item 697 — Add deployment workflow placeholder
+#
+# KB epic E25 / E26: CI prepares packages; production deployment is a later ops concern
+# (Sprint 18). This workflow is intentionally a PLACEHOLDER:
+# - Manual trigger only (workflow_dispatch)
+# - No registry publish, no remote shell, no cloud apply, no production secrets
+# - Documents the future deploy gate after green CI + release tag
+#
+# Real production deployment is Sprint 18 (items 716+). Do not treat a green run of this
+# workflow as evidence that production was updated.
+
+name: Deploy (placeholder)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_environment:
+        description: "Logical target (placeholder only; no host is contacted)"
+        required: true
+        default: "staging-placeholder"
+        type: choice
+        options:
+          - staging-placeholder
+          - production-placeholder
+      release_tag:
+        description: "Optional release tag name for notes (e.g. v0.9); not validated against remotes"
+        required: false
+        default: ""
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-placeholder-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  # Item 697: single placeholder job — prints planned steps; never deploys.
+  deploy-placeholder:
+    name: Deployment placeholder
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Record placeholder deployment intent
+        id: deploy-placeholder
+        env:
+          TARGET: ${{ inputs.target_environment }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          echo "=== Deploy (placeholder) — Sprint 17 item 697 ==="
+          echo "This job does NOT deploy to any host, registry, or cloud account."
+          echo "Target environment (logical only): ${TARGET}"
+          if [ -n "${RELEASE_TAG}" ]; then
+            echo "Release tag (note only): ${RELEASE_TAG}"
+          else
+            echo "Release tag: (none provided)"
+          fi
+          echo ""
+          echo "Planned future steps (not executed here):"
+          echo "  1. Require green CI workflow on the release commit (items 693–694, 714)"
+          echo "  2. Confirm annotated release tag on main (item 696)"
+          echo "  3. Download release artifacts bwc-backend-jar / bwc-frontend-dist (item 691)"
+          echo "  4. Apply production Compose / reverse proxy (Sprint 18)"
+          echo "  5. Inject secrets from a secret manager (never from Git)"
+          echo "  6. Smoke test health endpoint and rollback plan (Sprint 18)"
+          echo ""
+          echo "Forbidden in this placeholder (must remain absent):"
+          echo "  - container registry publish"
+          echo "  - cluster manifest apply / chart upgrade"
+          echo "  - remote shell to production hosts"
+          echo "  - production secret values in YAML"
+          echo ""
+          echo "Deployment placeholder completed successfully (no infrastructure changed)."
+
+      - name: Assert placeholder did not attempt a real deploy
+        run: |
+          set -euo pipefail
+          wf=".github/workflows/deploy-placeholder.yml"
+          if [ ! -f "$wf" ]; then
+            echo "Missing $wf"
+            exit 1
+          fi
+          echo "Placeholder workflow present; no live deploy commands executed in this job."

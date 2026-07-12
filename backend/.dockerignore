@@ -1,0 +1,10 @@
+# Keep Docker build context small for item 685 backend image builds.
+target/
+.idea/
+*.iml
+*.log
+.env
+.env.*
+.git/
+.gitignore
+README.md

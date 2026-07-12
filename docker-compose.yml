@@ -1,3 +1,6 @@
+# Local development Compose model (Sprint 17 item 687 — validated in CI via
+# docker compose config; does not start a full application stack).
+# See docs/deployment/ci-cd.md and scripts/test-docker-compose-config.ps1.
 services:
   postgres:
     image: postgres:16-alpine

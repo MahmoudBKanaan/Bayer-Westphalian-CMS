@@ -1,0 +1,459 @@
+# Sprint 17 CI workflow
+# Item 677 — GitHub Actions workflow
+# Item 678 — Backend build job
+# Item 679 — Backend test job
+# Item 680 — Backend integration test job (feasible via *IntegrationTests + Testcontainers)
+# Item 681 — Frontend install job
+# Item 682 — Frontend lint job
+# Item 683 — Frontend test job
+# Item 684 — Frontend build job
+# Item 685 — Docker backend image build
+# Item 686 — Docker frontend image build
+# Item 687 — Docker Compose validation
+# Item 690 — Production config validation step
+# Item 691 — Release artifact generation (upload-artifact from build jobs)
+# Item 692 — CI badge on root README (status image for this workflow)
+# Item 693 — Verify pipeline fails when tests fail (no continue-on-error on test jobs)
+# Item 694 — Verify pipeline passes on clean main branch (push to main runs full job set)
+# Item 695 — Branch protection recommendation (docs: docs/deployment/branch-protection.md)
+# Item 696 — Release tagging process (docs: docs/deployment/release-tagging.md)
+# Item 697 — Deployment workflow placeholder (.github/workflows/deploy-placeholder.yml)
+#
+# Automates build, test, packaging, and release preparation on pull requests and
+# protected branches (KB epic CI/CD / E25). Deploy placeholder is a separate workflow.
+
+name: CI
+
+on:
+  push:
+    branches:
+      # Pass-on-green (694): clean commits on main run the full job matrix without path filters
+      # or job-level if: skips. A green suite on a clean main tree yields a green workflow.
+      - main
+      - dev
+  pull_request:
+    branches:
+      - main
+      - dev
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+# Pass-on-green (694): all jobs below run for every matching push/PR (no workflow-level if: false).
+jobs:
+  # --- Item 678: Backend build job ---
+  backend-build:
+    name: Backend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      # Compile and package the Spring Boot backend without running the test suite.
+      # Tests are a separate concern (item 679); package validates the build graph.
+      - name: Build backend (Maven package, skip tests)
+        id: backend-build
+        run: mvn -B -DskipTests package
+
+      - name: Assert backend JAR artifact was produced
+        run: |
+          set -e
+          jar_count=$(find target -maxdepth 1 -type f -name "*.jar" ! -name "*.jar.original" | wc -l)
+          if [ "$jar_count" -lt 1 ]; then
+            echo "Expected at least one packaged JAR under backend/target"
+            ls -la target || true
+            exit 1
+          fi
+          echo "Packaged artifacts:"
+          find target -maxdepth 1 -type f -name "*.jar" ! -name "*.jar.original" -print
+
+      # Item 691: publish the packaged Spring Boot JAR as a downloadable CI release artifact.
+      # Paths are workspace-relative (not affected by job defaults.working-directory).
+      - name: Upload backend release JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: bwc-backend-jar
+          path: |
+            backend/target/*.jar
+            !backend/target/*.jar.original
+          if-no-files-found: error
+          retention-days: 14
+
+  # --- Item 679: Backend test job ---
+  # Item 693: fail-on-red — non-zero Maven Surefire exit fails this job and the workflow (no continue-on-error).
+  backend-test:
+    name: Backend test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      # Run the full Maven Surefire suite (unit + integration). Testcontainers uses Docker.
+      # Separate from backend-build so packaging (678) and full-suite signal (679) stay independent.
+      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      - name: Run backend tests (Maven test)
+        id: backend-test
+        run: mvn -B test
+
+  # --- Item 680: Backend integration test job (feasible) ---
+  # Item 693: fail-on-red — integration filter failures fail the job (no continue-on-error).
+  backend-integration-test:
+    name: Backend integration test
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+          cache-dependency-path: backend/pom.xml
+
+      # Feasible because integration classes use the *IntegrationTests naming convention and
+      # Testcontainers PostgreSQL (Docker available on ubuntu-latest). Explicit integration signal
+      # separate from the full suite (679).
+      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      - name: Run backend integration tests (Maven, *IntegrationTests)
+        id: backend-integration-test
+        run: mvn -B test -Dtest='*IntegrationTests'
+
+  # --- Item 681: Frontend install job ---
+  frontend-install:
+    name: Frontend install
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      # Clean install from the lockfile. Dedicated signal that dependencies resolve on CI
+      # without requiring lint/test/build (items 682–684).
+      - name: Install frontend dependencies (npm ci)
+        id: frontend-install
+        run: npm ci
+
+      - name: Assert node_modules was installed
+        run: |
+          set -e
+          if [ ! -d node_modules ]; then
+            echo "Expected frontend/node_modules after npm ci"
+            ls -la
+            exit 1
+          fi
+          echo "Frontend dependencies installed (node_modules present)"
+
+  # --- Item 682: Frontend lint job ---
+  # Item 693: fail-on-red — ESLint non-zero exit fails this job (no continue-on-error).
+  frontend-lint:
+    name: Frontend lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # ESLint static analysis only — Vitest and production build stay on items 683–684.
+      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      - name: Lint frontend (npm run lint)
+        id: frontend-lint
+        run: npm run lint
+
+  # --- Item 683: Frontend test job ---
+  # Item 693: fail-on-red — Vitest non-zero exit fails this job and the workflow (no continue-on-error).
+  frontend-test:
+    name: Frontend test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Vitest unit/component suite only — production build stays on item 684.
+      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      - name: Run frontend unit tests (npm test)
+        id: frontend-test
+        run: npm test
+
+  # --- Item 684: Frontend build job ---
+  frontend-build:
+    name: Frontend build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        run: npm ci
+
+      # Production Vite/TypeScript build only — lint/test live on items 682–683.
+      - name: Build frontend (npm run build)
+        id: frontend-build
+        run: npm run build
+
+      - name: Assert frontend dist was produced
+        run: |
+          set -e
+          if [ ! -d dist ]; then
+            echo "Expected frontend/dist after npm run build"
+            ls -la
+            exit 1
+          fi
+          if [ ! -f dist/index.html ]; then
+            echo "Expected frontend/dist/index.html after production build"
+            ls -la dist || true
+            exit 1
+          fi
+          echo "Frontend production build artifacts present under dist/"
+
+      # Item 691: publish the Vite production bundle as a downloadable CI release artifact.
+      - name: Upload frontend release dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: bwc-frontend-dist
+          path: frontend/dist
+          if-no-files-found: error
+          retention-days: 14
+
+  # --- Item 685: Docker backend image build ---
+  docker-backend:
+    name: Docker backend image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Build the multi-stage backend image (Maven package + JRE runtime). Does not push
+      # to a registry; proves the Dockerfile builds on a clean CI agent with Docker.
+      - name: Build backend Docker image
+        id: docker-backend
+        run: docker build -t bwc-backend:ci -f backend/Dockerfile backend
+
+      - name: Assert backend Docker image exists
+        run: |
+          set -e
+          docker image inspect bwc-backend:ci >/dev/null
+          echo "Backend image bwc-backend:ci built successfully"
+          docker image ls bwc-backend:ci
+
+  # --- Item 686: Docker frontend image build ---
+  docker-frontend:
+    name: Docker frontend image
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Build the multi-stage frontend image (npm run build + nginx static). Does not push
+      # to a registry; proves the Dockerfile builds on a clean CI agent with Docker.
+      - name: Build frontend Docker image
+        id: docker-frontend
+        run: docker build -t bwc-frontend:ci -f frontend/Dockerfile frontend
+
+      - name: Assert frontend Docker image exists
+        run: |
+          set -e
+          docker image inspect bwc-frontend:ci >/dev/null
+          echo "Frontend image bwc-frontend:ci built successfully"
+          docker image ls bwc-frontend:ci
+
+  # --- Item 687: Docker Compose validation ---
+  docker-compose-validate:
+    name: Docker Compose validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Parse and validate docker-compose.yml without starting containers (model check).
+      # Local parity: scripts/test-docker-compose-config.ps1 (PowerShell) or the steps below.
+      - name: Validate Docker Compose configuration
+        id: docker-compose-validate
+        run: |
+          set -euo pipefail
+          compose_file="docker-compose.yml"
+          if [ ! -f "$compose_file" ]; then
+            echo "Missing $compose_file"
+            exit 1
+          fi
+
+          echo "Rendering Compose model..."
+          # Validate/render the project model (no containers started).
+          docker compose -f "$compose_file" config > /tmp/bwc-compose.rendered.yml
+
+          echo "Asserting required services, network, volume, and healthcheck..."
+          config_json=$(docker compose -f "$compose_file" config --format json)
+
+          echo "$config_json" | jq -e '.services.postgres' >/dev/null
+          echo "$config_json" | jq -e '.services.postgres.image == "postgres:16-alpine"' >/dev/null
+          echo "$config_json" | jq -e '.services.postgres.healthcheck != null' >/dev/null
+          echo "$config_json" | jq -e '.networks | has("bwc_local")' >/dev/null
+          echo "$config_json" | jq -e '.volumes | has("bwc_postgres_data")' >/dev/null
+
+          # Service must attach to the local bridge network (name may be project-prefixed in JSON).
+          echo "$config_json" | jq -e '
+            (.services.postgres.networks | type) as $t
+            | if $t == "object" then (.services.postgres.networks | has("bwc_local"))
+              elif $t == "array" then (.services.postgres.networks | index("bwc_local") != null)
+              else false end
+          ' >/dev/null
+
+          echo "Docker Compose validation passed for $compose_file"
+
+  # --- Item 690: Production config validation step ---
+  production-config-validate:
+    name: Production config validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Static checks only: prod YAML, validators, templates, and secrets docs.
+      # Does not start Spring Boot and does not use real production secret values.
+      - name: Validate production configuration artifacts
+        id: production-config-validate
+        run: |
+          set -euo pipefail
+
+          prod_yml="backend/src/main/resources/application-prod.yml"
+          env_validator="backend/src/main/java/com/bayerwestphalian/campaign/common/config/EnvironmentVariableValidator.java"
+          secret_validator="backend/src/main/java/com/bayerwestphalian/campaign/common/config/SecretPresenceValidator.java"
+          post_processor="backend/src/main/java/com/bayerwestphalian/campaign/common/config/ProductionEnvironmentPostProcessor.java"
+          root_env=".env.example"
+          backend_env="backend/.env.example"
+          secrets_doc="docs/deployment/secrets.md"
+          env_doc="docs/deployment/environment-variables.md"
+          checklist="docs/deployment/production-security-checklist.md"
+
+          for f in "$prod_yml" "$env_validator" "$secret_validator" "$post_processor" \
+                   "$root_env" "$backend_env" "$secrets_doc" "$env_doc" "$checklist"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required production config artifact: $f"
+              exit 1
+            fi
+            echo "Found $f"
+          done
+
+          echo "Checking application-prod.yml hardens errors and requires env injection..."
+          grep -q 'include-stacktrace: never' "$prod_yml"
+          grep -q 'include-exception: false' "$prod_yml"
+          grep -q 'DB_URL' "$prod_yml"
+          grep -q 'DB_USERNAME' "$prod_yml"
+          grep -q 'DB_PASSWORD' "$prod_yml"
+          grep -q 'JWT_SECRET' "$prod_yml"
+          grep -q 'CORS_ALLOWED_ORIGINS' "$prod_yml"
+          # Prod JWT secret must come from the environment (no insecure default in prod YAML).
+          grep -Eq 'secret: \$\{JWT_SECRET\}' "$prod_yml"
+          # Prod CORS must not embed localhost defaults in the prod profile file.
+          if grep -qi 'localhost' "$prod_yml"; then
+            echo "application-prod.yml must not embed localhost CORS defaults"
+            exit 1
+          fi
+
+          echo "Checking production validators and secret strength constants..."
+          grep -q 'class EnvironmentVariableValidator' "$env_validator"
+          grep -q 'productionRequiredEnvNames' "$env_validator"
+          grep -q 'class SecretPresenceValidator' "$secret_validator"
+          grep -q 'MIN_JWT_SECRET_LENGTH = 32' "$secret_validator"
+          grep -q 'MIN_DB_PASSWORD_LENGTH = 8' "$secret_validator"
+          grep -q 'EnvironmentVariableValidator.validateProduction' "$post_processor"
+          grep -q 'SecretPresenceValidator.validateProductionSecrets' "$post_processor"
+
+          echo "Checking env templates document required production keys..."
+          for key in DB_URL DB_USERNAME DB_PASSWORD JWT_SECRET CORS_ALLOWED_ORIGINS; do
+            grep -q "${key}=" "$root_env"
+            grep -q "${key}=" "$backend_env"
+          done
+
+          echo "Checking secrets and checklist docs..."
+          grep -q 'JWT_SECRET' "$secrets_doc"
+          grep -q 'SecretPresenceValidator' "$secrets_doc"
+          grep -q 'JWT_SECRET' "$checklist"
+          grep -q 'DB_PASSWORD' "$checklist"
+
+          echo "Production config validation step passed (static checks only)"

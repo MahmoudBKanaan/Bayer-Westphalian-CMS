@@ -1,5 +1,10 @@
 # Bayer-Westphalian Campaign Management Platform
 
+[![CI](https://github.com/MahmoudBKanaan/Bayer-Westphalian-CMS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MahmoudBKanaan/Bayer-Westphalian-CMS/actions/workflows/ci.yml)
+
+<!-- Sprint 17 item 692: CI badge reflects the GitHub Actions workflow named "CI"
+     (`.github/workflows/ci.yml`). Branch query `main` is the releasable line; `dev` also runs CI. -->
+
 Internal enterprise CRM, campaign management, and marketing automation system for Bayer-Westphalian Insurance.
 
 The platform is for authorized internal employees only. It supports customer and prospect management, beneficiaries, consent and opt-out handling, products, segmentation, campaigns, recipient preview, communication tracking, follow-ups, reminders, analytics, reports, audit logging, role-based access control, and AI-assisted recommendations.
@@ -75,7 +80,7 @@ The platform is for authorized internal employees only. It supports customer and
 6. Configure frontend environment files.
 7. Add OpenAPI/Swagger documentation.
 8. Add code formatting, linting, and test baselines.
-9. Add GitHub Actions for build, test, and package checks.
+9. Add GitHub Actions for build, test, and package checks (item **677** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml); [docs/deployment/ci-cd.md](docs/deployment/ci-cd.md)).
 
 ## Planning Boards
 
