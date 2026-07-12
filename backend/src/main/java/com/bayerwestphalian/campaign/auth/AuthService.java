@@ -37,7 +37,12 @@ public class AuthService {
 
     @Transactional
     public AuthenticatedUser login(String email, String rawPassword) {
-        User user = validateCredentials(email, rawPassword);
+        return login(email, rawPassword, null);
+    }
+
+    @Transactional
+    public AuthenticatedUser login(String email, String rawPassword, String clientIp) {
+        User user = validateCredentials(email, rawPassword, clientIp);
 
         user.recordLogin(Instant.now());
         return AuthenticatedUser.from(userRepository.save(user));
@@ -45,7 +50,15 @@ public class AuthService {
 
     @Transactional
     public AuthenticatedSession loginSession(String email, String rawPassword) {
-        User user = validateCredentials(email, rawPassword);
+        return loginSession(email, rawPassword, null);
+    }
+
+    /**
+     * Authenticates and issues a session (item 544: optional client IP for lockout keying).
+     */
+    @Transactional
+    public AuthenticatedSession loginSession(String email, String rawPassword, String clientIp) {
+        User user = validateCredentials(email, rawPassword, clientIp);
 
         user.recordLogin(Instant.now());
         User savedUser = userRepository.save(user);
@@ -107,23 +120,34 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public User validateCredentials(String email, String rawPassword) {
+        return validateCredentials(email, rawPassword, null);
+    }
+
+    /**
+     * Validates credentials under the login lockout strategy (item 544).
+     *
+     * @param clientIp optional remote address used with email for rate-limit keying
+     */
+    @Transactional(readOnly = true)
+    public User validateCredentials(String email, String rawPassword, String clientIp) {
         if (!StringUtils.hasText(email) || !StringUtils.hasText(rawPassword)) {
             throw invalidCredentials();
         }
 
-        loginAttemptTracker.ensureAllowed(email);
+        loginAttemptTracker.ensureAllowed(email, clientIp);
 
         User user = userRepository.findByEmailIgnoreCase(email).orElse(null);
         if (user == null || !passwordHashingService.matches(rawPassword, user.getPasswordHash())) {
-            loginAttemptTracker.recordFailure(email);
+            loginAttemptTracker.recordFailure(email, clientIp);
             throw invalidCredentials();
         }
 
+        // Item 659 / FR-001 / NFR-001: DISABLED (and LOCKED) accounts never receive a session.
         if (!user.isActive()) {
             throw new UnauthorizedException("User account is not active");
         }
 
-        loginAttemptTracker.recordSuccess(email);
+        loginAttemptTracker.recordSuccess(email, clientIp);
         return user;
     }
 

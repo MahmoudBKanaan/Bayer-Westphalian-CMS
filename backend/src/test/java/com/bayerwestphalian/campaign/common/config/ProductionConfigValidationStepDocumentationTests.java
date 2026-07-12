@@ -53,7 +53,7 @@ class ProductionConfigValidationStepDocumentationTests {
             String yaml = Files.readString(CI_WORKFLOW, StandardCharsets.UTF_8);
 
             int jobIndex = indexOfJob(yaml, "production-config-validate:");
-            assertThat(jobIndex).isNonNegative();
+            assertThat(jobIndex).isGreaterThanOrEqualTo(0);
             String jobBlock = yaml.substring(jobIndex);
 
             assertThat(jobBlock).contains("application-prod.yml");

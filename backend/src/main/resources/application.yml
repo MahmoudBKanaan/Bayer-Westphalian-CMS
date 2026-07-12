@@ -1,6 +1,9 @@
 spring:
   application:
     name: bayer-westphalian-campaign-platform
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   profiles:
     default: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
@@ -17,6 +20,12 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  # Item 538: secure container error pages (no stack traces / exception messages / binding dumps).
+  error:
+    include-stacktrace: never
+    include-message: never
+    include-binding-errors: never
+    include-exception: false
 
 management:
   endpoints:
@@ -38,6 +47,8 @@ springdoc:
   packages-to-scan: com.bayerwestphalian.campaign
 
 app:
+  reminders:
+    processing-cron: "${REMINDER_PROCESSING_CRON:0 */15 * * * *}"
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://127.0.0.1:5173}
   contact:
@@ -45,6 +56,7 @@ app:
     retry-limit: ${CONTACT_RETRY_LIMIT:3}
     uninterested-exclusion-days: ${UNINTERESTED_EXCLUSION_DAYS:90}
   providers:
+    real-sending-enabled: ${PROVIDER_REAL_SENDING_ENABLED:false}
     email:
       mode: ${EMAIL_PROVIDER_MODE:mock}
       smtp-host: ${SMTP_HOST:}
@@ -58,6 +70,11 @@ app:
       mode: ${FILE_STORAGE_MODE:local}
       local-path: ${FILE_STORAGE_LOCAL_PATH:./data/files}
   security:
+    # Item 541: HTTPS enforcement applies only when profile=prod (see HttpsEnforcementFilter).
+    https:
+      required: ${HTTPS_REQUIRED:false}
+      hsts-enabled: ${HTTPS_HSTS_ENABLED:false}
+      hsts-max-age-seconds: ${HTTPS_HSTS_MAX_AGE_SECONDS:31536000}
     jwt:
       issuer: ${JWT_ISSUER:bayer-westphalian-campaign-platform}
       secret: ${JWT_SECRET:dev-only-change-me}

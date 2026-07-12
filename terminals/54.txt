@@ -1,0 +1,22 @@
+---
+pid: 11724
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location \"D:\\Documents\\IU\\AgileApp\\backend\"; & \"D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd\" test \"-Dtest=*DocumentationTests,*ProductChangeRequest*,ProductChangesCreateAuditLogTests\" 2>&1 | Select-Object -Last 15"
+started_at: 2026-07-08T11:16:41.867Z
+running_for_ms: 1435003  
+---
+[INFO] Running com.bayerwestphalian.campaign.product.ProductModuleDocumentationTests
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.021 s -- in com.bayerwestphalian.campaign.product.ProductModuleDocumentationTests
+[INFO] Running com.bayerwestphalian.campaign.product.ProductOwnershipDocumentationTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in com.bayerwestphalian.campaign.product.ProductOwnershipDocumentationTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 128, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  13.073 s
+[INFO] Finished at: 2026-07-08T14:16:57+03:00
+[INFO] ------------------------------------------------------------------------

@@ -1,5 +1,6 @@
 package com.bayerwestphalian.campaign.auth;
 
+import com.bayerwestphalian.campaign.common.api.SecureErrorResponses;
 import com.bayerwestphalian.campaign.common.exception.UnauthorizedException;
 import com.bayerwestphalian.campaign.user.SystemRoleName;
 import jakarta.servlet.FilterChain;
@@ -8,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +21,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
+    private final SecureErrorResponses secureErrorResponses;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(
+            JwtService jwtService, SecureErrorResponses secureErrorResponses) {
         this.jwtService = jwtService;
+        this.secureErrorResponses = secureErrorResponses;
     }
 
     @Override
@@ -37,7 +42,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         } catch (UnauthorizedException exception) {
             SecurityContextHolder.clearContext();
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, exception.getMessage());
+            // Item 538: structured JSON only — do not echo exception message (may leak token details).
+            secureErrorResponses.write(
+                    request,
+                    response,
+                    HttpStatus.UNAUTHORIZED,
+                    "UNAUTHORIZED",
+                    "Authentication is required");
             return;
         }
 

@@ -2,10 +2,26 @@ package com.bayerwestphalian.campaign;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bayerwestphalian.campaign.ai.AiRecommendationRepository;
 import com.bayerwestphalian.campaign.audit.AuditLogRepository;
 import com.bayerwestphalian.campaign.beneficiary.BeneficiaryRepository;
+import com.bayerwestphalian.campaign.campaign.CampaignMetricsRepository;
+import com.bayerwestphalian.campaign.campaign.CampaignProductRepository;
+import com.bayerwestphalian.campaign.campaign.CampaignRecipientRepository;
+import com.bayerwestphalian.campaign.campaign.CampaignRepository;
+import com.bayerwestphalian.campaign.campaign.ContactEventRepository;
 import com.bayerwestphalian.campaign.consent.ConsentRepository;
 import com.bayerwestphalian.campaign.customer.CustomerRepository;
+import com.bayerwestphalian.campaign.followup.FollowUpRepository;
+import com.bayerwestphalian.campaign.product.PaymentRecordRepository;
+import com.bayerwestphalian.campaign.product.ProductChangeRequestRepository;
+import com.bayerwestphalian.campaign.product.ProductOwnershipRepository;
+import com.bayerwestphalian.campaign.product.ProductRepository;
+import com.bayerwestphalian.campaign.report.ReportExportRepository;
+import com.bayerwestphalian.campaign.schedule.ReminderRepository;
+import com.bayerwestphalian.campaign.segment.SegmentCriteriaRepository;
+import com.bayerwestphalian.campaign.segment.SegmentRepository;
+import com.bayerwestphalian.campaign.settings.SystemSettingsRepository;
 import com.bayerwestphalian.campaign.user.RoleRepository;
 import com.bayerwestphalian.campaign.user.UserRepository;
 import com.bayerwestphalian.campaign.user.UserRoleRepository;
@@ -39,9 +55,33 @@ class HealthEndpointIntegrationTests {
 
     @MockBean private BeneficiaryRepository beneficiaryRepository;
 
+    @MockBean private CampaignMetricsRepository campaignMetricsRepository;
+
+    @MockBean private CampaignProductRepository campaignProductRepository;
+
+    @MockBean private CampaignRecipientRepository campaignRecipientRepository;
+
+    @MockBean private CampaignRepository campaignRepository;
+
+    @MockBean private ContactEventRepository contactEventRepository;
+
     @MockBean private ConsentRepository consentRepository;
 
     @MockBean private CustomerRepository customerRepository;
+
+    @MockBean private FollowUpRepository followUpRepository;
+
+    @MockBean private PaymentRecordRepository paymentRecordRepository;
+
+    @MockBean private ProductChangeRequestRepository productChangeRequestRepository;
+
+    @MockBean private ProductOwnershipRepository productOwnershipRepository;
+
+    @MockBean private ProductRepository productRepository;
+
+    @MockBean private SegmentCriteriaRepository segmentCriteriaRepository;
+
+    @MockBean private SegmentRepository segmentRepository;
 
     @MockBean private JdbcTemplate jdbcTemplate;
 
@@ -50,6 +90,14 @@ class HealthEndpointIntegrationTests {
     @MockBean private UserRepository userRepository;
 
     @MockBean private UserRoleRepository userRoleRepository;
+
+    @MockBean private AiRecommendationRepository aiRecommendationRepository;
+
+    @MockBean private ReportExportRepository reportExportRepository;
+
+    @MockBean private ReminderRepository reminderRepository;
+
+    @MockBean private SystemSettingsRepository systemSettingsRepository;
 
     @Test
     void exposesHealthEndpointForLocalVerificationAndDeploymentReadiness() {

@@ -48,6 +48,9 @@ class BaseEntityTests {
         entity.create();
 
         assertThat(entity.getId()).isNotNull();
+        assertThat(entity.getId().toString())
+                .matches("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$");
+        assertThat(entity.getId().version()).isEqualTo(4);
         assertThat(entity.getCreatedAt()).isNotNull();
         assertThat(entity.getUpdatedAt()).isEqualTo(entity.getCreatedAt());
     }

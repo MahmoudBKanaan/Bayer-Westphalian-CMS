@@ -1,0 +1,7 @@
+---
+pid: 2432
+cwd: "D:\Documents\IU\AgileApp"
+command: "while (Get-Process -Id 3556 -ErrorAction SilentlyContinue) { Start-Sleep -Seconds 15 }; Write-Output \"DONE\""
+started_at: 2026-07-08T10:54:09.639Z
+running_for_ms: 130012   
+---

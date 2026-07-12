@@ -78,4 +78,18 @@ The beneficiary module must preserve KB evidence that:
 - A beneficiary can be linked to a policyholder customer.
 - The guardian consent required flag is saved.
 - Invalid or duplicate beneficiary links are rejected.
+
+### Critical test (item 650)
+
+Minor beneficiaries with `guardianConsentRequired = true` and without valid guardian consent must
+be excluded from campaign audiences (**BR-003**). Automated evidence:
+
+| Layer | Location |
+| --- | --- |
+| Backend | `MinorBeneficiaryWithoutGuardianConsentIsExcludedTests` |
+| Eligibility architecture | [eligibility-rules.md](../architecture/eligibility-rules.md) |
+| Frontend catalog | `frontend/src/features/customers/minorBeneficiaryWithoutGuardianConsentIsExcluded.ts` |
+
+The flag on the beneficiary link drives `EligibilityService` guardian checks; contact is blocked
+until a valid `GUARDIAN` consent record exists.
 - Unauthorized roles cannot modify beneficiary relationships.

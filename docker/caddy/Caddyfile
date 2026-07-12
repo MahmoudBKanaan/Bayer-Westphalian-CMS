@@ -1,13 +1,26 @@
+# Local / placeholder HTTP front door.
+# Production (item 541): use a real domain block so Caddy obtains certificates, e.g.:
+#   campaign.example.com {
+#       reverse_proxy ...
+#   }
+# Always forward X-Forwarded-Proto so the backend HttpsEnforcementFilter accepts the hop.
+
 :80 {
     root * /srv
     encode gzip
 
     handle_path /api/* {
-        reverse_proxy backend:8080
+        reverse_proxy backend:8080 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Host {host}
+        }
     }
 
     handle_path /actuator/health {
-        reverse_proxy backend:8080
+        reverse_proxy backend:8080 {
+            header_up X-Forwarded-Proto {scheme}
+            header_up X-Forwarded-Host {host}
+        }
     }
 
     handle {

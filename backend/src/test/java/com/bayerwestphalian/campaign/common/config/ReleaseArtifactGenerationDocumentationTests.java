@@ -52,7 +52,7 @@ class ReleaseArtifactGenerationDocumentationTests {
 
             int buildJobIndex = indexOfJob(yaml, "backend-build:");
             int nextJobIndex = yaml.indexOf("\n  backend-test:");
-            assertThat(buildJobIndex).isNonNegative();
+            assertThat(buildJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(nextJobIndex).isGreaterThan(buildJobIndex);
             String buildJobBlock = yaml.substring(buildJobIndex, nextJobIndex);
 
@@ -71,7 +71,7 @@ class ReleaseArtifactGenerationDocumentationTests {
 
             int buildJobIndex = indexOfJob(yaml, "frontend-build:");
             int nextJobIndex = yaml.indexOf("\n  docker-backend:");
-            assertThat(buildJobIndex).isNonNegative();
+            assertThat(buildJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(nextJobIndex).isGreaterThan(buildJobIndex);
             String buildJobBlock = yaml.substring(buildJobIndex, nextJobIndex);
 

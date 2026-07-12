@@ -1,0 +1,7 @@
+---
+pid: 18520
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location \"D:\\Documents\\IU\\AgileApp\\backend\"; & \"D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd\" test 2>&1 | Tee-Object -FilePath \"D:\\Documents\\IU\\AgileApp\\agent-tools\\mvn-test-full.log\" | Select-Object -Last 5"
+started_at: 2026-07-08T11:40:19.028Z
+running_for_ms: 35005    
+---

@@ -99,7 +99,7 @@ class DockerFrontendImageBuildDocumentationTests {
 
             int backendJob = indexOfJob(yaml, "docker-backend:");
             int frontendJob = indexOfJob(yaml, "docker-frontend:");
-            assertThat(backendJob).isNonNegative();
+            assertThat(backendJob).isGreaterThanOrEqualTo(0);
             assertThat(frontendJob).isGreaterThan(backendJob);
 
             int nextJobIndex = yaml.indexOf("\n  docker-compose-validate:");

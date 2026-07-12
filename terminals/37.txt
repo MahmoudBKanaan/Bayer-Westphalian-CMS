@@ -1,0 +1,7 @@
+---
+pid: 4948
+cwd: "D:\Documents\IU\AgileApp"
+command: "Start-Sleep -Seconds 30"
+started_at: 2026-07-08T10:51:35.708Z
+running_for_ms: 174994   
+---

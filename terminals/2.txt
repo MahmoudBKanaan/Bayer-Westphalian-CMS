@@ -1,0 +1,23 @@
+---
+pid: 23112
+cwd: "D:\Documents\IU\AgileApp"
+command: "choco install maven -y --no-progress"
+started_at: 2026-07-08T08:19:52.739Z
+running_for_ms: 1740001  
+---
+Chocolatey v2.2.2
+Installing the following packages:
+maven
+By installing, you accept licenses for the packages.
+
+maven v3.9.16 [Approved]
+maven package files install completed. Performing other installation steps.
+C:\Users\mbk73\.m2
+PATH environment variable does not have C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.16\bin in it. Adding...
+Environment Vars (like PATH) have changed. Close/reopen your shell to
+ see the changes (or in powershell/cmd.exe just type `refreshenv`).
+ The install of maven was successful.
+  Software installed to 'C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.16'
+
+Chocolatey installed 1/1 packages. 
+ See the log for details (C:\ProgramData\chocolatey\logs\chocolatey.log).

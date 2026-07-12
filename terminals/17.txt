@@ -1,0 +1,19 @@
+---
+pid: 18896
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; Set-Location D:\\Documents\\IU\\AgileApp\\backend; mvn -q exec:java \"-Dexec.mainClass=org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder\" 2>&1"
+started_at: 2026-07-08T09:43:02.782Z
+running_for_ms: 690014   
+---
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: D:\Documents\IU\AgileApp\.tools\apache-maven-3.9.11
+Java version: 21.0.11, vendor: Eclipse Adoptium, runtime: C:\Users\mbk73\.jdks\temurin-21
+Default locale: en_US, platform encoding: UTF-8
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
+[ERROR] Failed to execute goal org.codehaus.mojo:exec-maven-plugin:3.6.3:java (default-cli) on project campaign: An exception occurred while executing the Java class. The specified mainClass doesn't contain a main method with appropriate signature. No suitable main method found for class org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder, and not Runnable -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException

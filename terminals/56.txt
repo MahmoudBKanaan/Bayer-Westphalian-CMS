@@ -1,0 +1,37 @@
+---
+pid: 16128
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location \"D:\\Documents\\IU\\AgileApp\\backend\"; & \"D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd\" -q test \"-Dtest=*DocumentationTests,*ProductChangeRequest*,ProductChangesCreateAuditLogTests\" 2>&1 | Select-Object -Last 30"
+started_at: 2026-07-08T11:38:37.104Z
+running_for_ms: 120078   
+---
+2026-07-08T14:38:52.581+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:52.581+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:52.581+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:52.731+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:52.732+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:52.732+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:52.804+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:52.804+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:52.804+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:52.857+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:52.857+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:52.857+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:52.904+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:52.904+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:52.904+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:52.952+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:52.953+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:52.953+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:53.032+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:53.032+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:53.032+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:53.068+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:53.070+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:53.070+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:53.124+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:53.127+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:53.127+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:38:53.173+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:38:53.173+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:38:53.174+03:00  INFO 16992 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms

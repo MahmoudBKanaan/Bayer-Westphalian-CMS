@@ -1,0 +1,30 @@
+---
+pid: 3556
+cwd: "D:\Documents\IU\AgileApp"
+command: "cd \"D:\\Documents\\IU\\AgileApp\\backend\"; ..\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd test \"-Dtest=ProductOwnership*\" 2>&1 | Select-String -Pattern \"FAILURE|ERROR|Tests run:|BUILD|compilation\""
+started_at: 2026-07-08T10:26:46.838Z
+running_for_ms: 4429994  
+---
+
+[INFO] Building campaign 0.1.0-SNAPSHOT
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of 
+the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: 
+https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.787 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipControllerTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.132 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipDocumentationTests
+[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.131 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipDtoTests
+[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.616 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipExpirationDateSavedTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.050 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipRepositoryTests
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.791 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipServiceTests
+[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.065 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipTests
+[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+

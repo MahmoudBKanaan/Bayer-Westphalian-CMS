@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bayerwestphalian.campaign.audit.AuditService;
+import com.bayerwestphalian.campaign.auth.AuthorizationExpressions;
 import com.bayerwestphalian.campaign.common.domain.BaseEntity;
 import com.bayerwestphalian.campaign.common.exception.ResourceNotFoundException;
 import com.bayerwestphalian.campaign.common.exception.ValidationException;
@@ -37,12 +38,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 @ExtendWith(MockitoExtension.class)
 class ConsentServiceTests {
 
-    private static final UUID CONSENT_ID =
-            UUID.fromString("22000000-0000-0000-0000-000000000001");
-    private static final UUID CUSTOMER_ID =
-            UUID.fromString("20000000-0000-0000-0000-000000000101");
-    private static final UUID USER_ID =
-            UUID.fromString("10000000-0000-0000-0000-000000000101");
+    private static final UUID CONSENT_ID = UUID.fromString("22000000-0000-0000-0000-000000000001");
+    private static final UUID CUSTOMER_ID = UUID.fromString("20000000-0000-0000-0000-000000000101");
+    private static final UUID USER_ID = UUID.fromString("10000000-0000-0000-0000-000000000101");
     private static final Instant NOW = Instant.parse("2026-07-06T12:00:00Z");
     private static final Instant EXPIRES_AT = Instant.parse("2027-07-06T12:00:00Z");
 
@@ -51,6 +49,8 @@ class ConsentServiceTests {
     @Mock private CustomerRepository customerRepository;
 
     @Mock private UserRepository userRepository;
+
+    @Mock private AuthorizationExpressions authorizationExpressions;
 
     @Mock private AuditService auditService;
 
@@ -63,6 +63,7 @@ class ConsentServiceTests {
                         consentRepository,
                         customerRepository,
                         userRepository,
+                        authorizationExpressions,
                         auditService,
                         Clock.fixed(NOW, ZoneOffset.UTC));
     }
@@ -80,8 +81,7 @@ class ConsentServiceTests {
         assertPreAuthorize("isGuardianConsentSatisfied", UUID.class, boolean.class);
         assertPreAuthorize("validateGuardianConsent", UUID.class, boolean.class);
         assertPreAuthorize("isCommunicationEligible", UUID.class, ConsentType.class);
-        assertPreAuthorize(
-                "isCommunicationEligible", UUID.class, ConsentType.class, boolean.class);
+        assertPreAuthorize("isCommunicationEligible", UUID.class, ConsentType.class, boolean.class);
     }
 
     @Test
@@ -111,8 +111,7 @@ class ConsentServiceTests {
                                 " s3://evidence/email.pdf ",
                                 USER_ID));
 
-        ArgumentCaptor<ConsentRecord> consentCaptor =
-                ArgumentCaptor.forClass(ConsentRecord.class);
+        ArgumentCaptor<ConsentRecord> consentCaptor = ArgumentCaptor.forClass(ConsentRecord.class);
         verify(consentRepository).save(consentCaptor.capture());
         ConsentRecord savedConsent = consentCaptor.getValue();
         assertThat(savedConsent.getCustomer()).isSameAs(customer);
@@ -126,21 +125,22 @@ class ConsentServiceTests {
         assertThat(savedConsent.getCreatedBy()).isSameAs(createdBy);
         assertThat(view.valid()).isTrue();
         assertThat(view.requiresAction()).isFalse();
+        // Item 524: consent record writes CREATE on consent_records with actor + full payload.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
-                .logConsentCreation(
-                        eq(USER_ID),
-                        eq(CONSENT_ID),
-                        eq(
-                                Map.ofEntries(
-                                        Map.entry("customerId", CUSTOMER_ID),
-                                        Map.entry("consentType", "MARKETING_EMAIL"),
-                                        Map.entry("status", "GIVEN"),
-                                        Map.entry("purpose", "Email marketing consent"),
-                                        Map.entry("source", "WEB_FORM"),
-                                        Map.entry("grantedAt", NOW),
-                                        Map.entry("expiresAt", EXPIRES_AT),
-                                        Map.entry("evidenceFileUrl", "s3://evidence/email.pdf"),
-                                        Map.entry("createdBy", USER_ID))));
+                .logConsentCreation(eq(USER_ID), eq(CONSENT_ID), payloadCaptor.capture());
+        assertThat(payloadCaptor.getValue())
+                .containsEntry("id", CONSENT_ID.toString())
+                .containsEntry("customerId", CUSTOMER_ID)
+                .containsEntry("consentType", "MARKETING_EMAIL")
+                .containsEntry("status", "GIVEN")
+                .containsEntry("purpose", "Email marketing consent")
+                .containsEntry("source", "WEB_FORM")
+                .containsEntry("grantedAt", NOW)
+                .containsEntry("expiresAt", EXPIRES_AT)
+                .containsEntry("evidenceFileUrl", "s3://evidence/email.pdf")
+                .containsEntry("createdBy", USER_ID);
     }
 
     @Test
@@ -171,17 +171,17 @@ class ConsentServiceTests {
         assertThat(view.status()).isEqualTo(ConsentStatus.REQUIRED);
         assertThat(view.valid()).isFalse();
         assertThat(view.requiresAction()).isTrue();
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
-                .logConsentCreation(
-                        eq((UUID) null),
-                        eq(CONSENT_ID),
-                        eq(
-                                Map.ofEntries(
-                                        Map.entry("customerId", CUSTOMER_ID),
-                                        Map.entry("consentType", "GUARDIAN"),
-                                        Map.entry("status", "REQUIRED"),
-                                        Map.entry("purpose", "Guardian consent required"),
-                                        Map.entry("source", "PHONE"))));
+                .logConsentCreation(eq((UUID) null), eq(CONSENT_ID), payloadCaptor.capture());
+        assertThat(payloadCaptor.getValue())
+                .containsEntry("id", CONSENT_ID.toString())
+                .containsEntry("customerId", CUSTOMER_ID)
+                .containsEntry("consentType", "GUARDIAN")
+                .containsEntry("status", "REQUIRED")
+                .containsEntry("purpose", "Guardian consent required")
+                .containsEntry("source", "PHONE");
     }
 
     @Test
@@ -213,23 +213,30 @@ class ConsentServiceTests {
 
         assertThat(view.status()).isEqualTo(ConsentStatus.REJECTED);
         assertThat(view.valid()).isFalse();
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
-                .logConsentCreation(
-                        eq(USER_ID),
-                        eq(CONSENT_ID),
-                        eq(
-                                Map.ofEntries(
-                                        Map.entry("customerId", CUSTOMER_ID),
-                                        Map.entry("consentType", "MARKETING_EMAIL"),
-                                        Map.entry("status", "REJECTED"),
-                                        Map.entry("purpose", "Marketing opt-out"),
-                                        Map.entry("source", "CUSTOMER_REQUEST"))));
+                .logConsentCreation(eq(USER_ID), eq(CONSENT_ID), payloadCaptor.capture());
+        assertThat(payloadCaptor.getValue())
+                .containsEntry("status", "REJECTED")
+                .containsEntry("purpose", "Marketing opt-out")
+                .containsEntry("source", "CUSTOMER_REQUEST");
+        // Item 525: marketing REJECTED also writes dedicated OPT_OUT audit.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> optOutCaptor = ArgumentCaptor.forClass(Map.class);
+        verify(auditService)
+                .logOptOutChange(eq(USER_ID), eq(CONSENT_ID), eq(null), optOutCaptor.capture());
+        assertThat(optOutCaptor.getValue())
+                .containsEntry("status", "REJECTED")
+                .containsEntry("optOut", true)
+                .containsEntry("marketingConsent", true);
     }
 
     @Test
     void withdrawsConsentAndAuditsUpdate() throws Exception {
         ConsentRecord consentRecord = givenConsent();
         setConsentId(consentRecord, CONSENT_ID);
+        when(authorizationExpressions.currentUserId()).thenReturn(USER_ID);
         when(consentRepository.findById(CONSENT_ID)).thenReturn(Optional.of(consentRecord));
         when(consentRepository.save(consentRecord)).thenReturn(consentRecord);
 
@@ -240,15 +247,19 @@ class ConsentServiceTests {
         assertThat(consentRecord.getWithdrawnAt()).isEqualTo(NOW);
         assertThat(view.valid()).isFalse();
         assertThat(view.requiresAction()).isTrue();
-        ArgumentCaptor<Map> oldValueCaptor = ArgumentCaptor.forClass(Map.class);
-        ArgumentCaptor<Map> newValueCaptor = ArgumentCaptor.forClass(Map.class);
+        // Item 524: withdrawal logs WITHDRAW_CONSENT with Admin/agent actor and before/after.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> oldValueCaptor = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> newValueCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
                 .logConsentWithdrawal(
-                        eq((UUID) null),
+                        eq(USER_ID),
                         eq(CONSENT_ID),
                         oldValueCaptor.capture(),
                         newValueCaptor.capture());
         assertThat(oldValueCaptor.getValue())
+                .containsEntry("id", CONSENT_ID.toString())
                 .containsEntry("customerId", CUSTOMER_ID)
                 .containsEntry("consentType", "MARKETING_SMS")
                 .containsEntry("status", "GIVEN")
@@ -265,6 +276,22 @@ class ConsentServiceTests {
                 .containsEntry("expiresAt", EXPIRES_AT)
                 .containsEntry("evidenceFileUrl", "s3://evidence/sms.pdf")
                 .containsEntry("createdBy", USER_ID);
+        // Item 525: marketing channel withdrawal also logs OPT_OUT.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> optOutOld = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> optOutNew = ArgumentCaptor.forClass(Map.class);
+        verify(auditService)
+                .logOptOutChange(
+                        eq(USER_ID), eq(CONSENT_ID), optOutOld.capture(), optOutNew.capture());
+        assertThat(optOutOld.getValue())
+                .containsEntry("status", "GIVEN")
+                .containsEntry("optOut", false)
+                .containsEntry("marketingConsent", true);
+        assertThat(optOutNew.getValue())
+                .containsEntry("status", "WITHDRAWN")
+                .containsEntry("optOut", true)
+                .containsEntry("marketingConsent", true);
     }
 
     @Test
@@ -317,9 +344,7 @@ class ConsentServiceTests {
         when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer()));
 
         assertThat(consentService.hasValidMarketingConsent(CUSTOMER_ID)).isTrue();
-        assertThat(
-                        consentService.hasValidMarketingConsent(
-                                CUSTOMER_ID, ConsentType.MARKETING_SMS))
+        assertThat(consentService.hasValidMarketingConsent(CUSTOMER_ID, ConsentType.MARKETING_SMS))
                 .isTrue();
         assertThat(consentService.hasValidGuardianConsent(CUSTOMER_ID)).isTrue();
         assertThat(consentService.isCommunicationEligible(CUSTOMER_ID, ConsentType.MARKETING_SMS))
@@ -337,8 +362,7 @@ class ConsentServiceTests {
                 .thenReturn(Optional.empty());
 
         assertThat(consentService.hasValidMarketingConsent(CUSTOMER_ID)).isFalse();
-        verify(consentRepository, never())
-                .findValidConsent(CUSTOMER_ID, ConsentType.GUARDIAN, NOW);
+        verify(consentRepository, never()).findValidConsent(CUSTOMER_ID, ConsentType.GUARDIAN, NOW);
     }
 
     @Test
@@ -348,9 +372,7 @@ class ConsentServiceTests {
         when(consentRepository.findValidConsent(CUSTOMER_ID, ConsentType.MARKETING_EMAIL, NOW))
                 .thenReturn(Optional.empty());
 
-        assertThat(
-                        consentService.isCommunicationEligible(
-                                CUSTOMER_ID, ConsentType.MARKETING_EMAIL))
+        assertThat(consentService.isCommunicationEligible(CUSTOMER_ID, ConsentType.MARKETING_EMAIL))
                 .isFalse();
     }
 
@@ -394,9 +416,7 @@ class ConsentServiceTests {
         when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer()));
 
         assertThat(consentService.hasValidMarketingConsent(CUSTOMER_ID)).isFalse();
-        assertThat(
-                        consentService.hasValidMarketingConsent(
-                                CUSTOMER_ID, ConsentType.MARKETING_SMS))
+        assertThat(consentService.hasValidMarketingConsent(CUSTOMER_ID, ConsentType.MARKETING_SMS))
                 .isFalse();
         assertThat(consentService.isCommunicationEligible(CUSTOMER_ID, ConsentType.MARKETING_SMS))
                 .isFalse();
@@ -628,8 +648,7 @@ class ConsentServiceTests {
         return user;
     }
 
-    private static void setConsentId(ConsentRecord consentRecord, UUID consentId)
-            throws Exception {
+    private static void setConsentId(ConsentRecord consentRecord, UUID consentId) throws Exception {
         Field id = ConsentRecord.class.getDeclaredField("id");
         id.setAccessible(true);
         id.set(consentRecord, consentId);

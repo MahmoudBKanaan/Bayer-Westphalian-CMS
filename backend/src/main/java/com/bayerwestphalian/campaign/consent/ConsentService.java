@@ -1,6 +1,7 @@
 package com.bayerwestphalian.campaign.consent;
 
 import com.bayerwestphalian.campaign.audit.AuditService;
+import com.bayerwestphalian.campaign.auth.AuthorizationExpressions;
 import com.bayerwestphalian.campaign.common.exception.ResourceNotFoundException;
 import com.bayerwestphalian.campaign.common.exception.ValidationException;
 import com.bayerwestphalian.campaign.customer.Customer;
@@ -21,8 +22,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+/**
+ * Consent, opt-out, guardian consent, and eligibility service (KB E09 / FR-033–FR-034 / COMP-001).
+ *
+ * <p>Item 524: every successful consent record or withdrawal writes an immutable audit row on
+ * entity type {@code consent_records} via {@link AuditService#logConsentCreation}, {@link
+ * AuditService#logConsentChange}, or {@link AuditService#logConsentWithdrawal}.
+ */
 @Service
 public class ConsentService {
+
+    /** KB audit entity type for consent history rows. */
+    public static final String AUDIT_ENTITY_TYPE = "consent_records";
 
     private static final List<ConsentType> MARKETING_CONSENT_TYPES =
             List.of(
@@ -33,6 +44,7 @@ public class ConsentService {
     private final ConsentRepository consentRepository;
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
+    private final AuthorizationExpressions authorizationExpressions;
     private final AuditService auditService;
     private final Clock clock;
 
@@ -41,11 +53,13 @@ public class ConsentService {
             ConsentRepository consentRepository,
             CustomerRepository customerRepository,
             UserRepository userRepository,
+            AuthorizationExpressions authorizationExpressions,
             AuditService auditService) {
         this(
                 consentRepository,
                 customerRepository,
                 userRepository,
+                authorizationExpressions,
                 auditService,
                 Clock.systemUTC());
     }
@@ -54,21 +68,36 @@ public class ConsentService {
             ConsentRepository consentRepository,
             CustomerRepository customerRepository,
             UserRepository userRepository,
+            AuthorizationExpressions authorizationExpressions,
             AuditService auditService,
             Clock clock) {
         this.consentRepository = consentRepository;
         this.customerRepository = customerRepository;
         this.userRepository = userRepository;
+        this.authorizationExpressions = authorizationExpressions;
         this.auditService = auditService;
         this.clock = clock;
     }
 
+    /**
+     * Records a new consent / opt-out / guardian / data-processing row (FR-033).
+     *
+     * <p>Item 524: persists a {@code CREATE} audit entry with actor and full consent payload.
+     *
+     * <p>Item 525 / COMP-002: when the recorded row is a marketing opt-out ({@code REJECTED} or
+     * {@code WITHDRAWN} on {@code MARKETING_EMAIL}/{@code MARKETING_PHONE}/{@code MARKETING_SMS}),
+     * also writes an {@code OPT_OUT} audit row via {@link AuditService#logOptOutChange}.
+     */
     @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'COMPLIANCE_OFFICER')")
     @Transactional
     public ConsentRecordView recordConsent(RecordConsentCommand command) {
         validateRecordCommand(command);
         Customer customer = findCustomer(command.customerId());
+        UUID actorUserId = resolveConsentActor(command.createdBy());
         User createdBy = findOptionalUser(command.createdBy());
+        if (createdBy == null && actorUserId != null) {
+            createdBy = userRepository.findById(actorUserId).orElse(null);
+        }
         ConsentRecord consentRecord =
                 ConsentRecord.create(
                         customer,
@@ -79,28 +108,55 @@ public class ConsentService {
 
         applyInitialStatus(consentRecord, command, createdBy);
         ConsentRecord savedConsent = consentRepository.save(consentRecord);
-        auditService.logConsentCreation(
-                command.createdBy(),
-                savedConsent.getId(),
-                consentAuditPayload(savedConsent));
+
+        // Item 524: log consent recording with actor and full payload (never secrets).
+        Map<String, Object> newValue = consentAuditPayload(savedConsent);
+        auditService.logConsentCreation(actorUserId, savedConsent.getId(), newValue);
+
+        // Item 525: dedicated OPT_OUT trail for marketing opt-out recordings.
+        if (isMarketingOptOutRecord(savedConsent)) {
+            auditService.logOptOutChange(
+                    actorUserId,
+                    savedConsent.getId(),
+                    null,
+                    marketingOptOutAuditPayload(savedConsent));
+        }
 
         return ConsentRecordView.from(savedConsent, now());
     }
 
+    /**
+     * Withdraws an existing consent record.
+     *
+     * <p>Item 524: writes {@code WITHDRAW_CONSENT} with before/after payloads and the acting
+     * principal as actor.
+     *
+     * <p>Item 525 / COMP-002: when the withdrawn consent is a marketing channel type, also writes
+     * {@code OPT_OUT} so opt-outs are filterable separately from general consent history.
+     */
     @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'COMPLIANCE_OFFICER')")
     @Transactional
     public ConsentRecordView withdrawConsent(WithdrawConsentCommand command) {
         validateWithdrawCommand(command);
         ConsentRecord consentRecord = findConsentRecord(command.consentRecordId());
-        Map<String, ?> oldValue = consentAuditPayload(consentRecord);
+        Map<String, Object> oldValue = consentAuditPayload(consentRecord);
+        boolean marketingChannel = isMarketingConsentType(consentRecord.getConsentType());
 
         consentRecord.withdraw(command.withdrawnAt() == null ? now() : command.withdrawnAt());
         ConsentRecord savedConsent = consentRepository.save(consentRecord);
+        UUID actorUserId = currentActorUserId();
+        Map<String, Object> newValue = consentAuditPayload(savedConsent);
+
         auditService.logConsentWithdrawal(
-                null,
-                savedConsent.getId(),
-                oldValue,
-                consentAuditPayload(savedConsent));
+                actorUserId, savedConsent.getId(), oldValue, newValue);
+
+        if (marketingChannel) {
+            auditService.logOptOutChange(
+                    actorUserId,
+                    savedConsent.getId(),
+                    marketingOptOutAuditPayload(oldValue, false),
+                    marketingOptOutAuditPayload(savedConsent));
+        }
 
         return ConsentRecordView.from(savedConsent, now());
     }
@@ -223,10 +279,36 @@ public class ConsentService {
             return false;
         }
         validateConsentType(consentType);
-        if (isMarketingConsentType(consentType) && hasMarketingOptOut(customer.getId())) {
+        if (isMarketingConsentType(consentType) && hasMarketingOptOut(customer)) {
             return false;
         }
         return hasValidConsent(customer.getId(), consentType);
+    }
+
+    /**
+     * Unsecured customer-entity overload for internal campaign/segment eligibility evaluation.
+     * Callers (for example {@code EligibilityService} / {@code SegmentService}) must already be
+     * authorized.
+     */
+    public boolean isCommunicationEligible(
+            Customer customer, ConsentType consentType, boolean guardianConsentRequired) {
+        if (!isCommunicationEligible(customer, consentType)) {
+            return false;
+        }
+        return !guardianConsentRequired || hasValidConsent(customer.getId(), ConsentType.GUARDIAN);
+    }
+
+    /**
+     * Unsecured customer-entity opt-out check for internal eligibility evaluation. Callers must
+     * already be authorized.
+     */
+    public boolean hasMarketingOptOut(Customer customer) {
+        if (customer == null || customer.getId() == null) {
+            return false;
+        }
+        return consentRepository.findOptOuts(customer.getId()).stream()
+                .map(ConsentRecord::getConsentType)
+                .anyMatch(this::isMarketingConsentType);
     }
 
     private void applyInitialStatus(
@@ -252,6 +334,30 @@ public class ConsentService {
 
     private boolean isMarketingConsentType(ConsentType consentType) {
         return MARKETING_CONSENT_TYPES.contains(consentType);
+    }
+
+    /**
+     * Marketing opt-out: marketing channel consent with status that excludes the customer from
+     * marketing (KB: WITHDRAWN or REJECTED).
+     */
+    private boolean isMarketingOptOutRecord(ConsentRecord consentRecord) {
+        if (consentRecord == null || !isMarketingConsentType(consentRecord.getConsentType())) {
+            return false;
+        }
+        ConsentStatus status = consentRecord.getStatus();
+        return status == ConsentStatus.REJECTED || status == ConsentStatus.WITHDRAWN;
+    }
+
+    private Map<String, Object> marketingOptOutAuditPayload(ConsentRecord consentRecord) {
+        return marketingOptOutAuditPayload(consentAuditPayload(consentRecord), true);
+    }
+
+    private Map<String, Object> marketingOptOutAuditPayload(
+            Map<String, Object> basePayload, boolean optedOut) {
+        Map<String, Object> payload = new LinkedHashMap<>(basePayload);
+        payload.put("optOut", optedOut);
+        payload.put("marketingConsent", true);
+        return payload;
     }
 
     private List<ConsentRecord> loadCandidates(ConsentSearchCriteria criteria) {
@@ -336,8 +442,7 @@ public class ConsentService {
                 && command.grantedAt() != null
                 && !command.expiresAt().isAfter(command.grantedAt())) {
             throw new ValidationException(
-                    "Consent validation failed",
-                    List.of("expiresAt: must be after grantedAt"));
+                    "Consent validation failed", List.of("expiresAt: must be after grantedAt"));
         }
     }
 
@@ -391,9 +496,14 @@ public class ConsentService {
         return Instant.now(clock);
     }
 
-    private Map<String, ?> consentAuditPayload(ConsentRecord consentRecord) {
+    private Map<String, Object> consentAuditPayload(ConsentRecord consentRecord) {
         Map<String, Object> payload = new LinkedHashMap<>();
-        payload.put("customerId", consentRecord.getCustomer().getId());
+        if (consentRecord.getId() != null) {
+            payload.put("id", consentRecord.getId().toString());
+        }
+        if (consentRecord.getCustomer() != null && consentRecord.getCustomer().getId() != null) {
+            payload.put("customerId", consentRecord.getCustomer().getId());
+        }
         payload.put("consentType", consentRecord.getConsentType().name());
         payload.put("status", consentRecord.getStatus().name());
         payload.put("purpose", consentRecord.getPurpose());
@@ -406,6 +516,22 @@ public class ConsentService {
             payload.put("createdBy", consentRecord.getCreatedBy().getId());
         }
         return payload;
+    }
+
+    /** Prefer explicit recorder from the request; otherwise the authenticated principal. */
+    private UUID resolveConsentActor(UUID createdByUserId) {
+        if (createdByUserId != null) {
+            return createdByUserId;
+        }
+        return currentActorUserId();
+    }
+
+    private UUID currentActorUserId() {
+        try {
+            return authorizationExpressions.currentUserId();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private void putIfPresent(Map<String, Object> payload, String key, Object value) {

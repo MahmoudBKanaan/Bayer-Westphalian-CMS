@@ -62,7 +62,7 @@ class BackendBuildJobDocumentationTests {
             if (nextJobIndex < 0) {
                 nextJobIndex = yaml.indexOf("\n  frontend:");
             }
-            assertThat(buildJobIndex).isNonNegative();
+            assertThat(buildJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(nextJobIndex).isGreaterThan(buildJobIndex);
             String buildJobBlock = yaml.substring(buildJobIndex, nextJobIndex);
             assertThat(buildJobBlock).contains("mvn -B -DskipTests package");

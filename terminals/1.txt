@@ -1,0 +1,15 @@
+---
+pid: 3988
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location D:\\Documents\\IU\\AgileApp\\backend; mvn spring-boot:run"
+started_at: 2026-07-08T08:17:19.035Z
+running_for_ms: 1910002  
+---
+mvn : The term 'mvn' is not recognized as the name of a cmdlet, function, script file, or operable program. Check the 
+spelling of the name, or if a path was included, verify that the path is correct and try again.
+At line:1 char:48
++ Set-Location D:\Documents\IU\AgileApp\backend; mvn spring-boot:run
++                                                ~~~
+    + CategoryInfo          : ObjectNotFound: (mvn:String) [], CommandNotFoundException
+    + FullyQualifiedErrorId : CommandNotFoundException
+ 

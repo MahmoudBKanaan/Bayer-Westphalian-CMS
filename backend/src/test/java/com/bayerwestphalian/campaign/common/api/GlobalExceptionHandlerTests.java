@@ -88,13 +88,55 @@ class GlobalExceptionHandlerTests {
 
     @Test
     void mapsUnexpectedExceptionToInternalErrorResponse() throws Exception {
-        mockMvc.perform(get("/test/unexpected"))
+        mockMvc.perform(get("/test/unexpected").header("X-Request-Id", "req-internal"))
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value("INTERNAL_ERROR"))
-                .andExpect(jsonPath("$.message").value("Unexpected server error"));
+                .andExpect(jsonPath("$.message").value("Unexpected server error"))
+                .andExpect(jsonPath("$.requestId").value("req-internal"))
+                .andExpect(jsonPath("$.stackTrace").doesNotExist())
+                .andExpect(jsonPath("$.trace").doesNotExist())
+                .andExpect(jsonPath("$.exception").doesNotExist());
+    }
+
+    @Test
+    void mapsMalformedBodyToSecureClientErrorWithoutInternalParseDetails() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/test/validate")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{not-json"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("MALFORMED_REQUEST"))
+                .andExpect(jsonPath("$.message").value("Request body is malformed or unreadable"))
+                .andExpect(jsonPath("$.details").isEmpty())
+                .andExpect(jsonPath("$.stackTrace").doesNotExist());
+    }
+
+    @Test
+    void mapsUnsupportedMethodToMethodNotAllowed() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/test/not-found"))
+                .andExpect(status().isMethodNotAllowed())
+                .andExpect(jsonPath("$.code").value("METHOD_NOT_ALLOWED"))
+                .andExpect(
+                        jsonPath("$.message")
+                                .value("HTTP method is not allowed for this endpoint"));
+    }
+
+    @Test
+    void redactsSensitiveRejectedValuesInValidationErrors() throws Exception {
+        mockMvc.perform(
+                        MockMvcRequestBuilders.post("/test/validate-password")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"password\":\"SuperSecret1!\"}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
+                .andExpect(jsonPath("$.validationErrors[0].field").value("password"))
+                .andExpect(jsonPath("$.validationErrors[0].rejectedValue").value("[REDACTED]"));
     }
 
     private record TestRequest(@NotBlank String name) {}
+
+    private record PasswordRequest(
+            @jakarta.validation.constraints.Size(min = 20) String password) {}
 
     @RestController
     private static final class TestController {
@@ -113,6 +155,11 @@ class GlobalExceptionHandlerTests {
         @PostMapping("/test/validate")
         String validate(@Valid @RequestBody TestRequest request) {
             return request.name();
+        }
+
+        @PostMapping("/test/validate-password")
+        String validatePassword(@Valid @RequestBody PasswordRequest request) {
+            return request.password();
         }
 
         @GetMapping("/test/forbidden")

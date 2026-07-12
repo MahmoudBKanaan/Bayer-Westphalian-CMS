@@ -110,8 +110,7 @@ class ProductChangeRequestTests {
         assertThat(request.getProduct()).isSameAs(product);
         assertThat(request.getRequestedBy()).isSameAs(requester);
         assertThat(request.getRequestType()).isEqualTo(ProductChangeType.PRICE_CHANGE);
-        assertThat(request.getDescription())
-                .isEqualTo("Adjust monthly price for the new tariff.");
+        assertThat(request.getDescription()).isEqualTo("Adjust monthly price for the new tariff.");
         assertThat(request.getStatus()).isEqualTo(ProductChangeStatus.OPEN);
     }
 

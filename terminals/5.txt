@@ -1,0 +1,14 @@
+---
+pid: 21724
+cwd: "D:\Documents\IU\AgileApp"
+command: "Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue | Select-Object OwningProcess; Get-Process -Id (Get-NetTCPConnection -LocalPort 8080 -State Listen -ErrorAction SilentlyContinue).OwningProcess -ErrorAction SilentlyContinue | Select-Object Id, ProcessName, StartTime"
+started_at: 2026-07-08T08:21:25.769Z
+running_for_ms: 1649971  
+---
+
+OwningProcess
+-------------
+        16988
+             
+
+

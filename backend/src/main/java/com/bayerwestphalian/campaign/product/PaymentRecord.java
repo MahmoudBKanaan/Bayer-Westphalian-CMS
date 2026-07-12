@@ -47,12 +47,10 @@ public class PaymentRecord {
     @Column(name = "paid_at")
     private Instant paidAt;
 
-    @NotNull @DecimalMin("0.00") @Digits(integer = 10, fraction = 2)
-    @Column(name = "amount_due", nullable = false, precision = 12, scale = 2)
+    @NotNull @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) @Column(name = "amount_due", nullable = false, precision = 12, scale = 2)
     private BigDecimal amountDue;
 
-    @DecimalMin("0.00") @Digits(integer = 10, fraction = 2)
-    @Column(name = "amount_paid", precision = 12, scale = 2)
+    @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) @Column(name = "amount_paid", precision = 12, scale = 2)
     private BigDecimal amountPaid;
 
     @NotNull @Enumerated(EnumType.STRING)
@@ -126,8 +124,13 @@ public class PaymentRecord {
         status = PaymentStatus.PAID;
     }
 
+    public void updateDetails(LocalDate dueDate, BigDecimal amountDue) {
+        this.dueDate = dueDate;
+        this.amountDue = amountDue;
+    }
+
     public void markOverdue() {
-        if (status != PaymentStatus.PAID) {
+        if (status == PaymentStatus.DUE) {
             status = PaymentStatus.OVERDUE;
         }
     }
@@ -140,6 +143,8 @@ public class PaymentRecord {
         reminderCount++;
         if (reminderCount >= DEFAULT_RISK_REMINDER_THRESHOLD) {
             status = PaymentStatus.DEFAULT_RISK;
+        } else if (reminderCount >= 2) {
+            status = PaymentStatus.OVERDUE;
         }
     }
 

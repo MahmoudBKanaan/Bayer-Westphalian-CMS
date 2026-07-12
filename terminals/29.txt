@@ -1,0 +1,101 @@
+---
+pid: 4480
+cwd: "D:\Documents\IU\AgileApp"
+command: "cd \"D:\\Documents\\IU\\AgileApp\\backend\"; ..\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd test \"-Dtest=PaymentRecordCanBeCreatedTests,PaymentRecordCanBeMarkedPaidTests,PaymentRecordDtoTests\" 2>&1"
+started_at: 2026-07-08T10:17:20.709Z
+running_for_ms: 5000004  
+---
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: D:\Documents\IU\AgileApp\.tools\apache-maven-3.9.11
+Java version: 21.0.11, vendor: Eclipse Adoptium, runtime: C:\Users\mbk73\.jdks\temurin-21
+Default locale: en_US, platform encoding: UTF-8
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.bayerwestphalian:campaign >--------------------
+[INFO] Building campaign 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ campaign ---
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] Copying 22 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ campaign ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ campaign ---
+[INFO] skip non existing resourceDirectory D:\Documents\IU\AgileApp\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ campaign ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- surefire:3.5.3:test (default-test) @ campaign ---
+[INFO] Using auto detected provider org.apache.maven.surefire.junitplatform.JUnitPlatformProvider
+[INFO] 
+[INFO] -------------------------------------------------------
+[INFO]  T E S T S
+[INFO] -------------------------------------------------------
+[INFO] Running com.bayerwestphalian.campaign.product.PaymentRecordCanBeCreatedTests
+13:17:27.686 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.bayerwestphalian.campaign.product.PaymentRecordCanBeCreatedTests]: PaymentRecordCanBeCreatedTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+13:17:28.985 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.bayerwestphalian.campaign.CampaignApplication for test class com.bayerwestphalian.campaign.product.PaymentRecordCanBeCreatedTests
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.3)
+
+2026-07-08T13:17:29.691+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] c.b.c.p.PaymentRecordCanBeCreatedTests   : Starting PaymentRecordCanBeCreatedTests using Java 21.0.11 with PID 19788 (started by mbk73 in D:\Documents\IU\AgileApp\backend)
+2026-07-08T13:17:29.692+03:00 DEBUG 19788 --- [bayer-westphalian-campaign-platform] [           main] c.b.c.p.PaymentRecordCanBeCreatedTests   : Running with Spring Boot v3.5.3, Spring v6.2.8
+2026-07-08T13:17:29.694+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] c.b.c.p.PaymentRecordCanBeCreatedTests   : No active profile set, falling back to 1 default profile: "dev"
+..\.tools\apache-maven-3.9.11\bin\mvn.cmd : Mockito is currently self-attaching to enable the inline-mock-maker. This 
+will no longer work in future releases of the JDK. Please add Mockito as an agent to your build as described in 
+Mockito's documentation: 
+https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+At line:1 char:40
++ ... p\backend"; ..\.tools\apache-maven-3.9.11\bin\mvn.cmd test "-Dtest=Pa ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (Mockito is curr...ockito.html#0.3:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+WARNING: A Java agent has been loaded dynamically 
+(C:\Users\mbk73\.m2\repository\net\bytebuddy\byte-buddy-agent\1.17.6\byte-buddy-agent-1.17.6.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+OpenJDK 64-Bit Server VM warning: Sharing is only supported for boot loader classes because bootstrap classpath has 
+been appended
+2026-07-08T13:17:35.253+03:00  WARN 19788 --- [bayer-westphalian-campaign-platform] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: 95d4cf18-313e-41b6-ad89-dc4ed9c6c58b
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-08T13:17:35.277+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-07-08T13:17:37.049+03:00 DEBUG 19788 --- [bayer-westphalian-campaign-platform] [           main] c.b.c.auth.JwtAuthenticationFilter       : Filter 'jwtAuthenticationFilter' configured for use
+2026-07-08T13:17:37.058+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] o.s.b.t.m.w.SpringBootMockServletContext : Initializing Spring TestDispatcherServlet ''
+2026-07-08T13:17:37.058+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T13:17:37.060+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 1 ms
+2026-07-08T13:17:37.113+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] c.b.c.p.PaymentRecordCanBeCreatedTests   : Started PaymentRecordCanBeCreatedTests in 8.023 seconds (process running for 10.67)
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 10.51 s -- in com.bayerwestphalian.campaign.product.PaymentRecordCanBeCreatedTests
+[INFO] Running com.bayerwestphalian.campaign.product.PaymentRecordCanBeMarkedPaidTests
+2026-07-08T13:17:37.959+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [com.bayerwestphalian.campaign.product.PaymentRecordCanBeMarkedPaidTests]: PaymentRecordCanBeMarkedPaidTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2026-07-08T13:17:38.067+03:00  INFO 19788 --- [bayer-westphalian-campaign-platform] [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration com.bayerwestphalian.campaign.CampaignApplication for test class com.bayerwestphalian.campaign.product.PaymentRecordCanBeMarkedPaidTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.239 s -- in com.bayerwestphalian.campaign.product.PaymentRecordCanBeMarkedPaidTests
+[INFO] Running com.bayerwestphalian.campaign.product.PaymentRecordDtoTests
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.114 s -- in com.bayerwestphalian.campaign.product.PaymentRecordDtoTests
+[INFO] 
+[INFO] Results:
+[INFO] 
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] 
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.442 s
+[INFO] Finished at: 2026-07-08T13:17:38+03:00
+[INFO] ------------------------------------------------------------------------

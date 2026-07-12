@@ -1,5 +1,7 @@
 # Release Tagging Process
 
+**Sprint 17 item 711** - Release tagging guide.
+
 **Sprint 17 item 696** — Add release tagging process.
 
 The Bayer-Westphalian Campaign Management Platform records **release versions** as Git tags on the
@@ -7,7 +9,8 @@ releasable **`main`** branch after CI is green. Tags map to the Knowledge Base r
 (`v0.1` … `v1.0`). Related: [CI/CD](ci-cd.md), [branch protection](branch-protection.md) (**695**),
 release artifacts (**691**), production gate (**714**).
 
-Item **711** may expand this guide further; this document is the process baseline for **696**.
+Item **711** expands this page from the baseline process into an operator guide with ownership,
+evidence capture, verification commands, GitHub Release notes, and troubleshooting.
 
 ## Scope and solo-project honesty (KB)
 
@@ -52,6 +55,30 @@ Item **711** may expand this guide further; this document is the process baselin
    run when packaging evidence is required.
 6. Secrets remain outside Git — [secrets.md](secrets.md).
 
+### Mandatory main CI release gate (item 714)
+
+`main` is a release candidate only when the **CI** workflow has a `completed` run with a
+`success` conclusion for the **exact commit SHA** being released. A green run for an older commit,
+an in-progress or skipped run, a successful workflow on `dev`, or local test results do not make
+the current `main` commit releasable.
+
+The deployment placeholder enforces this rule with `scripts/assert-main-ci-success.sh` before it
+records release intent. The gate queries the `ci.yml` push runs using read-only `actions: read`
+permission and fails closed when matching evidence is absent. Branch protection remains the merge
+gate; this check is the release-time gate.
+
+## Release roles and ownership
+
+| Role | Responsibility |
+| --- | --- |
+| Release operator | Confirms green `main`, creates the annotated tag, and pushes it to `origin` |
+| Reviewer / admin | Confirms the tag points at the intended commit and release notes contain no secrets |
+| System Auditor | Keeps evidence of tag name, commit SHA, CI run URL, artifacts, and any exceptions |
+
+For the solo university project, the same person may perform the operator and reviewer work, but
+the evidence record must still show the checks separately. Do not delegate tag creation to AI or an
+automation that can bypass CI; the human release operator owns the final tag decision.
+
 ## Process (Git CLI)
 
 From a clean checkout of `main` at the release commit:
@@ -78,6 +105,30 @@ git tag -l "v*"
 GitHub UI alternative: **Releases → Draft a new release → Choose a tag → Create new tag** on
 `main`, paste the same version and notes, publish. Prefer **annotated** tags (GitHub Releases
 creates them).
+
+### Verification commands
+
+Use these read-only checks before and after tagging:
+
+```powershell
+# Confirm current branch and latest commit
+git branch --show-current
+git log -1 --oneline
+
+# Confirm no local changes are being included accidentally
+git status --short
+
+# Confirm tag target after creation
+git show --no-patch --decorate v0.9
+git rev-list -n 1 v0.9
+
+# Confirm remote contains the tag after push
+git ls-remote --tags origin v0.9
+```
+
+If any command points at the wrong commit, stop before pushing the tag. If the wrong tag was already
+pushed, do not force-move it silently; document the mistake and create a corrected patch tag such as
+`v0.9.1` unless the tag was private and never shared.
 
 ### Annotated tag message template
 
@@ -111,6 +162,48 @@ After pushing the tag:
 4. Attach or link CI artifacts if needed for demo (download from Actions run **691**).
 5. Keep notes free of secrets and production credentials.
 
+### Release notes template
+
+```markdown
+## Release vX.Y - <KB milestone>
+
+- Commit: `<short-sha>` on `main`
+- CI: green, workflow run `<url>`
+- Artifacts: `bwc-backend-jar`, `bwc-frontend-dist` when applicable
+- Scope: <features/docs/testing included in this milestone>
+- Known limitations: <short list or "None recorded">
+- Security note: no secrets, credentials, or environment values are included in this release note
+```
+
+Keep release notes concise and evidence-focused. Link to existing documentation instead of copying
+configuration values, secret names with values, or large test logs into the release description.
+
+## Evidence capture
+
+Record this evidence for each release tag:
+
+| Evidence | Required value |
+| --- | --- |
+| Tag | `v0.1` through `v1.0` or documented patch tag |
+| Commit | Full SHA on `main` |
+| CI result | Green workflow **CI** run URL for that SHA |
+| Artifacts | Artifact names and run URL when artifacts are part of the milestone |
+| Reviewer note | Confirmation that release notes contain no secrets |
+| Exception note | Any deviation, such as patch tag reason or deferred deployment |
+
+Evidence can live in the university report, release issue, or a controlled operations note. It must
+not contain secret values, database exports, private keys, or copied production environment files.
+
+## Troubleshooting
+
+| Symptom | Action |
+| --- | --- |
+| CI is red for the intended commit | Fix the failure and wait for a green `main`; do not tag |
+| Local branch is not `main` | Switch to `main`, pull, and verify the target commit |
+| Tag name already exists locally | Inspect it with `git show --no-patch --decorate <tag>` before doing anything else |
+| Tag exists on origin at a different commit | Treat it as published; create a patch tag or document the correction path |
+| Release notes accidentally include sensitive data | Remove the notes immediately, rotate exposed secrets if values leaked, and record the incident |
+
 ## Rollback note
 
 Tags mark history; they do not deploy by themselves. To stop using a bad release:
@@ -127,20 +220,4 @@ Tags mark history; they do not deploy by themselves. To stop using a bad release
 4. Push tag to `origin`.
 5. Optionally publish a GitHub Release with notes.
 6. Record tag name + SHA + CI run URL for Sprint 17 evidence.
-7. Proceed to deploy only when ops readiness allows (Sprint 18 / item **716+**).
-
-## Related items
-
-| Item | Topic |
-| --- | --- |
-| **691** | Release artifact generation (JAR + dist) |
-| **692** | CI badge on README |
-| **693–694** | Fail-on-red / pass-on-green |
-| **695** | Branch protection recommendation |
-| **696** | This release tagging process |
-| **697** | [Deployment workflow placeholder](ci-cd.md#deployment-workflow-placeholder-item-697) |
-| **711** | Release tagging guide expansion (docs) |
-| **714** | Main not releasable unless CI passes |
-
-Automated documentation evidence: `ReleaseTaggingProcessDocumentationTests` (backend),
-`releaseTaggingProcess.ts` (frontend catalog).
+7. Proceed to deploy only when 

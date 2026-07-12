@@ -49,8 +49,7 @@ public interface ConsentRepository extends JpaRepository<ConsentRecord, UUID> {
                 .findFirst();
     }
 
-    default Optional<ConsentRecord> findLatestByType(
-            UUID customerId, ConsentType consentType) {
+    default Optional<ConsentRecord> findLatestByType(UUID customerId, ConsentType consentType) {
         return findFirstByCustomerIdAndConsentTypeOrderByCreatedAtDesc(customerId, consentType);
     }
 

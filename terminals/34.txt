@@ -1,0 +1,7 @@
+---
+pid: 3556
+cwd: "D:\Documents\IU\AgileApp"
+command: "cd D:\\Documents\\IU\\AgileApp\\backend; & \"D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd\" test -q 2>&1 | Select-Object -Last 50"
+started_at: 2026-07-08T10:51:05.910Z
+running_for_ms: 314987   
+---

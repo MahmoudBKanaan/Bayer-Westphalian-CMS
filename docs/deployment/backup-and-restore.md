@@ -49,7 +49,7 @@ production SQL outside migrations.
 | **Migration scripts** | `backend/src/main/resources/db/migration` (in Git — not a DB dump) |
 | **Environment / secrets** | Ops secret store only (`JWT_SECRET`, `DB_PASSWORD`, …) — **never** in Git ([secrets.md](secrets.md), item **689**) |
 
-Do **not** treat Git history as a data backup. Do **not** commit dump files containing real
+Do **not** treat Git history as a data backup. Do not treat Git history as a data backup. Do **not** commit dump files containing real
 customer or credential data.
 
 ## Local Development Backup (Docker Compose)

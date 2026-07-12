@@ -7,15 +7,15 @@ Management Platform.
 
 | Workflow | Path | Purpose |
 | --- | --- | --- |
-| **CI** | [`workflows/ci.yml`](workflows/ci.yml) | Continuous integration on `push` / `pull_request` to `main` and `dev` |
+| **CI** | [`workflows/ci.yml`](workflows/ci.yml) | Continuous integration on `push` / `pull_request` to `main` and `dev` (item **698** = PR) |
 | **Deploy (placeholder)** | [`workflows/deploy-placeholder.yml`](workflows/deploy-placeholder.yml) | Manual `workflow_dispatch` placeholder (item **697**); does **not** deploy |
 
 ### CI jobs
 
 | Job id | Item | Description |
 | --- | --- | --- |
-| `backend-build` | **678**, **691** | Java 21 / Maven `package` (skip tests); asserts JAR; uploads **`bwc-backend-jar`** |
-| `backend-test` | **679** | Java 21 / Maven full Surefire suite (`mvn test`) |
+| `backend-build` | **678**, **691**, **700** | Java 21 / Maven `package` (skip tests); asserts JAR; uploads **`bwc-backend-jar`** (pass = **700**) |
+| `backend-test` | **679**, **701** | Java 21 / Maven full Surefire suite (`mvn test`); pass = **701** |
 | `backend-integration-test` | **680** | Surefire filter `*IntegrationTests` (feasible: naming + Testcontainers) |
 | `frontend-install` | **681** | Node 22 / `npm ci` from lockfile; asserts `node_modules` |
 | `frontend-lint` | **682** | Node 22 / `npm ci` + `npm run lint` (ESLint) |
@@ -53,6 +53,14 @@ Automated structure checks (do not execute the pipeline):
 - `BranchProtectionRecommendationDocumentationTests` (item **695**)
 - `ReleaseTaggingProcessDocumentationTests` (item **696**)
 - `DeploymentWorkflowPlaceholderDocumentationTests` (item **697**)
+- `CiRunsOnPullRequestDocumentationTests` (item **698**)
+- `CiRunsOnMainBranchDocumentationTests` (item **699**)
+- `BackendBuildPassesDocumentationTests` (item **700**)
+- `BackendTestsPassDocumentationTests` (item **701**)
+- `PipelineFailsOnIntentionallyBrokenTestDocumentationTests` (item **706**)
+- `PipelinePassesOnCleanMainRuntimeDocumentationTests` (item **707**)
+- `CiCdDocumentationExpansionTests` (item **708**)
+- `ReleaseTaggingGuideDocumentationTests` (item **711**)
 - `frontend/src/features/ops/githubActionsWorkflow.ts`
 - `frontend/src/features/ops/branchProtectionRecommendation.ts`
 - `frontend/src/features/ops/releaseTaggingProcess.ts`
@@ -74,8 +82,36 @@ push — [branch-protection.md](../docs/deployment/branch-protection.md).
 
 **Release tagging (item **696**):** annotate KB versions (`v0.1`…`v1.0`) on green `main` only —
 [release-tagging.md](../docs/deployment/release-tagging.md).
+Item **711** expands the release tagging guide with roles, verification commands, release notes,
+evidence capture, and troubleshooting. Evidence: `ReleaseTaggingGuideDocumentationTests`.
 
 **Deploy placeholder (item **697**):** [`deploy-placeholder.yml`](workflows/deploy-placeholder.yml)
 is manual only and does not update production (Sprint 18 owns real deploy).
 
-Later Sprint 17 items: acceptance (**698+**), full CI/CD docs (**708**).
+**CI on pull request (item **698**):** `pull_request` to `main`/`dev` runs the full **CI** job
+matrix — [ci-cd.md](../docs/deployment/ci-cd.md#ci-runs-on-pull-request-item-698).
+
+**CI on main (item **699**):** `push` to **`main`** (and `dev`) runs the full **CI** job matrix —
+[ci-cd.md](../docs/deployment/ci-cd.md#ci-runs-on-main-branch-item-699).
+
+**Backend build passes (item **700**):** `backend-build` green requires Maven package + JAR assert —
+[ci-cd.md](../docs/deployment/ci-cd.md#backend-build-passes-item-700).
+
+**Backend tests pass (item **701**):** `backend-test` green requires `mvn -B test` without soft-fail —
+[ci-cd.md](../docs/deployment/ci-cd.md#backend-tests-pass-item-701).
+
+**Pipeline fails on intentionally broken test (item **706**):** run
+[`../scripts/verify-pipeline-fails-on-broken-test.ps1`](../scripts/verify-pipeline-fails-on-broken-test.ps1)
+to create a temporary failing Vitest probe, confirm `npm test` exits non-zero, and remove the probe.
+See [ci-cd.md](../docs/deployment/ci-cd.md#pipeline-fails-on-intentionally-broken-test-item-706).
+
+**Pipeline passes on clean main branch (item **707**):** run
+[`../scripts/verify-pipeline-passes-on-clean-main.ps1`](../scripts/verify-pipeline-passes-on-clean-main.ps1)
+from a clean `main` worktree to execute the local CI parity gates. See
+[ci-cd.md](../docs/deployment/ci-cd.md#pipeline-passes-on-clean-main-branch-item-707).
+
+**CI/CD documentation (item **708**):** [`docs/deployment/ci-cd.md`](../docs/deployment/ci-cd.md)
+is the operational index for CI jobs, triggers, artifacts, runtime evidence, local parity, security
+notes, and maintenance checks. Evidence: `CiCdDocumentationExpansionTests`.
+
+Later Sprint 17 items: none currently listed after release guide expansion (**711**).

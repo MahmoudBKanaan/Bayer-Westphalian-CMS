@@ -1,5 +1,7 @@
 # Environment Variable Template
 
+**Sprint 17 item 709** - Environment variable documentation.
+
 **Sprint 17 item 688** — Add environment variable template.
 
 The Bayer-Westphalian Campaign Management Platform is configured primarily through **environment
@@ -30,6 +32,37 @@ Real `.env` files must stay out of version control.
 | Item | Backend test | Frontend catalog |
 | --- | --- | --- |
 | **688** | `EnvironmentVariableTemplateDocumentationTests` | `environmentVariableTemplate.ts` |
+| **709** | `EnvironmentVariableDocumentationTests` | `ENVIRONMENT_VARIABLE_DOC_REQUIRED_MARKERS` / `environmentVariableDocDefinesRequiredMarkers` |
+
+## Classification
+
+| Class | Meaning | Examples | Handling |
+| --- | --- | --- | --- |
+| Required production variables | App cannot safely run in `prod` without these values | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `CORS_ALLOWED_ORIGINS` | Supply through deployment environment or secret manager before startup |
+| Secret variables | Values grant access or sign tokens | `DB_PASSWORD`, `JWT_SECRET`, `SMTP_PASSWORD`, `SMS_API_KEY`, `POSTGRES_PASSWORD` | Never commit real values; rotate through the secret manager |
+| Operational tuning | Non-secret runtime behavior | `CONTACT_MONTHLY_LIMIT`, `CONTACT_RETRY_LIMIT`, `REMINDER_PROCESSING_CRON` | Change via environment, document reason in release notes |
+| Frontend build/runtime | Public client configuration | `VITE_API_BASE_URL`, `VITE_APP_ENV` | Safe to expose, but must point at the intended API/environment |
+
+## Required production variables
+
+Production must provide at least these variables:
+
+| Variable | Required because |
+| --- | --- |
+| `DB_URL` | Selects the production database endpoint |
+| `DB_USERNAME` | Authenticates the application database user |
+| `DB_PASSWORD` | Authenticates the application database user; secret |
+| `JWT_SECRET` | Signs and verifies access/refresh tokens; secret, minimum strength enforced |
+| `CORS_ALLOWED_ORIGINS` | Restricts browser clients to approved HTTPS origins |
+
+Optional provider secrets such as `SMTP_PASSWORD` and `SMS_API_KEY` become required when the
+corresponding real provider mode is enabled.
+
+## Secret variables
+
+Secret variables are documented by name only. Store values in the deployment environment or a
+secret manager, not in Git, Docker images, CI YAML, screenshots, or exported reports. See
+[secrets.md](secrets.md) for rotation ownership and incident handling.
 
 ## Variable catalog
 
@@ -99,7 +132,55 @@ Real `.env` files must stay out of version control.
   `CORS_ALLOWED_ORIGINS` (https origins).
 - CI must not embed production secret **values** in workflow YAML (item **677+** security notes).
 
+## Validation and startup behavior
+
+Production validation is split across:
+
+- `EnvironmentVariableValidator` for required names such as `DB_URL`, `DB_USERNAME`,
+  `DB_PASSWORD`, `JWT_SECRET`, and `CORS_ALLOWED_ORIGINS`.
+- `SecretPresenceValidator` for minimum secret strength (`JWT_SECRET` and database password).
+- `ProductionEnvironmentPostProcessor` for invoking validation during production startup.
+- The CI production configuration step in [ci-cd.md](ci-cd.md), which statically checks templates,
+  validators, `application-prod.yml`, secrets docs, and the production checklist without loading
+  real secret values.
+
+Missing required production values should fail startup or produce a safe configuration error. The
+error must name the missing variable but must not print secret values.
+
+## Change management
+
+When adding, renaming, or removing an environment variable:
+
+1. Update `.env.example`, `backend/.env.example`, or `frontend/.env.example`.
+2. Update this guide's variable catalog, classification, and required production variables if
+   applicable.
+3. Update [secrets.md](secrets.md) if the variable is secret.
+4. Update [production-security-checklist.md](production-security-checklist.md) if production
+   operators must verify it.
+5. Update CI/static tests that lock the expected variable set.
+
+## Rotation notes
+
+- Rotate `JWT_SECRET` with a token/session impact plan because existing tokens may become invalid.
+- Rotate `DB_PASSWORD` together with database user credentials and deployment environment updates.
+- Rotate `SMTP_PASSWORD` and `SMS_API_KEY` in the provider console and the secret manager.
+- After rotation, verify production startup and provider connectivity without logging secret values.
+
+## Troubleshooting
+
+| Symptom | Likely variable area | First check |
+| --- | --- | --- |
+| Production startup fails fast | Required production variables | Confirm `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, `CORS_ALLOWED_ORIGINS` are present |
+| Login tokens fail validation | JWT settings | Check `JWT_SECRET`, `JWT_ISSUER`, access/refresh durations |
+| Browser calls blocked | CORS settings | Check `CORS_ALLOWED_ORIGINS` contains the deployed frontend origin |
+| Provider sends fail | Email/SMS provider settings | Check provider mode and matching secret/API key |
+| Frontend points to wrong API | Vite variables | Check `VITE_API_BASE_URL` for the deployed environment |
+
 ## Related backlog
+
+Additional item: **709** — this environment variable documentation. Item **710** expands the
+[secrets documentation](secrets.md).
+Evidence tests: `EnvironmentVariableDocumentationTests`.
 
 | Item | Topic |
 | --- | --- |
@@ -113,4 +194,8 @@ Real `.env` files must stay out of version control.
 | **695** | Branch protection recommendation — [branch-protection.md](branch-protection.md) |
 | **696** | Release tagging process — [release-tagging.md](release-tagging.md) |
 | **697** | Deployment workflow placeholder — [ci-cd.md](ci-cd.md#deployment-workflow-placeholder-item-697) |
+| **698** | CI runs on pull request — [ci-cd.md](ci-cd.md#ci-runs-on-pull-request-item-698) |
+| **699** | CI runs on main branch — [ci-cd.md](ci-cd.md#ci-runs-on-main-branch-item-699) |
+| **700** | Backend build passes — [ci-cd.md](ci-cd.md#backend-build-passes-item-700) |
+| **701** | Backend tests pass — [ci-cd.md](ci-cd.md#backend-tests-pass-item-701) |
 | **542–543** / **665** | Runtime env / secret validation |

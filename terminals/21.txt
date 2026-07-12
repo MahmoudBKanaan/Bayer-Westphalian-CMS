@@ -1,0 +1,8 @@
+---
+pid: 13128
+cwd: "D:\Documents\IU\AgileApp"
+command: "$max = 12; for ($i=1; $i -le $max; $i++) { try { $r = Invoke-RestMethod -Uri \"http://localhost:8080/api/health\" -TimeoutSec 3; Write-Output \"UP after ${i}s: $($r | ConvertTo-Json -Compress)\"; exit 0 } catch { Start-Sleep -Seconds 5 } }; Write-Output \"STILL_DOWN\"; exit 1"
+started_at: 2026-07-08T09:56:09.317Z
+running_for_ms: 1095000  
+---
+UP after 7s: {"status":"UP","service":"bayer-westphalian-campaign-platform","timestamp":"2026-07-08T09:56:58.941577700Z"}

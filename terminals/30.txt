@@ -1,0 +1,21 @@
+---
+pid: 20548
+cwd: "D:\Documents\IU\AgileApp"
+command: "cd \"D:\\Documents\\IU\\AgileApp\\backend\"; ..\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd test \"-Dtest=PaymentRecordControllerTests,PaymentRecordDtoTests,JacksonConfigurationTests,ProductOwnershipControllerTests,PaymentRecordCanBeCreatedTests,PaymentRecordCanBeMarkedPaidTests\" 2>&1 | Select-String -Pattern \"Tests run:|Failures:|Errors:|BUILD\""
+started_at: 2026-07-08T10:21:21.375Z
+running_for_ms: 4755019  
+---
+
+[INFO] Building campaign 0.1.0-SNAPSHOT
+  symbol:   method customizers(org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer)
+  location: class org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+  symbol:   class StandaloneMockMvcBuilder
+  location: class org.springframework.test.web.servlet.setup.MockMvcBuilders
+[INFO] BUILD FAILURE
+[ERROR]   symbol:   method 
+customizers(org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer)
+[ERROR]   location: class org.springframework.http.converter.json.Jackson2ObjectMapperBuilder
+[ERROR]   symbol:   class StandaloneMockMvcBuilder
+[ERROR]   location: class org.springframework.test.web.servlet.setup.MockMvcBuilders
+
+

@@ -1,0 +1,20 @@
+---
+pid: 14768
+cwd: "D:\Documents\IU\AgileApp"
+command: "cd \"D:\\Documents\\IU\\AgileApp\\backend\"; ..\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd test \"-Dtest=PaymentRecordCanBeCreatedTests,PaymentRecordCanBeMarkedPaidTests\" 2>&1 | Select-String -Pattern \"Tests run:|Failures:|Errors:|BUILD\""
+started_at: 2026-07-08T10:24:03.901Z
+running_for_ms: 4594989  
+---
+
+[INFO] Building campaign 0.1.0-SNAPSHOT
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of 
+the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: 
+https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.334 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordCanBeCreatedTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.339 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordCanBeMarkedPaidTests
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+

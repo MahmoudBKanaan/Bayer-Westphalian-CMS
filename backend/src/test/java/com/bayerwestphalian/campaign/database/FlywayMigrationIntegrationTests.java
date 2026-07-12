@@ -114,9 +114,9 @@ class FlywayMigrationIntegrationTests {
         MigrateResult migrationResult = migrate();
 
         assertThat(migrationResult.success).isTrue();
-        assertThat(migrationResult.migrationsExecuted).isEqualTo(18);
+        assertThat(migrationResult.migrationsExecuted).isEqualTo(25);
         assertThat(migrationResult.schemaName).isEqualTo(TEST_SCHEMA);
-        assertThat(migrationResult.targetSchemaVersion).isEqualTo("18");
+        assertThat(migrationResult.targetSchemaVersion).isEqualTo("25");
 
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
                 Statement statement = connection.createStatement()) {
@@ -131,8 +131,8 @@ class FlywayMigrationIntegrationTests {
                                     + ".flyway_schema_history"
                                     + " where type = 'SQL'")) {
                 assertThat(resultSet.next()).isTrue();
-                assertThat(resultSet.getInt("migration_count")).isEqualTo(18);
-                assertThat(resultSet.getInt("latest_version")).isEqualTo(18);
+                assertThat(resultSet.getInt("migration_count")).isEqualTo(25);
+                assertThat(resultSet.getInt("latest_version")).isEqualTo(25);
                 assertThat(resultSet.getInt("failed_count")).isZero();
                 assertThat(resultSet.getInt("repeatable_count")).isZero();
             }
@@ -157,7 +157,7 @@ class FlywayMigrationIntegrationTests {
                                     + ".users"
                                     + " where email like '%@bayer-westphalian.test'")) {
                 assertThat(resultSet.next()).isTrue();
-                assertThat(resultSet.getInt("seeded_users")).isEqualTo(6);
+                assertThat(resultSet.getInt("seeded_users")).isEqualTo(10);
             }
         }
     }
@@ -1507,45 +1507,45 @@ class FlywayMigrationIntegrationTests {
                                     + TEST_SCHEMA
                                     + ".users where email like '%@bayer-westphalian.test'")) {
                 assertThat(resultSet.next()).isTrue();
-                assertThat(resultSet.getInt("seeded_user_count")).isEqualTo(6);
-                assertThat(resultSet.getInt("active_count")).isEqualTo(6);
-                assertThat(resultSet.getInt("bcrypt_hash_count")).isEqualTo(6);
+                assertThat(resultSet.getInt("seeded_user_count")).isEqualTo(10);
+                assertThat(resultSet.getInt("active_count")).isEqualTo(10);
+                assertThat(resultSet.getInt("bcrypt_hash_count")).isEqualTo(10);
             }
 
             assertSeedUserRole(
                     statement,
                     "admin@bayer-westphalian.test",
-                    "MVP Admin",
+                    "Test Admin",
                     "ADMIN",
                     "admin@bayer-westphalian.test");
             assertSeedUserRole(
                     statement,
                     "campaign.manager@bayer-westphalian.test",
-                    "MVP Campaign Manager",
+                    "Test Campaign Manager",
                     "CAMPAIGN_MANAGER",
                     "admin@bayer-westphalian.test");
             assertSeedUserRole(
                     statement,
                     "bi.analyst@bayer-westphalian.test",
-                    "MVP BI Analyst",
+                    "Test BI Analyst",
                     "BI_ANALYST",
                     "admin@bayer-westphalian.test");
             assertSeedUserRole(
                     statement,
                     "product.manager@bayer-westphalian.test",
-                    "MVP Product Manager",
+                    "Test Product Manager",
                     "PRODUCT_MANAGER",
                     "admin@bayer-westphalian.test");
             assertSeedUserRole(
                     statement,
                     "compliance.officer@bayer-westphalian.test",
-                    "MVP Compliance Officer",
+                    "Test Compliance Officer",
                     "COMPLIANCE_OFFICER",
                     "admin@bayer-westphalian.test");
             assertSeedUserRole(
                     statement,
                     "customer.service@bayer-westphalian.test",
-                    "MVP Customer Service Agent",
+                    "Test Customer Service Agent",
                     "CUSTOMER_SERVICE_AGENT",
                     "admin@bayer-westphalian.test");
         }
@@ -1584,8 +1584,8 @@ class FlywayMigrationIntegrationTests {
                 assertThat(resultSet.getString("status")).isEqualTo("APPROVED");
                 assertThat(resultSet.getString("channel")).isEqualTo("EMAIL");
                 assertThat(resultSet.getString("eligibility_status")).isEqualTo("ELIGIBLE");
-                assertThat(resultSet.getInt("audience_size")).isEqualTo(3);
-                assertThat(resultSet.getInt("eligible_count")).isEqualTo(1);
+                assertThat(resultSet.getInt("audience_size")).isEqualTo(20);
+                assertThat(resultSet.getInt("eligible_count")).isEqualTo(9);
             }
 
             try (ResultSet resultSet =
@@ -4307,8 +4307,8 @@ class FlywayMigrationIntegrationTests {
                                 + TEST_SCHEMA
                                 + ".flyway_schema_history")) {
             assertThat(resultSet.next()).isTrue();
-            assertThat(resultSet.getInt("versioned_count")).isEqualTo(18);
-            assertThat(resultSet.getInt("latest_version")).isEqualTo(18);
+            assertThat(resultSet.getInt("versioned_count")).isEqualTo(25);
+            assertThat(resultSet.getInt("latest_version")).isEqualTo(25);
             assertThat(resultSet.getInt("demo_repeatable_count")).isEqualTo(1);
             assertThat(resultSet.getInt("failed_count")).isZero();
         }
@@ -4337,7 +4337,7 @@ class FlywayMigrationIntegrationTests {
                                 + " as demo_audit_count")) {
             assertThat(resultSet.next()).isTrue();
             assertThat(resultSet.getInt("role_count")).isEqualTo(10);
-            assertThat(resultSet.getInt("seed_user_count")).isEqualTo(6);
+            assertThat(resultSet.getInt("seed_user_count")).isEqualTo(10);
             assertThat(resultSet.getInt("demo_customer_count")).isEqualTo(2);
             assertThat(resultSet.getInt("demo_campaign_count")).isEqualTo(1);
             assertThat(resultSet.getInt("demo_audit_count")).isEqualTo(1);

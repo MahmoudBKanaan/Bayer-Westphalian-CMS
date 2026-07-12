@@ -1,0 +1,12 @@
+---
+pid: 20764
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; cd D:\\Documents\\IU\\AgileApp\\backend; mvn -q compile test-compile -DskipTests 2>&1"
+started_at: 2026-07-08T08:40:49.615Z
+running_for_ms: 484993   
+---
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: D:\Documents\IU\AgileApp\.tools\apache-maven-3.9.11
+Java version: 21.0.11, vendor: Eclipse Adoptium, runtime: C:\Users\mbk73\.jdks\temurin-21
+Default locale: en_US, platform encoding: UTF-8
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"

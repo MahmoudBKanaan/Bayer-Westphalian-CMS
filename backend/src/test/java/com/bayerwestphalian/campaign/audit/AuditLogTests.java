@@ -4,10 +4,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 class AuditLogTests {
@@ -27,6 +35,42 @@ class AuditLogTests {
         assertColumn("newValue", "new_value", true, true, 255);
         assertColumn("ipAddress", "ip_address", true, true, 100);
         assertColumn("createdAt", "created_at", false, false, 255);
+    }
+
+    @Test
+    @DisplayName("515 Implement AuditLog entity")
+    void implementsKbAuditLogEntityContract() throws Exception {
+        AuditLog auditLog =
+                AuditLog.recordChange(
+                        ACTOR_ID,
+                        "UPDATE_CONSENT",
+                        "consent_records",
+                        USER_ID,
+                        Map.of("status", "GRANTED"),
+                        Map.of("status", "WITHDRAWN"));
+
+        assertThat(AuditLog.class.getDeclaredField("id").isAnnotationPresent(Id.class)).isTrue();
+        assertThat(
+                        AuditLog.class
+                                .getDeclaredMethod("onCreate")
+                                .isAnnotationPresent(PrePersist.class))
+                .isTrue();
+        assertJsonbColumn("oldValue");
+        assertJsonbColumn("newValue");
+        assertThat(auditLog.getActorUserId()).isEqualTo(ACTOR_ID);
+        assertThat(auditLog.getAction()).isEqualTo("UPDATE_CONSENT");
+        assertThat(auditLog.getEntityType()).isEqualTo("consent_records");
+        assertThat(auditLog.getEntityId()).isEqualTo(USER_ID);
+        assertThat(auditLog.getOldValue()).containsEntry("status", "GRANTED");
+        assertThat(auditLog.getNewValue()).containsEntry("status", "WITHDRAWN");
+        List<String> publicMutators =
+                Arrays.stream(AuditLog.class.getMethods())
+                        .filter(method -> method.getDeclaringClass().equals(AuditLog.class))
+                        .filter(method -> Modifier.isPublic(method.getModifiers()))
+                        .map(Method::getName)
+                        .filter(name -> name.startsWith("set"))
+                        .toList();
+        assertThat(publicMutators).isEmpty();
     }
 
     @Test
@@ -100,5 +144,14 @@ class AuditLogTests {
         assertThat(column.nullable()).isEqualTo(nullable);
         assertThat(column.updatable()).isEqualTo(updatable);
         assertThat(column.length()).isEqualTo(length);
+    }
+
+    private static void assertJsonbColumn(String fieldName) throws Exception {
+        JdbcTypeCode jdbcTypeCode =
+                AuditLog.class.getDeclaredField(fieldName).getAnnotation(JdbcTypeCode.class);
+        Column column = AuditLog.class.getDeclaredField(fieldName).getAnnotation(Column.class);
+
+        assertThat(jdbcTypeCode.value()).isEqualTo(SqlTypes.JSON);
+        assertThat(column.columnDefinition()).isEqualTo("jsonb");
     }
 }

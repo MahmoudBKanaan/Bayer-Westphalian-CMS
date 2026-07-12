@@ -31,8 +31,7 @@ public class Product extends SoftDeletableEntity {
     @Column(name = "description", columnDefinition = "text")
     private String description;
 
-    @DecimalMin("0.00") @Digits(integer = 10, fraction = 2)
-    @Column(name = "price", precision = 12, scale = 2)
+    @DecimalMin("0.00") @Digits(integer = 10, fraction = 2) @Column(name = "price", precision = 12, scale = 2)
     private BigDecimal price;
 
     @Positive @Column(name = "duration_months")
@@ -81,6 +80,10 @@ public class Product extends SoftDeletableEntity {
 
     public String getExpirationPolicy() {
         return expirationPolicy;
+    }
+
+    public boolean getActive() {
+        return active;
     }
 
     public boolean isActive() {

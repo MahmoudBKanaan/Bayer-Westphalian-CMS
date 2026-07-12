@@ -45,7 +45,7 @@ Sprint 16 critical item **665** (*Missing secrets are detected*):
 `MissingSecretsAreDetectedTests` (companion `SecretPresenceValidatorTests`).
 
 Safe failure rule: configuration errors may name missing keys, but must not print configured secret
-values.
+values. Validators must not print configured secret values.
 
 ## HTTPS And Transport Security
 

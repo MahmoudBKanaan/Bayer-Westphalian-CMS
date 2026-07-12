@@ -97,7 +97,7 @@ class DockerBackendImageBuildDocumentationTests {
             String yaml = Files.readString(CI_WORKFLOW, StandardCharsets.UTF_8);
 
             int jobIndex = indexOfJob(yaml, "docker-backend:");
-            assertThat(jobIndex).isNonNegative();
+            assertThat(jobIndex).isGreaterThanOrEqualTo(0);
             int nextJobIndex = yaml.indexOf("\n  docker-frontend:");
             String jobBlock =
                     nextJobIndex > jobIndex

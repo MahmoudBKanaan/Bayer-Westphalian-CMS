@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bayerwestphalian.campaign.audit.AuditService;
+import com.bayerwestphalian.campaign.auth.AuthorizationExpressions;
 import com.bayerwestphalian.campaign.auth.PasswordHashingService;
 import com.bayerwestphalian.campaign.auth.method.AdminOnly;
 import com.bayerwestphalian.campaign.common.domain.BaseEntity;
@@ -44,6 +45,8 @@ class UserServiceTests {
 
     @Mock private PasswordHashingService passwordHashingService;
 
+    @Mock private AuthorizationExpressions authorizationExpressions;
+
     @Mock private AuditService auditService;
 
     @InjectMocks private UserService userService;
@@ -62,6 +65,7 @@ class UserServiceTests {
     @Test
     void createsUserWithBCryptHashAndRejectsDuplicateEmail() throws Exception {
         User savedUser = user();
+        when(authorizationExpressions.currentUserId()).thenReturn(ADMIN_ID);
         when(userRepository.existsByEmailIgnoreCase(EMAIL)).thenReturn(false);
         when(passwordHashingService.hash("StrongPassword!2026")).thenReturn("$2a$10$newhash");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
@@ -77,12 +81,18 @@ class UserServiceTests {
         assertThat(userCaptor.getValue().getPasswordHash()).isEqualTo("$2a$10$newhash");
         assertThat(userCaptor.getValue().getPasswordHash()).isNotEqualTo("StrongPassword!2026");
         assertThat(view.email()).isEqualTo(EMAIL);
+        // Item 520: successful create logs CREATE on users with Admin actor (no secrets).
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> payloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
-                .logCreate(
-                        eq((UUID) null),
-                        eq("users"),
-                        eq(USER_ID),
-                        eq(Map.of("email", EMAIL, "fullName", "Advisor User", "status", "ACTIVE")));
+                .logCreate(eq(ADMIN_ID), eq("users"), eq(USER_ID), payloadCaptor.capture());
+        assertThat(payloadCaptor.getValue())
+                .containsEntry("id", USER_ID.toString())
+                .containsEntry("email", EMAIL)
+                .containsEntry("fullName", "Advisor User")
+                .containsEntry("status", "ACTIVE")
+                .doesNotContainKey("password")
+                .doesNotContainKey("passwordHash");
 
         when(userRepository.existsByEmailIgnoreCase(EMAIL)).thenReturn(true);
 
@@ -136,6 +146,7 @@ class UserServiceTests {
     @Test
     void disablesUser() throws Exception {
         User user = user();
+        when(authorizationExpressions.currentUserId()).thenReturn(ADMIN_ID);
         when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
         when(userRepository.save(user)).thenReturn(user);
         when(userRoleRepository.findByIdUserId(USER_ID)).thenReturn(List.of());
@@ -144,12 +155,38 @@ class UserServiceTests {
 
         assertThat(view.status()).isEqualTo(UserStatus.DISABLED);
         verify(userRepository).save(user);
+        // Item 522: DISABLE_USER with Admin actor and identity + status transition (no secrets).
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> oldCaptor = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> newCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
-                .logUserDisable(
-                        eq((UUID) null),
-                        eq(USER_ID),
-                        eq(Map.of("status", "ACTIVE")),
-                        eq(Map.of("status", "DISABLED")));
+                .logUserDisable(eq(ADMIN_ID), eq(USER_ID), oldCaptor.capture(), newCaptor.capture());
+        assertThat(oldCaptor.getValue())
+                .containsEntry("id", USER_ID.toString())
+                .containsEntry("email", EMAIL)
+                .containsEntry("fullName", "Advisor User")
+                .containsEntry("status", "ACTIVE")
+                .doesNotContainKey("passwordHash");
+        assertThat(newCaptor.getValue())
+                .containsEntry("status", "DISABLED")
+                .containsEntry("email", EMAIL)
+                .doesNotContainKey("passwordHash");
+    }
+
+    @Test
+    void doesNotReAuditAlreadyDisabledUser() throws Exception {
+        User user = user();
+        user.disable();
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(userRoleRepository.findByIdUserId(USER_ID)).thenReturn(List.of());
+
+        UserView view = userService.disableUser(USER_ID);
+
+        assertThat(view.status()).isEqualTo(UserStatus.DISABLED);
+        verify(userRepository, never()).save(any(User.class));
+        verify(auditService, never())
+                .logUserDisable(any(UUID.class), any(UUID.class), any(Map.class), any(Map.class));
     }
 
     @Test
@@ -177,6 +214,7 @@ class UserServiceTests {
         when(userRepository.findById(ADMIN_ID)).thenReturn(Optional.of(assignedBy));
         when(roleRepository.findByName(SystemRoleName.ADMIN)).thenReturn(Optional.of(role));
         when(userRoleRepository.existsById(new UserRoleId(USER_ID, ROLE_ID))).thenReturn(false);
+        when(userRoleRepository.findByIdUserId(USER_ID)).thenReturn(List.of());
 
         UserView view = userService.assignRole(USER_ID, SystemRoleName.ADMIN, ADMIN_ID);
 
@@ -186,18 +224,23 @@ class UserServiceTests {
         assertThat(userRoleCaptor.getValue().getRole()).isSameAs(role);
         assertThat(userRoleCaptor.getValue().getAssignedBy()).isSameAs(assignedBy);
         assertThat(view.email()).isEqualTo(EMAIL);
+        // Item 521: role change uses logRoleChange with before/after role sets.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> oldCaptor = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> newCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
-                .logRoleAssignment(
-                        eq(ADMIN_ID),
-                        eq(USER_ID),
-                        eq(
-                                Map.of(
-                                        "email",
-                                        EMAIL,
-                                        "roleName",
-                                        "ADMIN",
-                                        "roleId",
-                                        ROLE_ID.toString())));
+                .logRoleChange(eq(ADMIN_ID), eq(USER_ID), oldCaptor.capture(), newCaptor.capture());
+        assertThat(oldCaptor.getValue())
+                .containsEntry("email", EMAIL)
+                .containsEntry("roles", List.of());
+        assertThat(newCaptor.getValue())
+                .containsEntry("email", EMAIL)
+                .containsEntry("roles", List.of("ADMIN"))
+                .containsEntry("assignedRole", "ADMIN")
+                .containsEntry("roleName", "ADMIN")
+                .containsEntry("roleId", ROLE_ID.toString())
+                .containsEntry("assignedByUserId", ADMIN_ID.toString());
     }
 
     @Test
@@ -211,6 +254,8 @@ class UserServiceTests {
         userService.assignRole(USER_ID, SystemRoleName.ADMIN, null);
 
         verify(userRoleRepository, never()).save(any(UserRole.class));
+        verify(auditService, never())
+                .logRoleChange(any(UUID.class), any(UUID.class), any(Map.class), any(Map.class));
         verify(auditService, never())
                 .logRoleAssignment(any(UUID.class), any(UUID.class), any(Map.class));
     }

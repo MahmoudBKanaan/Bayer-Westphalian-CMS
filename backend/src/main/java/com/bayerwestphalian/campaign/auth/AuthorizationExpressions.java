@@ -40,6 +40,14 @@ public class AuthorizationExpressions {
         return hasRole(SystemRoleName.ADMIN.name());
     }
 
+    /**
+     * Admin-only System Settings screen and API (KB item 534): contact limits, reminder-related
+     * exclusion period, send retry limit.
+     */
+    public boolean canManageSystemSettings() {
+        return hasRole(SystemRoleName.ADMIN.name());
+    }
+
     public boolean canManageRoles() {
         return hasRole(SystemRoleName.ADMIN.name());
     }
@@ -48,12 +56,85 @@ public class AuthorizationExpressions {
         return hasAnyRole(SystemRoleName.ADMIN.name(), SystemRoleName.PRODUCT_MANAGER.name());
     }
 
+    public boolean canManageProductOwnership() {
+        return canManageProducts();
+    }
+
+    public boolean canReadCustomers() {
+        return hasAnyRole(
+                SystemRoleName.ADMIN.name(),
+                SystemRoleName.CAMPAIGN_MANAGER.name(),
+                SystemRoleName.BI_ANALYST.name(),
+                SystemRoleName.COMPLIANCE_OFFICER.name(),
+                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
+                SystemRoleName.SALES_AGENT.name(),
+                SystemRoleName.PRODUCT_MANAGER.name());
+    }
+
     public boolean canManageCampaigns() {
         return hasAnyRole(SystemRoleName.ADMIN.name(), SystemRoleName.CAMPAIGN_MANAGER.name());
     }
 
+    /**
+     * Read access for campaign list/details (KB campaign read matrix): Admin, Campaign Manager, BI,
+     * Product Manager, Compliance, agents, executive, auditor.
+     */
+    public boolean canReadCampaigns() {
+        return hasAnyRole(
+                SystemRoleName.ADMIN.name(),
+                SystemRoleName.CAMPAIGN_MANAGER.name(),
+                SystemRoleName.BI_ANALYST.name(),
+                SystemRoleName.PRODUCT_MANAGER.name(),
+                SystemRoleName.COMPLIANCE_OFFICER.name(),
+                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
+                SystemRoleName.SALES_AGENT.name(),
+                SystemRoleName.EXECUTIVE_VIEWER.name(),
+                SystemRoleName.SYSTEM_AUDITOR.name());
+    }
+
+    /**
+     * Segment edit/delete/manage criteria (KB item 200): only {@link SystemRoleName#ADMIN} and
+     * {@link SystemRoleName#CAMPAIGN_MANAGER}. {@link SystemRoleName#BI_ANALYST} cannot edit unless
+     * also granted one of those manage roles (dual-role accounts).
+     */
+    public boolean canManageSegments() {
+        return hasAnyRole(SystemRoleName.ADMIN.name(), SystemRoleName.CAMPAIGN_MANAGER.name());
+    }
+
+    /**
+     * KB segment creation permissions (FR-077, role matrix, Campaign Manager “define segments”,
+     * item 201 — Campaign Manager can create reusable segment): only {@link SystemRoleName#ADMIN}
+     * and {@link SystemRoleName#CAMPAIGN_MANAGER} may create and save reusable audience segments.
+     * Kept separate from {@link #canManageSegments()} so create can diverge later (e.g. optional BI
+     * analytical drafts without full manage — item 200). {@link SystemRoleName#BI_ANALYST} alone
+     * cannot create/edit.
+     */
+    public boolean canCreateSegments() {
+        return hasAnyRole(SystemRoleName.ADMIN.name(), SystemRoleName.CAMPAIGN_MANAGER.name());
+    }
+
+    public boolean canReadSegments() {
+        return hasAnyRole(
+                SystemRoleName.ADMIN.name(),
+                SystemRoleName.CAMPAIGN_MANAGER.name(),
+                SystemRoleName.BI_ANALYST.name(),
+                SystemRoleName.COMPLIANCE_OFFICER.name());
+    }
+
+    public boolean canPreviewSegments() {
+        return hasAnyRole(
+                SystemRoleName.ADMIN.name(),
+                SystemRoleName.CAMPAIGN_MANAGER.name(),
+                SystemRoleName.BI_ANALYST.name());
+    }
+
     public boolean canApproveCampaigns() {
         return hasAnyRole(SystemRoleName.ADMIN.name(), SystemRoleName.COMPLIANCE_OFFICER.name());
+    }
+
+    /** Campaign compliance review decisions: approve, reject, and review notes. */
+    public boolean canReviewCampaigns() {
+        return canApproveCampaigns();
     }
 
     public boolean canViewAuditLogs() {
@@ -63,11 +144,20 @@ public class AuthorizationExpressions {
                 SystemRoleName.SYSTEM_AUDITOR.name());
     }
 
+    /**
+     * Campaign report export / history access (KB FR-109–FR-110 / item 458 / Sprint 16 critical item
+     * 663).
+     *
+     * <p>Matches {@code SecurityConfiguration} {@code /api/reports/**} and report service
+     * {@code PreAuthorize}: Admin, BI Analyst, Campaign Manager, Marketing Analyst, Executive
+     * Viewer. Unauthorized roles must not export restricted campaign reports.
+     */
     public boolean canViewReports() {
         return hasAnyRole(
                 SystemRoleName.ADMIN.name(),
                 SystemRoleName.BI_ANALYST.name(),
                 SystemRoleName.CAMPAIGN_MANAGER.name(),
+                SystemRoleName.MARKETING_ANALYST.name(),
                 SystemRoleName.EXECUTIVE_VIEWER.name());
     }
 

@@ -1,0 +1,14 @@
+---
+pid: 17576
+cwd: "D:\Documents\IU\AgileApp"
+command: "Start-Sleep -Seconds 60; Get-Process -Id 3556 -ErrorAction SilentlyContinue | Select-Object Id; if (Test-Path \"D:\\Documents\\IU\\AgileApp\\backend\\target\\surefire-reports\") { (Get-ChildItem \"D:\\Documents\\IU\\AgileApp\\backend\\target\\surefire-reports\\*.txt\").Count }"
+started_at: 2026-07-08T10:54:39.540Z
+running_for_ms: 100001   
+---
+
+  Id
+  --
+3556
+128
+
+

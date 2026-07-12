@@ -1,6 +1,7 @@
 package com.bayerwestphalian.campaign.customer;
 
 import com.bayerwestphalian.campaign.audit.AuditService;
+import com.bayerwestphalian.campaign.auth.AuthorizationExpressions;
 import com.bayerwestphalian.campaign.common.api.PageResponse;
 import com.bayerwestphalian.campaign.common.exception.ResourceNotFoundException;
 import com.bayerwestphalian.campaign.common.exception.ValidationException;
@@ -19,17 +20,32 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+/**
+ * Customer / prospect CRM service (KB E07 / FR-010–FR-020).
+ *
+ * <p>Sensitive mutations write immutable {@code audit_logs} rows via {@link AuditService}. Item 523
+ * requires every successful soft delete to leave a {@code DELETE} entry on entity type {@code
+ * customers} with the acting Admin as actor and a before/after payload (including {@code deleted}).
+ */
 @Service
 public class CustomerService {
+
+    /** KB audit entity type for customer/prospect profiles. */
+    public static final String AUDIT_ENTITY_TYPE = "customers";
 
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$");
     private static final Pattern PHONE_PATTERN = Pattern.compile("^\\+?[0-9 ()-]{7,50}$");
 
     private final CustomerRepository customerRepository;
+    private final AuthorizationExpressions authorizationExpressions;
     private final AuditService auditService;
 
-    public CustomerService(CustomerRepository customerRepository, AuditService auditService) {
+    public CustomerService(
+            CustomerRepository customerRepository,
+            AuthorizationExpressions authorizationExpressions,
+            AuditService auditService) {
         this.customerRepository = customerRepository;
+        this.authorizationExpressions = authorizationExpressions;
         this.auditService = auditService;
     }
 
@@ -40,8 +56,21 @@ public class CustomerService {
 
         Customer customer = createCustomerEntity(command);
         Customer savedCustomer = customerRepository.save(customer);
+        UUID actorUserId = currentActorUserId();
         auditService.logCreate(
-                null, "customers", savedCustomer.getId(), customerAuditPayload(savedCustomer));
+                actorUserId,
+                AUDIT_ENTITY_TYPE,
+                savedCustomer.getId(),
+                customerAuditPayload(savedCustomer));
+
+        // Item 526: initial do-not-contact=true is a contactability change (false → true).
+        if (savedCustomer.isDoNotContact()) {
+            auditService.logDoNotContactUpdate(
+                    actorUserId,
+                    savedCustomer.getId(),
+                    doNotContactAuditPayload(savedCustomer, false),
+                    doNotContactAuditPayload(savedCustomer, true));
+        }
 
         return CustomerView.from(savedCustomer);
     }
@@ -76,6 +105,14 @@ public class CustomerService {
                 importedCustomers.size(), failedCount, importedCustomers, errors);
     }
 
+    /**
+     * Updates a customer/prospect profile (FR-012).
+     *
+     * <p>Item 526 / BR-001 / COMP-003: when {@code doNotContact} changes, writes a dedicated
+     * {@code UPDATE_DO_NOT_CONTACT} audit row on entity type {@code customers} with the acting
+     * principal and before/after flags (in addition to the general profile {@code UPDATE} row).
+     * Unchanged DNC preference does not emit a second DNC audit entry.
+     */
     @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'COMPLIANCE_OFFICER')")
     @Transactional
     public CustomerView updateCustomer(UUID customerId, UpdateCustomerCommand command) {
@@ -103,54 +140,58 @@ public class CustomerService {
         customer.recordSource(normalize(command.source()));
         Customer savedCustomer = customerRepository.save(customer);
         Map<String, ?> newValue = customerAuditPayload(savedCustomer);
+        UUID actorUserId = currentActorUserId();
         auditService.logUpdate(
-                null,
-                "customers",
-                savedCustomer.getId(),
-                oldValue,
-                newValue);
+                actorUserId, AUDIT_ENTITY_TYPE, savedCustomer.getId(), oldValue, newValue);
         if (oldDoNotContact != savedCustomer.isDoNotContact()) {
+            // Item 526: dedicated do-not-contact change trail (BR-001 overrides all marketing).
             auditService.logDoNotContactUpdate(
-                    null,
+                    actorUserId,
                     savedCustomer.getId(),
-                    doNotContactAuditPayload(oldDoNotContact),
-                    doNotContactAuditPayload(savedCustomer.isDoNotContact()));
+                    doNotContactAuditPayload(savedCustomer, oldDoNotContact),
+                    doNotContactAuditPayload(savedCustomer, savedCustomer.isDoNotContact()));
         }
 
         return CustomerView.from(savedCustomer);
     }
 
+    /**
+     * Soft-deletes a customer/prospect (FR-013). Rows remain in the database with {@code
+     * deletedAt} set; permanent deletion is not part of the MVP.
+     *
+     * <p>Item 523 / SEC-012: successful soft delete writes a {@code DELETE} audit row on entity
+     * type {@code customers} with the Admin actor and before/after payloads ({@code deleted:
+     * false → true}). Already-deleted customers are not found and produce no audit entry.
+     */
     @PreAuthorize("@authz.hasRole('ADMIN')")
     @Transactional
     public CustomerView softDeleteCustomer(UUID customerId) {
         validateCustomerId(customerId);
         Customer customer = findCustomer(customerId);
-        Map<String, ?> oldValue = customerAuditPayload(customer);
+        Map<String, Object> oldValue = customerDeletionAuditPayload(customer);
 
         customer.markDeleted();
         Customer savedCustomer = customerRepository.save(customer);
+
+        // Item 523: log customer deletion (soft delete) with actor and deleted flag transition.
         auditService.logDelete(
-                null,
-                "customers",
+                currentActorUserId(),
+                AUDIT_ENTITY_TYPE,
                 savedCustomer.getId(),
                 oldValue,
-                customerAuditPayload(savedCustomer));
+                customerDeletionAuditPayload(savedCustomer));
 
         return CustomerView.from(savedCustomer);
     }
 
-    @PreAuthorize(
-            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER', 'BI_ANALYST', 'COMPLIANCE_OFFICER', "
-                    + "'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
+    @PreAuthorize("@authz.canReadCustomers()")
     @Transactional(readOnly = true)
     public CustomerView findById(UUID customerId) {
         validateCustomerId(customerId);
         return CustomerView.from(findCustomer(customerId));
     }
 
-    @PreAuthorize(
-            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER', 'BI_ANALYST', 'COMPLIANCE_OFFICER', "
-                    + "'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
+    @PreAuthorize("@authz.canReadCustomers()")
     @Transactional(readOnly = true)
     public List<CustomerView> searchCustomers(CustomerSearchCriteria criteria) {
         CustomerSearchCriteria normalized = normalize(criteria);
@@ -162,9 +203,7 @@ public class CustomerService {
                 .toList();
     }
 
-    @PreAuthorize(
-            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER', 'BI_ANALYST', 'COMPLIANCE_OFFICER', "
-                    + "'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
+    @PreAuthorize("@authz.canReadCustomers()")
     @Transactional(readOnly = true)
     public PageResponse<CustomerView> searchCustomers(
             CustomerSearchCriteria criteria, int page, int size) {
@@ -644,8 +683,11 @@ public class CustomerService {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
 
-    private Map<String, ?> customerAuditPayload(Customer customer) {
+    private Map<String, Object> customerAuditPayload(Customer customer) {
         Map<String, Object> payload = new LinkedHashMap<>();
+        if (customer.getId() != null) {
+            payload.put("id", customer.getId().toString());
+        }
         payload.put("customerType", customer.getCustomerType().name());
         payload.put("firstName", customer.getFirstName());
         payload.put("lastName", customer.getLastName());
@@ -664,8 +706,40 @@ public class CustomerService {
         return payload;
     }
 
-    private Map<String, ?> doNotContactAuditPayload(boolean doNotContact) {
-        return Map.of("doNotContact", doNotContact);
+    /**
+     * Soft-delete audit payload for item 523. Includes identity, contactability, and {@code
+     * deleted} so auditors can reconstruct who was removed without reloading the row.
+     */
+    private Map<String, Object> customerDeletionAuditPayload(Customer customer) {
+        Map<String, Object> payload = customerAuditPayload(customer);
+        if (customer.isDeleted() && customer.getDeletedAt() != null) {
+            payload.put("deletedAt", customer.getDeletedAt().toString());
+        }
+        return payload;
+    }
+
+    /**
+     * Structured UPDATE_DO_NOT_CONTACT payload for item 526. Includes customer identity for audit
+     * search; never includes secrets.
+     */
+    private Map<String, Object> doNotContactAuditPayload(Customer customer, boolean doNotContact) {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        if (customer.getId() != null) {
+            payload.put("id", customer.getId().toString());
+        }
+        payload.put("firstName", customer.getFirstName());
+        payload.put("lastName", customer.getLastName());
+        putIfPresent(payload, "email", customer.getEmail());
+        payload.put("doNotContact", doNotContact);
+        return payload;
+    }
+
+    private UUID currentActorUserId() {
+        try {
+            return authorizationExpressions.currentUserId();
+        } catch (RuntimeException ignored) {
+            return null;
+        }
     }
 
     private void putIfPresent(Map<String, Object> payload, String key, String value) {

@@ -1,0 +1,12 @@
+---
+pid: 15708
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location \"D:\\Documents\\IU\\AgileApp\\backend\"; mvn.cmd -q compile -DskipTests 2>&1"
+started_at: 2026-07-09T07:03:24.743Z
+running_for_ms: 324968   
+---
+Apache Maven 3.9.16 (2bdd9fddda4b155ebf8000e807eb73fd829a51d5)
+Maven home: C:\ProgramData\chocolatey\lib\maven\apache-maven-3.9.16
+Java version: 21.0.11, vendor: Eclipse Adoptium, runtime: C:\Users\mbk73\.jdks\temurin-21
+Default locale: en_US, platform encoding: UTF-8
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"

@@ -153,14 +153,27 @@ class PaymentRecordTests {
     }
 
     @Test
-    void prePersistCreatesIdForKbPrimaryKey() throws Exception {
-        Customer customer = Customer.create(CustomerType.CUSTOMER, "Clara", "Payer");
+    void updatesEditablePaymentRecordDetails() {
+        Customer customer = Customer.create(CustomerType.CUSTOMER, "Dana", "Payer");
         PaymentRecord payment =
                 PaymentRecord.create(
                         customer,
                         ownershipFor(customer),
-                        LocalDate.now(),
-                        new BigDecimal("10.00"));
+                        LocalDate.of(2026, 7, 15),
+                        new BigDecimal("99.50"));
+
+        payment.updateDetails(LocalDate.of(2026, 8, 1), new BigDecimal("120.25"));
+
+        assertThat(payment.getDueDate()).isEqualTo(LocalDate.of(2026, 8, 1));
+        assertThat(payment.getAmountDue()).isEqualByComparingTo("120.25");
+    }
+
+    @Test
+    void prePersistCreatesIdForKbPrimaryKey() throws Exception {
+        Customer customer = Customer.create(CustomerType.CUSTOMER, "Clara", "Payer");
+        PaymentRecord payment =
+                PaymentRecord.create(
+                        customer, ownershipFor(customer), LocalDate.now(), new BigDecimal("10.00"));
         Method onCreate = PaymentRecord.class.getDeclaredMethod("onCreate");
         onCreate.setAccessible(true);
 

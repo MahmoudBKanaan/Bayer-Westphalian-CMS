@@ -1,0 +1,113 @@
+---
+pid: 18320
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; Set-Location D:\\Documents\\IU\\AgileApp\\frontend; npm test -- --run 2>&1 | Tee-Object -FilePath D:\\Documents\\IU\\AgileApp\\agent-tools\\npm-test-output.txt"
+started_at: 2026-07-08T09:58:53.642Z
+running_for_ms: 934997   
+---
+
+> bayer-westphalian-campaign-platform-frontend@0.1.0 test
+> vitest run --run
+
+
+ RUN  v4.1.9 D:/Documents/IU/AgileApp/frontend
+
+ ✓ src/pages/CustomersPage.test.tsx (20 tests) 8945ms
+     ✓ loads customers and renders create and edit forms  612ms
+     ✓ hides customer management controls for KB read-only customer roles  403ms
+     ✓ selects a customer from the list table for editing  430ms
+     ✓ shows a filtered empty state when active filters return no customer records  650ms
+     ✓ filters customers using KB search fields  1462ms
+     ✓ resets customer search and filter controls  618ms
+     ✓ creates a customer through the backend endpoint  307ms
+     ✓ validates the create customer form before posting  908ms
+     ✓ edits the selected customer profile  618ms
+     ✓ allows an authorized customer service user to update a customer  762ms
+     ✓ validates the edit customer form before saving  667ms
+ ✓ src/pages/ProductsPage.test.tsx (17 tests) 11732ms
+     ✓ loads products and renders create and edit forms for admins  603ms
+     ✓ applies product search and filter query parameters  967ms
+     ✓ resets product search and filter controls  735ms
+     ✓ shows an empty catalog state when filters return no products  451ms
+     ✓ allows an admin to create a product  2243ms
+     ✓ allows a product manager to edit a product  942ms
+     ✓ allows an admin to update the selected product  534ms
+     ✓ allows a product manager to create a product  2761ms
+     ✓ allows a BI analyst to search and filter the product catalog  342ms
+     ✓ removes an applied filter chip and reloads the catalog  619ms
+     ✓ removes a search term chip and reloads the catalog  689ms
+ ✓ src/pages/CustomerDetailsPage.test.tsx (30 tests) 12226ms
+     ✓ loads and renders the customer profile sections required by the KB  773ms
+     ✓ records a new consent from the customer details consent tab  563ms
+     ✓ marks a marketing opt-out from the customer details consent tab  1160ms
+     ✓ marks a customer do-not-contact from the customer details consent tab  392ms
+     ✓ updates guardian consent from the customer details beneficiaries tab  337ms
+     ✓ displays the saved expiration date after assigning a product to the customer  1049ms
+     ✓ allows an admin to assign a product to the customer  1029ms
+     ✓ allows a product manager to assign a product to the customer  824ms
+     ✓ allows a product manager to update a product ownership record  602ms
+     ✓ displays the saved payment record after creating one for the customer  806ms
+     ✓ allows a customer service agent to update a payment record  761ms
+     ✓ allows a customer service agent to create and mark a payment record paid  982ms
+ ✓ src/pages/ProductChangeRequestsPage.test.tsx (8 tests) 8749ms
+     ✓ loads change requests and renders workflow panels for admins  556ms
+     ✓ applies product and status filters  448ms
+     ✓ creates a product change request and shows it in the tracker table  2084ms
+     ✓ allows an admin to create a product change request  2223ms
+     ✓ allows an admin to approve and mark a request implemented  404ms
+     ✓ allows a product manager to update an open request description  2691ms
+ ✓ src/pages/ProductDetailsPage.test.tsx (6 tests) 8391ms
+     ✓ loads and renders the product profile sections required by the KB  647ms
+     ✓ allows an admin to update product pricing and expiration rules  2107ms
+     ✓ allows a product manager to edit product pricing and expiration rules  2451ms
+     ✓ allows a product manager to disable a product  429ms
+     ✓ allows a product manager to create a product change request  2575ms
+ ✓ src/pages/LoginPage.test.tsx (8 tests) 8800ms
+     ✓ renders the internal employee login form  365ms
+     ✓ logs in with valid credentials, stores the session, and opens the dashboard  2127ms
+     ✓ returns employees to the protected route they requested after login  1481ms
+     ✓ shows validation feedback before calling the backend  499ms
+     ✓ fails login with invalid credentials without storing a session  1414ms
+     ✓ does not log in a disabled user account  1890ms
+     ✓ shows a generic login error when the backend is unavailable  998ms
+ ✓ src/components/ProductSearchFilters.test.tsx (5 tests) 1445ms
+     ✓ renders KB product search fields and reports active filter count  531ms
+     ✓ updates draft filters when search fields change  451ms
+ ✓ src/pages/UsersPage.test.tsx (6 tests) 8880ms
+     ✓ loads and displays admin user management data  915ms
+     ✓ creates a user through the admin endpoint  4912ms
+     ✓ edits the selected user's name and status  1832ms
+     ✓ assigns roles and disables selected users  862ms
+ ✓ src/app/router.integration.test.tsx (5 tests) 848ms
+     ✓ redirects unauthenticated protected routes to login  364ms
+ ✓ src/auth/AuthProvider.test.tsx (4 tests) 492ms
+     ✓ signs in through the backend and stores auth state  332ms
+ ✓ src/components/AppLayout.test.tsx (7 tests) 743ms
+     ✓ shows administrative navigation for admins  373ms
+ ✓ src/app/App.test.tsx (1 test) 424ms
+     ✓ renders the login screen before an employee is authenticated  419ms
+ ✓ src/utils/format.test.ts (2 tests) 30ms
+ ✓ src/pages/CompliancePage.test.tsx (2 tests) 425ms
+     ✓ renders the KB compliance dashboard alert placeholder  382ms
+ ✓ src/pages/AuditPage.test.tsx (1 test) 353ms
+     ✓ renders live consent and product audit log rows  349ms
+ ✓ src/api/paymentRecords.test.ts (11 tests) 22ms
+ ✓ src/api/products.test.ts (14 tests) 27ms
+ ✓ src/api/client.test.ts (6 tests) 23ms
+ ✓ src/api/customers.test.ts (6 tests) 19ms
+ ✓ src/api/productOwnerships.test.ts (5 tests) 15ms
+ ✓ src/api/productChangeRequests.test.ts (8 tests) 18ms
+ ✓ src/api/users.test.ts (2 tests) 13ms
+ ✓ src/api/consents.test.ts (3 tests) 13ms
+ ✓ src/api/beneficiaries.test.ts (2 tests) 12ms
+ ✓ src/auth/sessionStorageStrategy.test.ts (8 tests) 12ms
+ ✓ src/api/auditLogs.test.ts (1 test) 13ms
+ ✓ src/api/auth.test.ts (1 test) 11ms
+ ✓ src/features/products/productSearch.test.ts (6 tests) 9ms
+ ✓ src/features/auth/permissions.test.ts (9 tests) 11ms
+
+ Test Files  29 passed (29)
+      Tests  204 passed (204)
+   Start at  12:58:58
+   Duration  100.90s (transform 3.59s, setup 19.67s, import 32.74s, tests 72.70s, environment 151.93s)
+

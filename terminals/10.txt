@@ -1,0 +1,119 @@
+---
+pid: 19668
+cwd: "D:\Documents\IU\AgileApp"
+command: "cd D:\\Documents\\IU\\AgileApp\\frontend; npm test 2>&1"
+started_at: 2026-07-08T08:57:42.908Z
+running_for_ms: 1225002  
+---
+
+> bayer-westphalian-campaign-platform-frontend@0.1.0 test
+> vitest run
+
+
+ RUN  v4.1.9 D:/Documents/IU/AgileApp/frontend
+
+ ✓ src/pages/CustomersPage.test.tsx (20 tests) 12249ms
+     ✓ loads customers and renders create and edit forms  958ms
+     ✓ hides customer management controls for KB read-only customer roles  646ms
+     ✓ hides customer management controls for product managers with read-only customer access  319ms
+     ✓ renders the customer list table with KB profile columns  394ms
+     ✓ selects a customer from the list table for editing  396ms
+     ✓ shows a filtered empty state when active filters return no customer records  883ms
+     ✓ shows an error state with retry when customer records cannot load  324ms
+     ✓ filters customers using KB search fields  2148ms
+     ✓ resets customer search and filter controls  780ms
+     ✓ creates a customer through the backend endpoint  426ms
+     ✓ allows an authorized customer service user to create a customer  310ms
+     ✓ validates the create customer form before posting  861ms
+     ✓ imports customers from CSV and renders row-level validation errors  345ms
+     ✓ edits the selected customer profile  811ms
+     ✓ allows an authorized customer service user to update a customer  1126ms
+     ✓ validates the edit customer form before saving  791ms
+ ✓ src/pages/CustomerDetailsPage.test.tsx (30 tests) 15266ms
+     ✓ loads and renders the customer profile sections required by the KB  1294ms
+     ✓ renders the KB consent tab with status, validity, evidence, and recorder fields  408ms
+     ✓ records a new consent from the customer details consent tab  757ms
+     ✓ marks a marketing opt-out from the customer details consent tab  2411ms
+     ✓ validates consent purpose before recording consent  321ms
+     ✓ updates guardian consent from the customer details beneficiaries tab  421ms
+     ✓ displays the saved expiration date after assigning a product to the customer  1125ms
+     ✓ allows an admin to assign a product to the customer  1100ms
+     ✓ allows a product manager to assign a product to the customer  1110ms
+     ✓ allows a product manager to update a product ownership record  949ms
+     ✓ displays the saved payment record after creating one for the customer  921ms
+     ✓ allows a customer service agent to update a payment record  1021ms
+     ✓ allows a customer service agent to create and mark a payment record paid  775ms
+ ✓ src/pages/ProductsPage.test.tsx (17 tests) 15593ms
+     ✓ loads products and renders create and edit forms for admins  1251ms
+     ✓ renders the KB product search and filter UI on the catalog page  536ms
+     ✓ applies product search and filter query parameters  1209ms
+     ✓ resets product search and filter controls  1012ms
+     ✓ shows an empty catalog state when filters return no products  781ms
+     ✓ allows a product manager to filter products by type only  421ms
+     ✓ allows an admin to create a product  2811ms
+     ✓ allows a product manager to edit a product  854ms
+     ✓ allows an admin to update the selected product  918ms
+     ✓ allows an admin to disable and delete a product  344ms
+     ✓ allows a product manager to create a product  3791ms
+     ✓ allows a BI analyst to search and filter the product catalog  316ms
+     ✓ removes an applied filter chip and reloads the catalog  490ms
+     ✓ removes a search term chip and reloads the catalog  575ms
+ ✓ src/pages/ProductChangeRequestsPage.test.tsx (8 tests) 9106ms
+     ✓ loads change requests and renders workflow panels for admins  919ms
+     ✓ applies product and status filters  660ms
+     ✓ creates a product change request and shows it in the tracker table  2376ms
+     ✓ allows an admin to create a product change request  2556ms
+     ✓ allows an admin to approve and mark a request implemented  485ms
+     ✓ allows a product manager to update an open request description  1824ms
+ ✓ src/pages/ProductDetailsPage.test.tsx (6 tests) 7419ms
+     ✓ loads and renders the product profile sections required by the KB  833ms
+     ✓ allows an admin to update product pricing and expiration rules  2297ms
+     ✓ allows a product manager to edit product pricing and expiration rules  2133ms
+     ✓ allows a product manager to create a product change request  1796ms
+ ✓ src/pages/LoginPage.test.tsx (8 tests) 7667ms
+     ✓ renders the internal employee login form  448ms
+     ✓ logs in with valid credentials, stores the session, and opens the dashboard  1532ms
+     ✓ returns employees to the protected route they requested after login  1606ms
+     ✓ shows validation feedback before calling the backend  592ms
+     ✓ fails login with invalid credentials without storing a session  1303ms
+     ✓ does not log in a disabled user account  1058ms
+     ✓ shows a generic login error when the backend is unavailable  1072ms
+ ✓ src/components/ProductSearchFilters.test.tsx (5 tests) 1095ms
+     ✓ renders KB product search fields and reports active filter count  528ms
+ ✓ src/pages/UsersPage.test.tsx (6 tests) 4864ms
+     ✓ loads and displays admin user management data  680ms
+     ✓ creates a user through the admin endpoint  2266ms
+     ✓ edits the selected user's name and status  1109ms
+     ✓ assigns roles and disables selected users  558ms
+ ✓ src/app/router.integration.test.tsx (5 tests) 1112ms
+     ✓ redirects unauthenticated protected routes to login  539ms
+ ✓ src/components/AppLayout.test.tsx (7 tests) 815ms
+     ✓ shows administrative navigation for admins  505ms
+ ✓ src/app/App.test.tsx (1 test) 392ms
+     ✓ renders the login screen before an employee is authenticated  387ms
+ ✓ src/auth/AuthProvider.test.tsx (4 tests) 785ms
+     ✓ clears incomplete or invalid stored auth state  369ms
+ ✓ src/pages/CompliancePage.test.tsx (2 tests) 294ms
+ ✓ src/api/products.test.ts (14 tests) 31ms
+ ✓ src/pages/AuditPage.test.tsx (1 test) 436ms
+     ✓ renders live consent and product audit log rows  432ms
+ ✓ src/api/paymentRecords.test.ts (11 tests) 24ms
+ ✓ src/utils/format.test.ts (2 tests) 27ms
+ ✓ src/api/client.test.ts (6 tests) 23ms
+ ✓ src/api/productChangeRequests.test.ts (8 tests) 25ms
+ ✓ src/api/customers.test.ts (6 tests) 21ms
+ ✓ src/api/productOwnerships.test.ts (5 tests) 22ms
+ ✓ src/api/beneficiaries.test.ts (2 tests) 14ms
+ ✓ src/api/users.test.ts (2 tests) 15ms
+ ✓ src/api/consents.test.ts (3 tests) 13ms
+ ✓ src/auth/sessionStorageStrategy.test.ts (8 tests) 16ms
+ ✓ src/features/products/productSearch.test.ts (6 tests) 9ms
+ ✓ src/features/auth/permissions.test.ts (9 tests) 9ms
+ ✓ src/api/auditLogs.test.ts (1 test) 11ms
+ ✓ src/api/auth.test.ts (1 test) 9ms
+
+ Test Files  29 passed (29)
+      Tests  204 passed (204)
+   Start at  11:57:54
+   Duration  156.03s (transform 4.88s, setup 33.42s, import 49.80s, tests 77.36s, environment 270.65s)
+

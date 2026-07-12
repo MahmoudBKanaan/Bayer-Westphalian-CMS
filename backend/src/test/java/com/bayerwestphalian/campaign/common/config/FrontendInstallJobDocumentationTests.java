@@ -58,7 +58,7 @@ class FrontendInstallJobDocumentationTests {
             if (nextJobIndex < 0) {
                 nextJobIndex = yaml.indexOf("\n  frontend:");
             }
-            assertThat(installJobIndex).isNonNegative();
+            assertThat(installJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(nextJobIndex).isGreaterThan(installJobIndex);
 
             String installBlock = yaml.substring(installJobIndex, nextJobIndex);

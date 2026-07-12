@@ -59,8 +59,18 @@ The backend enforces access with Spring Security and method-level authorization.
 - Product read workflows: `ADMIN`, `CAMPAIGN_MANAGER`, `BI_ANALYST`, `PRODUCT_MANAGER`,
   `COMPLIANCE_OFFICER`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`, `EXECUTIVE_VIEWER`
 - Product management: `ADMIN`, `PRODUCT_MANAGER`
-- Segment management: `CAMPAIGN_MANAGER`
-- Segment preview: `CAMPAIGN_MANAGER`, `BI_ANALYST`
+- Segment creation (`POST /api/segments`, `@authz.canCreateSegments()` / `@SegmentCreateAccess`):
+  `ADMIN`, `CAMPAIGN_MANAGER` (KB FR-077 / item 201 — Campaign Manager can create reusable segments
+  with name, visibility PRIVATE/TEAM/GLOBAL, and filter criteria for later campaign targeting)
+- Segment management edit/delete (`PUT`/`DELETE /api/segments/**`, `@authz.canManageSegments()`):
+  `ADMIN`, `CAMPAIGN_MANAGER`
+- **BI Analyst cannot edit segments unless allowed** (item 200): `BI_ANALYST` alone has
+  read + preview only. Edit/create require `CAMPAIGN_MANAGER` or `ADMIN`. A dual-role user who also
+  holds `CAMPAIGN_MANAGER` (or `ADMIN`) is allowed to edit via those roles.
+- Segment read (`GET /api/segments/**`): `ADMIN`, `CAMPAIGN_MANAGER`, `BI_ANALYST`,
+  `COMPLIANCE_OFFICER`
+- Segment preview (`POST /api/segments/preview`, `@authz.canPreviewSegments()`): `ADMIN`,
+  `CAMPAIGN_MANAGER`, `BI_ANALYST`
 - Campaign read workflows: `ADMIN`, `CAMPAIGN_MANAGER`, `BI_ANALYST`, `PRODUCT_MANAGER`,
   `COMPLIANCE_OFFICER`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`, `EXECUTIVE_VIEWER`,
   `SYSTEM_AUDITOR`
@@ -69,10 +79,13 @@ The backend enforces access with Spring Security and method-level authorization.
 - Campaign recipients: `CAMPAIGN_MANAGER`, `COMPLIANCE_OFFICER`
 - Reminder read workflows: `ADMIN`, `CAMPAIGN_MANAGER`, `BI_ANALYST`,
   `COMPLIANCE_OFFICER`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`, `SYSTEM_AUDITOR`
-- Analytics and management reports: `ADMIN`, `BI_ANALYST`, `CAMPAIGN_MANAGER`,
+- Analytics and management reports (`/api/analytics/**`, `/api/reports/**`; see
+  [Analytics Module Documentation](../modules/analytics-module.md)): `ADMIN`, `BI_ANALYST`,
+  `CAMPAIGN_MANAGER`,
   `MARKETING_ANALYST`, `EXECUTIVE_VIEWER`
 - AI recommendation reads: `ADMIN`, `CAMPAIGN_MANAGER`, `BI_ANALYST`, `PRODUCT_MANAGER`,
-  `COMPLIANCE_OFFICER`, `EXECUTIVE_VIEWER`, `SYSTEM_AUDITOR`
+  `COMPLIANCE_OFFICER`, `EXECUTIVE_VIEWER`, `SYSTEM_AUDITOR` — see
+  [AI Feature Documentation](../modules/ai-features.md) (item 506)
 - Audit logs: `ADMIN`, `COMPLIANCE_OFFICER`, `SYSTEM_AUDITOR`
 
 ## Frontend Navigation
@@ -86,6 +99,13 @@ but does not replace backend enforcement.
 | `CAMPAIGN_MANAGER` | Dashboard, Customers, Products, Segments, Campaigns, Compliance, Analytics |
 | `BI_ANALYST` | Dashboard, Customers, Products, Segments, Analytics, Reports |
 | `COMPLIANCE_OFFICER` | Dashboard, Customers, Campaigns, Compliance, Reports, Audit |
+
+## Frontend accessibility (related)
+
+Shell navigation labels and role-filtered menus are part of the accessibility baseline. See
+[Accessibility Notes](../development/accessibility-notes.md) (item **611**) and
+[UI Role-Based Menu](../testing/ui-role-based-menu.md) (item **607**). Backend authorization remains
+authoritative (`SEC-002` / `SEC-003`).
 
 ## Verification
 

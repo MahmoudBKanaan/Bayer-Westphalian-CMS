@@ -1,0 +1,7 @@
+---
+pid: 2560
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; Set-Location D:\\Documents\\IU\\AgileApp\\backend; mvn test -q 2>&1 | Tee-Object -FilePath D:\\Documents\\IU\\AgileApp\\agent-tools\\mvn-test-output.txt | Select-Object -Last 20"
+started_at: 2026-07-08T10:10:02.939Z
+running_for_ms: 265016   
+---

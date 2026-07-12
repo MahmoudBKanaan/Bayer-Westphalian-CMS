@@ -2,22 +2,21 @@ package com.bayerwestphalian.campaign.campaign;
 
 public enum EligibilityExclusionReason {
     DO_NOT_CONTACT("DO_NOT_CONTACT", "Customer has do-not-contact enabled"),
-    MARKETING_OPT_OUT(
-            "MARKETING_OPT_OUT",
-            "Customer has withdrawn or rejected marketing consent"),
+    UNINTERESTED("UNINTERESTED", "Customer is marked as uninterested"),
+    CONVERTED("CONVERTED", "Customer has already converted"),
+    MARKETING_OPT_OUT("MARKETING_OPT_OUT", "Customer has withdrawn or rejected marketing consent"),
     INVALID_CONSENT("INVALID_CONSENT", "Customer does not have valid required consent"),
     DUPLICATE_CAMPAIGN_RECIPIENT(
-            "DUPLICATE_CAMPAIGN_RECIPIENT",
-            "Customer is already assigned to this campaign"),
+            "DUPLICATE_CAMPAIGN_RECIPIENT", "Customer is already assigned to this campaign"),
     MONTHLY_CONTACT_LIMIT(
-            "MONTHLY_CONTACT_LIMIT",
-            "Customer has reached the monthly marketing contact limit");
+            "MONTHLY_CONTACT_LIMIT", "Customer has reached the monthly marketing contact limit");
 
     public static final String CODE_DO_NOT_CONTACT = "DO_NOT_CONTACT";
+    public static final String CODE_UNINTERESTED = "UNINTERESTED";
+    public static final String CODE_CONVERTED = "CONVERTED";
     public static final String CODE_MARKETING_OPT_OUT = "MARKETING_OPT_OUT";
     public static final String CODE_INVALID_CONSENT = "INVALID_CONSENT";
-    public static final String CODE_DUPLICATE_CAMPAIGN_RECIPIENT =
-            "DUPLICATE_CAMPAIGN_RECIPIENT";
+    public static final String CODE_DUPLICATE_CAMPAIGN_RECIPIENT = "DUPLICATE_CAMPAIGN_RECIPIENT";
     public static final String CODE_MONTHLY_CONTACT_LIMIT = "MONTHLY_CONTACT_LIMIT";
 
     private final String code;

@@ -98,7 +98,7 @@ class BackendIntegrationTestJobDocumentationTests {
                 nextAfterIntegration = yaml.indexOf("\n  frontend:");
             }
 
-            assertThat(buildJobIndex).isNonNegative();
+            assertThat(buildJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(testJobIndex).isGreaterThan(buildJobIndex);
             assertThat(integrationJobIndex).isGreaterThan(testJobIndex);
             assertThat(nextAfterIntegration).isGreaterThan(integrationJobIndex);

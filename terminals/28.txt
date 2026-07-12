@@ -1,0 +1,7 @@
+---
+pid: 17792
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; Set-Location D:\\Documents\\IU\\AgileApp\\backend; mvn test -q 2>&1 | Select-Object -Last 30"
+started_at: 2026-07-08T10:14:17.783Z
+running_for_ms: 9992     
+---

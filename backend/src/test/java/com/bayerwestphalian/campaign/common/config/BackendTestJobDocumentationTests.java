@@ -66,7 +66,7 @@ class BackendTestJobDocumentationTests {
                 nextJobIndex = yaml.indexOf("\n  frontend:");
             }
 
-            assertThat(buildJobIndex).isNonNegative();
+            assertThat(buildJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(testJobIndex).isGreaterThan(buildJobIndex);
             assertThat(nextJobIndex).isGreaterThan(testJobIndex);
 

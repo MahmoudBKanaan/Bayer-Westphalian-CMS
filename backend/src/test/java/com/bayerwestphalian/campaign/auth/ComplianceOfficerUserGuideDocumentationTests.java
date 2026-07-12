@@ -66,19 +66,60 @@ class ComplianceOfficerUserGuideDocumentationTests {
 
         assertThat(guide)
                 .contains("Review submitted campaigns before launch")
-                .contains("campaign name, objective, target segment, product, message, schedule, and owner")
+                .contains(
+                        "campaign name, objective, target segment, product, message, schedule, and owner")
                 .contains("Approve campaigns")
                 .contains("Reject campaigns")
+                .contains("required formal rejection reason")
+                .contains("rejectionReason")
+                .contains("rejection_reason")
                 .contains("Request changes")
                 .contains("add review notes")
+                .contains("complianceReviewNotes")
+                .contains("compliance-review-notes")
                 .contains("cannot launch before Compliance Officer approval")
                 .contains("Unauthorized roles cannot approve")
                 .contains("consent withdrawals")
-                .contains("campaign approval and rejection history")
+                .contains("campaign creation history")
+                .contains("action=CREATE")
+                .contains("entityType=campaigns")
+                .contains("campaign approval history")
+                .contains("action=APPROVE")
+                .contains("campaign rejection history")
                 .contains("audit-log ready")
                 .contains("Backend authorization is authoritative")
                 .contains("403 Forbidden")
                 .contains("Validation failures");
+    }
+
+    @Test
+    void documentsComplianceOfficerCampaignReviewSteps() throws Exception {
+        String guide = Files.readString(COMPLIANCE_OFFICER_GUIDE, StandardCharsets.UTF_8);
+
+        assertThat(guide)
+                .contains("Campaign Review Steps")
+                .contains("Open the Compliance Review page")
+                .contains("SUBMITTED")
+                .contains("campaign owner is not the reviewer")
+                .contains("campaign objective, channel, message subject, message body")
+                .contains("selected products")
+                .contains("selected segment")
+                .contains("recipient preview totals")
+                .contains("eligible recipients")
+                .contains("excluded recipients")
+                .contains("consent, opt-out, do-not-contact, guardian consent")
+                .contains("duplicate-recipient")
+                .contains("monthly")
+                .contains("Approve the campaign only when the campaign is compliant")
+                .contains("non-blank `rejectionReason` is required")
+                .contains("complianceReviewNotes")
+                .contains("APPROVE")
+                .contains("REJECT")
+                .contains("entityType=campaigns")
+                .contains("POST /api/campaigns/{id}/approve")
+                .contains("POST /api/campaigns/{id}/reject")
+                .contains("PUT /api/campaigns/{id}/compliance-review-notes")
+                .contains("GET /api/audit-logs");
     }
 
     @Test
@@ -105,6 +146,8 @@ class ComplianceOfficerUserGuideDocumentationTests {
                 .contains("Campaigns")
                 .contains("Audit Log")
                 .contains("Reports")
+                .contains("Compliance review steps")
+                .contains("owner/reviewer separation")
                 .contains("FR-059")
                 .contains("BR-005")
                 .contains("COMP-006")

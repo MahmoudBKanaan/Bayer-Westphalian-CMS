@@ -22,10 +22,8 @@ class ConsentDtoTests {
 
     private static final Validator VALIDATOR =
             Validation.buildDefaultValidatorFactory().getValidator();
-    private static final UUID CUSTOMER_ID =
-            UUID.fromString("20000000-0000-0000-0000-000000000101");
-    private static final UUID CONSENT_ID =
-            UUID.fromString("22000000-0000-0000-0000-000000000101");
+    private static final UUID CUSTOMER_ID = UUID.fromString("20000000-0000-0000-0000-000000000101");
+    private static final UUID CONSENT_ID = UUID.fromString("22000000-0000-0000-0000-000000000101");
     private static final UUID CREATED_BY_ID =
             UUID.fromString("10000000-0000-0000-0000-000000000101");
 
@@ -41,9 +39,7 @@ class ConsentDtoTests {
                 .isTrue();
         assertThat(field(RecordConsentRequest.class, "status").isAnnotationPresent(NotNull.class))
                 .isTrue();
-        assertThat(
-                        field(RecordConsentRequest.class, "purpose")
-                                .isAnnotationPresent(NotBlank.class))
+        assertThat(field(RecordConsentRequest.class, "purpose").isAnnotationPresent(NotBlank.class))
                 .isTrue();
         assertThat(field(RecordConsentRequest.class, "source").getAnnotation(Size.class).max())
                 .isEqualTo(100);
@@ -94,8 +90,7 @@ class ConsentDtoTests {
     @Test
     void rejectsRecordConsentRequestWithoutRequiredKbFields() {
         RecordConsentRequest request =
-                new RecordConsentRequest(
-                        null, null, null, " ", "PHONE", null, null, null, null);
+                new RecordConsentRequest(null, null, null, " ", "PHONE", null, null, null, null);
 
         assertThat(invalidFields(request))
                 .contains("customerId", "consentType", "status", "purpose");
@@ -112,10 +107,7 @@ class ConsentDtoTests {
     void mapsConsentSearchRequestToCriteria() {
         ConsentSearchCriteria criteria =
                 new ConsentSearchRequest(
-                                CUSTOMER_ID,
-                                ConsentType.GUARDIAN,
-                                ConsentStatus.REQUIRED,
-                                true)
+                                CUSTOMER_ID, ConsentType.GUARDIAN, ConsentStatus.REQUIRED, true)
                         .toCriteria();
 
         assertThat(criteria.customerId()).isEqualTo(CUSTOMER_ID);

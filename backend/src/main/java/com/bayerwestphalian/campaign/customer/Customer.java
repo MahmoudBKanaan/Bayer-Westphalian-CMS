@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.time.Instant;
 import java.time.LocalDate;
 import org.hibernate.annotations.ColumnTransformer;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -60,6 +61,13 @@ public class Customer extends SoftDeletableEntity {
     @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false, columnDefinition = "customer_status")
     private CustomerStatus status = CustomerStatus.ACTIVE;
+
+    /**
+     * When {@link #status} last changed. Used as the start of the uninterested exclusion window
+     * (item 537 / System Settings uninterested exclusion days).
+     */
+    @Column(name = "status_changed_at")
+    private Instant statusChangedAt;
 
     @Column(name = "do_not_contact", nullable = false)
     private boolean doNotContact;
@@ -127,6 +135,10 @@ public class Customer extends SoftDeletableEntity {
         return status;
     }
 
+    public Instant getStatusChangedAt() {
+        return statusChangedAt;
+    }
+
     public boolean isDoNotContact() {
         return doNotContact;
     }
@@ -165,7 +177,13 @@ public class Customer extends SoftDeletableEntity {
     }
 
     public void changeStatus(CustomerStatus status) {
-        this.status = status;
+        if (status == null) {
+            throw new IllegalArgumentException("status is required");
+        }
+        if (this.status != status) {
+            this.status = status;
+            this.statusChangedAt = Instant.now();
+        }
     }
 
     public void markDoNotContact() {

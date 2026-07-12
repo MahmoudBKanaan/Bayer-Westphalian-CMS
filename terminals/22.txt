@@ -1,0 +1,95 @@
+---
+pid: 10164
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; Set-Location D:\\Documents\\IU\\AgileApp\\backend; mvn spring-boot:run -DskipTests"
+started_at: 2026-07-08T09:56:40.302Z
+running_for_ms: 1079993  
+---
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: D:\Documents\IU\AgileApp\.tools\apache-maven-3.9.11
+Java version: 21.0.11, vendor: Eclipse Adoptium, runtime: C:\Users\mbk73\.jdks\temurin-21
+Default locale: en_US, platform encoding: UTF-8
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------< com.bayerwestphalian:campaign >--------------------
+[INFO] Building campaign 0.1.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.5.3:run (default-cli) > test-compile @ campaign >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ campaign ---
+[INFO] Copying 4 resources from src\main\resources to target\classes
+[INFO] Copying 22 resources from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ campaign ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ campaign ---
+[INFO] skip non existing resourceDirectory D:\Documents\IU\AgileApp\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ campaign ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] <<< spring-boot:3.5.3:run (default-cli) < test-compile @ campaign <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.5.3:run (default-cli) @ campaign ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.5.3)
+
+2026-07-08T12:56:46.872+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] c.b.campaign.CampaignApplication         : Starting CampaignApplication using Java 21.0.11 with PID 10424 (D:\Documents\IU\AgileApp\backend\target\classes started by mbk73 in D:\Documents\IU\AgileApp\backend)
+2026-07-08T12:56:46.873+03:00 DEBUG 10424 --- [bayer-westphalian-campaign-platform] [           main] c.b.campaign.CampaignApplication         : Running with Spring Boot v3.5.3, Spring v6.2.8
+2026-07-08T12:56:46.874+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] c.b.campaign.CampaignApplication         : No active profile set, falling back to 1 default profile: "dev"
+2026-07-08T12:56:48.952+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-07-08T12:56:49.063+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 94 ms. Found 13 JPA repository interfaces.
+2026-07-08T12:56:49.963+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-07-08T12:56:49.981+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-07-08T12:56:49.981+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.42]
+2026-07-08T12:56:50.053+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-07-08T12:56:50.054+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3118 ms
+2026-07-08T12:56:50.504+03:00 DEBUG 10424 --- [bayer-westphalian-campaign-platform] [           main] c.b.c.auth.JwtAuthenticationFilter       : Filter 'jwtAuthenticationFilter' configured for use
+2026-07-08T12:56:50.818+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-07-08T12:56:50.995+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@e6e5da4
+2026-07-08T12:56:50.996+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-07-08T12:56:51.027+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/bwc_campaign (PostgreSQL 16.14)
+2026-07-08T12:56:51.146+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 21 migrations (execution time 00:00.074s)
+2026-07-08T12:56:51.175+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 20
+2026-07-08T12:56:51.178+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-07-08T12:56:51.312+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-07-08T12:56:51.378+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.18.Final
+2026-07-08T12:56:51.422+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-07-08T12:56:51.750+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-07-08T12:56:51.847+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+Database driver: undefined/unknown
+Database version: 16.14
+Autocommit mode: undefined/unknown
+Isolation level: undefined/unknown
+Minimum pool size: undefined/unknown
+Maximum pool size: undefined/unknown
+2026-07-08T12:56:53.343+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-07-08T12:56:53.467+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-07-08T12:56:54.006+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-07-08T12:56:57.348+03:00  WARN 10424 --- [bayer-westphalian-campaign-platform] [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: b680db62-7787-45f9-b268-6e50d4832400
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-07-08T12:56:57.364+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-07-08T12:56:57.961+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2026-07-08T12:56:58.792+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-07-08T12:56:58.811+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] c.b.campaign.CampaignApplication         : Started CampaignApplication in 12.535 seconds (process running for 12.988)
+2026-07-08T12:56:58.871+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-08T12:56:58.872+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-08T12:56:58.875+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms

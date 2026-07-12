@@ -1,0 +1,1160 @@
+Evidence to Attach:
+audit log screenshot,
+110. in accordance with  the KB, -Implement ProductOwnershipRepository, Add the necessary unit or integration tests but do not run any tests.
+111. in accordance with  the KB, -Implement ProductChangeRequestRepository, Add the necessary unit or integration tests but do not run any tests.
+112. in accordance with  the KB, -Implement PaymentRecordRepository, Add the necessary unit or integration tests but do not run any tests.
+113. in accordance with  the KB, -Implement product DTOs, Add the necessary unit or integration tests but do not run any tests.
+114. in accordance with  the KB, -Implement product ownership DTOs, Add the necessary unit or integration tests but do not run any tests.
+115. in accordance with  the KB, -Implement product change request DTOs, Add the necessary unit or integration tests but do not run any tests.
+116. in accordance with  the KB, -Implement payment record DTOs, Add the necessary unit or integration tests but do not run any tests.
+117. in accordance with  the KB, -Implement ProductService, Add the necessary unit or integration tests but do not run any tests.
+118. in accordance with  the KB, -Implement ProductOwnershipService, Add the necessary unit or integration tests but do not run any tests.
+119. in accordance with  the KB, -Implement ProductChangeRequestService, Add the necessary unit or integration tests but do not run any tests.
+120. in accordance with  the KB, -Implement PaymentRecordService, Add the necessary unit or integration tests but do not run any tests.
+121. in accordance with  the KB, -Implement ProductController, Add the necessary unit or integration tests but do not run any tests.
+122. in accordance with  the KB, -Implement product CRUD endpoints, Add the necessary unit or integration tests but do not run any tests.
+123. in accordance with  the KB, -Implement product search endpoint, Add the necessary unit or integration tests but do not run any tests.
+124. in accordance with  the KB, -Implement product disable/soft-delete endpoint, Add the necessary unit or integration tests but do not run any tests.
+125. in accordance with  the KB, -Implement product ownership assignment endpoint, Add the necessary unit or integration tests but do not run any tests.
+126. in accordance with  the KB, -Implement product ownership list for customer profile, Add the necessary unit or integration tests but do not run any tests.
+127. in accordance with  the KB, -Implement payment record create/update endpoints, Add the necessary unit or integration tests but do not run any tests.
+128. in accordance with  the KB, -Implement product-change request workflow, Add the necessary unit or integration tests but do not run any tests.
+129. in accordance with  the KB, -Add audit logs for product changes, Add the necessary unit or integration tests but do not run any tests.
+130. in accordance with  the KB, -Add Products page, Add the necessary unit or integration tests but do not run any tests.
+131. in accordance with  the KB, -Add Product Details page, Add the necessary unit or integration tests but do not run any tests.
+132. in accordance with  the KB, -Add Product Change Requests page, Add the necessary unit or integration tests but do not run any tests.
+133. in accordance with  the KB, -Add product ownership tab to Customer Details, Add the necessary unit or integration tests but do not run any tests.
+134. in accordance with  the KB, -Add payment records tab to Customer Details, Add the necessary unit or integration tests but do not run any tests.
+135. in accordance with  the KB, -Add product search and filter UI, Add the necessary unit or integration tests but do not run any tests.
+136. in accordance with  the KB, -Add Product Manager permissions, Add the necessary unit or integration tests but do not run any tests.
+.
+137. in accordance with  the KB, -Product Manager can create product, Add the necessary unit or integration tests but do not run any tests.
+138. in accordance with  the KB, -Product Manager can edit product, Add the necessary unit or integration tests but do not run any tests.
+139. in accordance with  the KB, -Product Manager can disable product, Add the necessary unit or integration tests but do not run any tests.
+140. in accordance with  the KB, -Unauthorized user cannot create product, Add the necessary unit or integration tests but do not run any tests.
+141. in accordance with  the KB, -Product can be assigned to customer, Add the necessary unit or integration tests but do not run any tests.
+142. in accordance with  the KB, -Product ownership expiration date is saved, Add the necessary unit or integration tests but do not run any tests.
+143. in accordance with  the KB, -Payment record can be created, Add the necessary unit or integration tests but do not run any tests.
+144. in accordance with  the KB, -Payment record can be marked paid, Add the necessary unit or integration tests but do not run any tests.
+145. in accordance with  the KB, -Product-change request can be created and tracked, Add the necessary unit or integration tests but do not run any tests.
+146. in accordance with  the KB, -Product changes create audit log
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+147. in accordance with  the KB, -Product module documentation, Add the necessary unit or integration tests but do not run any tests.
+148. in accordance with  the KB, -Product ownership documentation, Add the necessary unit or integration tests but do not run any tests.
+149. in accordance with  the KB, -Payment record documentation, Add the necessary unit or integration tests but do not run any tests.
+150. in accordance with  the KB, -Product Manager user guide section, Add the necessary unit or integration tests but do not run any tests.
+151. in accordance with  the KB, ----------------Sprint 6 review notes, Add the necessary unit or integration tests but do not run any tests.
+152. in accordance with  the KB, ----------------Sprint 6 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+153. in accordance with  the KB, -Product and ownership data must support product-expiration campaigns, segmentation, reminders, and analytics.
+154. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 6 — Product, Ownership, Product Change Requests, and Payments
+Sprint Planning:
+The sprint goal was to implement product and policy-related data required for campaign targeting, reminders, and analytics. The selected work included Product, ProductOwnership, ProductChangeRequest, and PaymentRecord entities, repositories, DTOs, services, controllers, product CRUD, product ownership assignment, payment records, product-change workflow, frontend product screens, and Product Manager permissions.
+Daily Scrum / Execution Summary:
+The sprint focused on building the product domain. Work progressed on product CRUD, assigning products to customers, storing product ownership/expiration data, payment records, product-change request workflow, and product-management UI.
+Sprint Review:
+The sprint increment demonstrated product creation/editing, product search, product assignment to customers, product ownership details, payment record creation/update, and product-change request tracking.
+Sprint Retrospective:
+What went well: product and ownership data became available for segmentation, reminders, and campaign targeting.
+What could improve: product expiration and payment fields should be validated carefully because later reminders depend on them.
+Action item: verify product ownership and payment records during Sprint 11 reminder testing.
+Roadmap Update:
+Sprint 6 completed product and policy data management. Related epics: BWCO-10 Product management; BWCO-11 Product ownership and payment records; BWCO-24 Testing and QA.
+Evidence to Attach:
+Products page screenshot, product create/edit screenshot, product ownership tab screenshot, payment record screenshot, product change request screenshot, Product Manager permission test screenshot, Sprint 6 review note, Sprint 6 retrospective note.
+---------------Sprint 7 — Segmentation Engine
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+155. in accordance with  the KB, -Build reusable, eligibility-aware audience segmentation.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+156. in accordance with  the KB, -Implement Segment entity, Add the necessary unit or integration tests but do not run any tests.
+157. in accordance with  the KB, -Implement SegmentCriteria entity, Add the necessary unit or integration tests but do not run any tests.
+158. in accordance with  the KB, -Implement SegmentRepository, Add the necessary unit or integration tests but do not run any tests.
+159. in accordance with  the KB, -Implement SegmentCriteriaRepository, Add the necessary unit or integration tests but do not run any tests.
+160. in accordance with  the KB, -Implement segment DTOs, Add the necessary unit or integration tests but do not run any tests.
+161. in accordance with  the KB, -Implement SegmentService, Add the necessary unit or integration tests but do not run any tests.
+162. in accordance with  the KB, -Implement SegmentController, Add the necessary unit or integration tests but do not run any tests.
+163. in accordance with  the KB, -Add create segment endpoint, Add the necessary unit or integration tests but do not run any tests.
+164. in accordance with  the KB, -Add update segment endpoint, Add the necessary unit or integration tests but do not run any tests.
+165. in accordance with  the KB, -Add delete segment endpoint, Add the necessary unit or integration tests but do not run any tests.
+166. in accordance with  the KB, -Add segment details endpoint, Add the necessary unit or integration tests but do not run any tests.
+167. in accordance with  the KB, -Add segment preview endpoint, Add the necessary unit or integration tests but do not run any tests.
+168. in accordance with  the KB, -Implement filter by age group, Add the necessary unit or integration tests but do not run any tests.
+169. in accordance with  the KB, -Implement filter by location, Add the necessary unit or integration tests but do not run any tests.
+170. in accordance with  the KB, -Implement filter by customer/prospect type, Add the necessary unit or integration tests but do not run any tests.
+171. in accordance with  the KB, -Implement filter by product ownership, Add the necessary unit or integration tests but do not run any tests.
+172. in accordance with  the KB, -Implement filter by payment history, Add the necessary unit or integration tests but do not run any tests.
+173. in accordance with  the KB, -Implement filter by behavior/status, Add the necessary unit or integration tests but do not run any tests.
+174. in accordance with  the KB, -Implement filter by consent status, Add the necessary unit or integration tests but do not run any tests.
+175. in accordance with  the KB, -Implement filter by product expiration, Add the necessary unit or integration tests but do not run any tests.
+176. in accordance with  the KB, -Implement AND criteria logic, Add the necessary unit or integration tests but do not run any tests.
+177. in accordance with  the KB, -Implement OR criteria logic, Add the necessary unit or integration tests but do not run any tests.
+178. in accordance with  the KB, -Apply EligibilityService to preview, Add the necessary unit or integration tests but do not run any tests.
+179. in accordance with  the KB, -Return total audience count, Add the necessary unit or integration tests but do not run any tests.
+180. in accordance with  the KB, -Return eligible count, Add the necessary unit or integration tests but do not run any tests.
+181. in accordance with  the KB, -Return excluded count, Add the necessary unit or integration tests but do not run any tests.
+182. in accordance with  the KB, -Return exclusion reason summary, Add the necessary unit or integration tests but do not run any tests.
+183. in accordance with  the KB, -Add audit log for saved segment changes, Add the necessary unit or integration tests but do not run any tests.
+184. in accordance with  the KB, -Build Segmentation page, Add the necessary unit or integration tests but do not run any tests.
+185. in accordance with  the KB, -Build criteria builder UI, Add the necessary unit or integration tests but do not run any tests.
+186. in accordance with  the KB, -Build segment preview results UI, Add the necessary unit or integration tests but do not run any tests.
+187. in accordance with  the KB, -Build exclusion reason summary UI, Add the necessary unit or integration tests but do not run any tests.
+188. in accordance with  the KB, -Add BI Analyst read-only segmentation insight view, Add the necessary unit or integration tests but do not run any tests.
+189. in accordance with  the KB, -Add Campaign Manager segment creation permissions, Add the necessary unit or integration tests but do not run any tests.
+.
+190. in accordance with  the KB, -Segment filter by age group works, Add the necessary unit or integration tests but do not run any tests.
+191. in accordance with  the KB, -Segment filter by location works, Add the necessary unit or integration tests but do not run any tests.
+192. in accordance with  the KB, -Segment filter by product ownership works, Add the necessary unit or integration tests but do not run any tests.
+193. in accordance with  the KB, -Segment filter by payment history works, Add the necessary unit or integration tests but do not run any tests.
+194. in accordance with  the KB, -Segment filter by consent status works, Add the necessary unit or integration tests but do not run any tests.
+195. in accordance with  the KB, -Segment filter by product expiration works, Add the necessary unit or integration tests but do not run any tests.
+196. in accordance with  the KB, -AND logic returns correct result, Add the necessary unit or integration tests but do not run any tests.
+197. in accordance with  the KB, -OR logic returns correct result, Add the necessary unit or integration tests but do not run any tests.
+198. in accordance with  the KB, -Preview applies EligibilityService, Add the necessary unit or integration tests but do not run any tests.
+199. in accordance with  the KB, -Preview returns eligible and excluded counts, Add the necessary unit or integration tests but do not run any tests.
+200. in accordance with  the KB, -BI Analyst cannot edit segment unless allowed, Add the necessary unit or integration tests but do not run any tests.
+201. in accordance with  the KB, -Campaign Manager can create reusable segment
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+202. in accordance with  the KB, -Segmentation module documentation, Add the necessary unit or integration tests but do not run any tests.
+203. in accordance with  the KB, -Segment criteria guide, Add the necessary unit or integration tests but do not run any tests.
+204. in accordance with  the KB, -Audience preview logic documentation, Add the necessary unit or integration tests but do not run any tests.
+205. in accordance with  the KB, -Segmentation user guide section, Add the necessary unit or integration tests but do not run any tests.
+206. in accordance with  the KB, ----------------Sprint 7 review notes, Add the necessary unit or integration tests but do not run any tests.
+207. in accordance with  the KB, ----------------Sprint 7 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+208. in accordance with  the KB, -Segmentation must never return a final campaign audience without eligibility checks.
+209. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 7 — Segmentation Engine
+Sprint Planning:
+The sprint goal was to build reusable and eligibility-aware audience segmentation. The selected work included Segment and SegmentCriteria entities, repositories, DTOs, services, controller, segment CRUD, segment preview endpoint, filters by age/location/customer type/product/payment/consent/expiration, AND/OR criteria, EligibilityService integration, audience counts, exclusion summaries, and segmentation UI.
+Daily Scrum / Execution Summary:
+The sprint focused on turning customer/product/consent data into reusable campaign audiences. Work progressed on segment criteria modeling, preview logic, eligibility-aware counts, exclusion summaries, and a frontend segment builder.
+Sprint Review:
+The sprint increment demonstrated creating a segment, applying multiple criteria, previewing the audience, and showing eligible/excluded counts with exclusion reasons. The preview used EligibilityService to prevent non-compliant audiences.
+Sprint Retrospective:
+What went well: segmentation became compliance-aware instead of being a simple filter.
+What could improve: the criteria builder must stay understandable for business users.
+Action item: improve segment preview clarity and keep exclusion summaries visible in future campaign screens.
+Roadmap Update:
+Sprint 7 completed the segmentation engine. Related epics: BWCO-12 Segmentation; BWCO-9 Consent, opt-out, and eligibility; BWCO-24 Testing and QA.
+Evidence to Attach:
+Segment builder screenshot, criteria builder screenshot, preview result screenshot, eligible/excluded count screenshot, exclusion summary screenshot, segmentation tests screenshot, Sprint 7 review note, Sprint 7 retrospective note.
+---------------Sprint 8 — Campaign Builder and Compliance Review
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+210. in accordance with  the KB, -Implement the controlled campaign lifecycle from draft creation to compliance approval or rejection.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+211. in accordance with  the KB, -Implement Campaign entity, Add the necessary unit or integration tests but do not run any tests.
+212. in accordance with  the KB, -Implement CampaignProduct entity, Add the necessary unit or integration tests but do not run any tests.
+213. in accordance with  the KB, -Implement CampaignRepository, Add the necessary unit or integration tests but do not run any tests.
+214. in accordance with  the KB, -Implement campaign DTOs, Add the necessary unit or integration tests but do not run any tests.
+215. in accordance with  the KB, -Implement CampaignService, Add the necessary unit or integration tests but do not run any tests.
+216. in accordance with  the KB, -Implement CampaignController, Add the necessary unit or integration tests but do not run any tests.
+217. in accordance with  the KB, -Add create campaign endpoint, Add the necessary unit or integration tests but do not run any tests.
+218. in accordance with  the KB, -Add update draft campaign endpoint, Add the necessary unit or integration tests but do not run any tests.
+219. in accordance with  the KB, -Add campaign list endpoint, Add the necessary unit or integration tests but do not run any tests.
+220. in accordance with  the KB, -Add campaign details endpoint, Add the necessary unit or integration tests but do not run any tests.
+221. in accordance with  the KB, -Add campaign product selection, Add the necessary unit or integration tests but do not run any tests.
+222. in accordance with  the KB, -Add campaign segment selection, Add the necessary unit or integration tests but do not run any tests.
+223. in accordance with  the KB, -Add campaign message subject and body fields, Add the necessary unit or integration tests but do not run any tests.
+224. in accordance with  the KB, -Add campaign channel field, Add the necessary unit or integration tests but do not run any tests.
+225. in accordance with  the KB, -Add campaign schedule fields, Add the necessary unit or integration tests but do not run any tests.
+226. in accordance with  the KB, -Implement campaign statuses: DRAFT, SUBMITTED, APPROVED, REJECTED, ACTIVE, PAUSED, COMPLETED, ARCHIVED, Add the necessary unit or integration tests but do not run any tests.
+227. in accordance with  the KB, -Implement required campaign field validation, Add the necessary unit or integration tests but do not run any tests.
+228. in accordance with  the KB, -Implement submit campaign endpoint, Add the necessary unit or integration tests but do not run any tests.
+229. in accordance with  the KB, -Implement approve campaign endpoint, Add the necessary unit or integration tests but do not run any tests.
+230. in accordance with  the KB, -Implement reject campaign endpoint, Add the necessary unit or integration tests but do not run any tests.
+231. in accordance with  the KB, -Add compliance review notes, Add the necessary unit or integration tests but do not run any tests.
+232. in accordance with  the KB, -Add rejection reason, Add the necessary unit or integration tests but do not run any tests.
+233. in accordance with  the KB, -Add audit log for campaign creation, Add the necessary unit or integration tests but do not run any tests.
+234. in accordance with  the KB, -Add audit log for campaign submission, Add the necessary unit or integration tests but do not run any tests.
+235. in accordance with  the KB, -Add audit log for campaign approval, Add the necessary unit or integration tests but do not run any tests.
+236. in accordance with  the KB, -Add audit log for campaign rejection, Add the necessary unit or integration tests but do not run any tests.
+237. in accordance with  the KB, -Build Campaigns page, Add the necessary unit or integration tests but do not run any tests.
+238. in accordance with  the KB, -Build Campaign Builder page, Add the necessary unit or integration tests but do not run any tests.
+239. in accordance with  the KB, -Build Compliance Review page, Add the necessary unit or integration tests but do not run any tests.
+240. in accordance with  the KB, -Build campaign status badge UI, Add the necessary unit or integration tests but do not run any tests.
+241. in accordance with  the KB, -Add role-based campaign permissions, Add the necessary unit or integration tests but do not run any tests.
+242. in accordance with  the KB, -Add validation messages for campaign form, Add the necessary unit or integration tests but do not run any tests.
+.
+243. in accordance with  the KB, -Campaign Manager can create draft campaign, Add the necessary unit or integration tests but do not run any tests.
+244. in accordance with  the KB, -Draft campaign can be edited, Add the necessary unit or integration tests but do not run any tests.
+245. in accordance with  the KB, -Campaign cannot be submitted with missing required fields, Add the necessary unit or integration tests but do not run any tests.
+246. in accordance with  the KB, -Campaign Manager can submit campaign, Add the necessary unit or integration tests but do not run any tests.
+247. in accordance with  the KB, -Submitted campaign cannot be edited as draft without proper workflow, Add the necessary unit or integration tests but do not run any tests.
+248. in accordance with  the KB, -Compliance Officer can approve campaign, Add the necessary unit or integration tests but do not run any tests.
+249. in accordance with  the KB, -Compliance Officer can reject campaign with reason, Add the necessary unit or integration tests but do not run any tests.
+250. in accordance with  the KB, -Campaign Manager cannot approve own campaign, Add the necessary unit or integration tests but do not run any tests.
+251. in accordance with  the KB, -Product Manager cannot approve campaign, Add the necessary unit or integration tests but do not run any tests.
+252. in accordance with  the KB, -Audit log is created for approval/rejection, Add the necessary unit or integration tests but do not run any tests.
+253. in accordance with  the KB, -Status transitions follow allowed lifecycle
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+254. in accordance with  the KB, -Campaign lifecycle documentation, Add the necessary unit or integration tests but do not run any tests.
+255. in accordance with  the KB, -Compliance review documentation, Add the necessary unit or integration tests but do not run any tests.
+256. in accordance with  the KB, -Campaign creation and approval activity diagram, Add the necessary unit or integration tests but do not run any tests.
+257. in accordance with  the KB, -Campaign Manager user guide section, Add the necessary unit or integration tests but do not run any tests.
+258. in accordance with  the KB, -Compliance Officer user guide section, Add the necessary unit or integration tests but do not run any tests.
+259. in accordance with  the KB, ----------------Sprint 8 review notes, Add the necessary unit or integration tests but do not run any tests.
+260. in accordance with  the KB, ----------------Sprint 8 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+261. in accordance with  the KB, -Submitted campaigns cannot be launched before Compliance Officer approval.
+262. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 8 — Campaign Builder and Compliance Review
+Sprint Planning:
+The sprint goal was to implement the controlled campaign lifecycle from draft creation to compliance approval or rejection. The selected work included Campaign and CampaignProduct entities, campaign DTOs, service/controller, create/update/list/detail endpoints, product and segment selection, message/channel/schedule fields, campaign statuses, required validation, submit/approve/reject endpoints, compliance review notes, audit logs, and campaign frontend screens.
+Daily Scrum / Execution Summary:
+The sprint focused on the main campaign workflow. Work progressed from draft campaign creation to submission, compliance review, approval/rejection, status transitions, validation messages, and role-based campaign permissions.
+Sprint Review:
+The sprint increment demonstrated creating a draft campaign, editing it, selecting products and segments, submitting it for compliance review, approving or rejecting it as Compliance Officer, and recording audit events for sensitive workflow changes.
+Sprint Retrospective:
+What went well: campaign lifecycle rules were implemented before launch, reducing compliance risk.
+What could improve: status transitions must remain strict and visible in the UI.
+Action item: connect the approved campaign state to recipient preview and launch rules in Sprint 9.
+Roadmap Update:
+Sprint 8 completed campaign builder and compliance review. Related epics: BWCO-13 Campaign management; BWCO-14 Compliance review; BWCO-22 Audit logging; BWCO-24 Testing and QA.
+Evidence to Attach:
+Campaign list screenshot, campaign builder screenshot, validation error screenshot, submitted campaign screenshot, compliance review screenshot, approval/rejection screenshot, campaign status badge screenshot, audit log screenshot, Sprint 8 review note, Sprint 8 retrospective note.
+---------------Sprint 9 — Recipient Preview and Approved Campaign Launch
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+263. in accordance with  the KB, -Implement recipient generation, eligibility enforcement, duplicate prevention, launch restrictions, contact event creation, and initial metric updates.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+264. in accordance with  the KB, -Implement CampaignRecipient entity, Add the necessary unit or integration tests but do not run any tests.
+265. in accordance with  the KB, -Implement CampaignRecipientRepository, Add the necessary unit or integration tests but do not run any tests.
+266. in accordance with  the KB, -Implement recipient DTOs, Add the necessary unit or integration tests but do not run any tests.
+267. in accordance with  the KB, -Implement generate recipients service logic, Add the necessary unit or integration tests but do not run any tests.
+268. in accordance with  the KB, -Add recipient preview endpoint, Add the necessary unit or integration tests but do not run any tests.
+269. in accordance with  the KB, -Add eligible recipient list, Add the necessary unit or integration tests but do not run any tests.
+270. in accordance with  the KB, -Add excluded recipient list, Add the necessary unit or integration tests but do not run any tests.
+271. in accordance with  the KB, -Store exclusion reasons, Add the necessary unit or integration tests but do not run any tests.
+272. in accordance with  the KB, -Store eligibility explanation, Add the necessary unit or integration tests but do not run any tests.
+273. in accordance with  the KB, -Prevent duplicate recipient rows, Add the necessary unit or integration tests but do not run any tests.
+274. in accordance with  the KB, -Enforce same-campaign duplicate prevention, Add the necessary unit or integration tests but do not run any tests.
+275. in accordance with  the KB, -Enforce monthly contact limit, Add the necessary unit or integration tests but do not run any tests.
+276. in accordance with  the KB, -Enforce uninterested exclusion rule, Add the necessary unit or integration tests but do not run any tests.
+277. in accordance with  the KB, -Enforce converted customer exclusion rule, Add the necessary unit or integration tests but do not run any tests.
+278. in accordance with  the KB, -Add launch campaign endpoint, Add the necessary unit or integration tests but do not run any tests.
+279. in accordance with  the KB, -Block launch unless campaign status is APPROVED, Add the necessary unit or integration tests but do not run any tests.
+280. in accordance with  the KB, -Create contact events on launch, Add the necessary unit or integration tests but do not run any tests.
+281. in accordance with  the KB, -Update campaign status after launch, Add the necessary unit or integration tests but do not run any tests.
+282. in accordance with  the KB, -Update campaign metrics after launch, Add the necessary unit or integration tests but do not run any tests.
+283. in accordance with  the KB, -Add audit log for campaign launch, Add the necessary unit or integration tests but do not run any tests.
+284. in accordance with  the KB, -Add response summary: eligible, excluded, sent, failed, Add the necessary unit or integration tests but do not run any tests.
+285. in accordance with  the KB, -Build Recipient Preview screen, Add the necessary unit or integration tests but do not run any tests.
+286. in accordance with  the KB, -Add eligible recipients tab, Add the necessary unit or integration tests but do not run any tests.
+287. in accordance with  the KB, -Add excluded recipients tab, Add the necessary unit or integration tests but do not run any tests.
+288. in accordance with  the KB, -Add exclusion reason summary panel, Add the necessary unit or integration tests but do not run any tests.
+289. in accordance with  the KB, -Add launch button with role/status rules, Add the necessary unit or integration tests but do not run any tests.
+290. in accordance with  the KB, -Add launch confirmation dialog, Add the necessary unit or integration tests but do not run any tests.
+291. in accordance with  the KB, -Add launch result screen, Add the necessary unit or integration tests but do not run any tests.
+.
+292. in accordance with  the KB, -Campaign cannot launch without approval, Add the necessary unit or integration tests but do not run any tests.
+293. in accordance with  the KB, -Customer without consent is excluded, Add the necessary unit or integration tests but do not run any tests.
+294. in accordance with  the KB, -Customer with do_not_contact is excluded, Add the necessary unit or integration tests but do not run any tests.
+295. in accordance with  the KB, -Customer with opt-out is excluded, Add the necessary unit or integration tests but do not run any tests.
+296. in accordance with  the KB, -Minor beneficiary without guardian consent is excluded, Add the necessary unit or integration tests but do not run any tests.
+297. in accordance with  the KB, -Duplicate recipient row is prevented, Add the necessary unit or integration tests but do not run any tests.
+298. in accordance with  the KB, -Same customer cannot receive same campaign twice, Add the necessary unit or integration tests but do not run any tests.
+299. in accordance with  the KB, -Monthly contact limit is enforced, Add the necessary unit or integration tests but do not run any tests.
+300. in accordance with  the KB, -Uninterested customer is excluded, Add the necessary unit or integration tests but do not run any tests.
+301. in accordance with  the KB, -Converted customer is excluded from same campaign/product, Add the necessary unit or integration tests but do not run any tests.
+302. in accordance with  the KB, -Launch creates contact events, Add the necessary unit or integration tests but do not run any tests.
+303. in accordance with  the KB, -Launch updates metrics, Add the necessary unit or integration tests but do not run any tests.
+304. in accordance with  the KB, -Launch creates audit log, Add the necessary unit or integration tests but do not run any tests.
+305. in accordance with  the KB, -Product Manager cannot launch campaign, Add the necessary unit or integration tests but do not run any tests.
+306. in accordance with  the KB, -Campaign Manager can launch approved campaign
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+307. in accordance with  the KB, -Recipient preview documentation, Add the necessary unit or integration tests but do not run any tests.
+308. in accordance with  the KB, -Campaign launch documentation, Add the necessary unit or integration tests but do not run any tests.
+309. in accordance with  the KB, -Campaign launch sequence diagram, Add the necessary unit or integration tests but do not run any tests.
+310. in accordance with  the KB, -Duplicate-contact prevention documentation, Add the necessary unit or integration tests but do not run any tests.
+311. in accordance with  the KB, ----------------Sprint 9 review notes, Add the necessary unit or integration tests but do not run any tests.
+312. in accordance with  the KB, ----------------Sprint 9 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+313. in accordance with  the KB, -Campaign launch must never bypass consent, opt-out, do-not-contact, duplicate prevention, guardian consent, contact frequency, or approval rules.
+314. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 9 — Recipient Preview and Approved Campaign Launch
+Sprint Planning:
+The sprint goal was to implement recipient generation, eligibility enforcement, duplicate prevention, campaign launch restrictions, contact event creation, and metric updates. The selected work included CampaignRecipient entity/repository, recipient preview endpoint, eligible and excluded recipient lists, exclusion reasons, duplicate prevention, monthly contact limits, uninterested/converted exclusions, launch endpoint, approval-status blocking, contact event creation, campaign status update, metrics update, audit log, and launch UI.
+Daily Scrum / Execution Summary:
+The sprint focused on making campaign launch safe and compliant. Work progressed on recipient generation, launch blocking unless approved, eligibility enforcement, duplicate prevention, launch confirmation, contact event creation, and launch result summaries.
+Sprint Review:
+The sprint increment demonstrated that only approved campaigns could be launched, ineligible recipients were excluded, duplicate contacts were prevented, contact events were created on launch, and initial campaign metrics were updated.
+Sprint Retrospective:
+What went well: launch rules enforced the compliance decisions from earlier sprints.
+What could improve: launch result summaries should clearly explain eligible, excluded, sent, and failed counts.
+Action item: keep launch workflow connected to communication tracking and analytics.
+Roadmap Update:
+Sprint 9 completed recipient preview and approved campaign launch. Related epics: BWCO-15 Recipient preview and campaign launch; BWCO-9 Consent, opt-out, and eligibility; BWCO-13 Campaign management; BWCO-14 Compliance review; BWCO-22 Audit logging; BWCO-24 Testing and QA.
+Evidence to Attach:
+Recipient preview screenshot, eligible recipients screenshot, excluded recipients screenshot, exclusion reason summary screenshot, approved campaign launch screenshot, launch blocked screenshot, launch result screenshot, contact event screenshot, metrics update screenshot, Sprint 9 review note, Sprint 9 retrospective note.
+---------------Sprint 10 — Communication Tracking and Provider Adapters
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+315. in accordance with  the KB, -Implement ContactEvent entity, Add the necessary unit or integration tests but do not run any tests.
+316. in accordance with  the KB, -Implement ContactEventRepository, Add the necessary unit or integration tests but do not run any tests.
+317. in accordance with  the KB, -Implement contact event DTOs, Add the necessary unit or integration tests but do not run any tests.
+318. in accordance with  the KB, -Implement CommunicationService, Add the necessary unit or integration tests but do not run any tests.
+319. in accordance with  the KB, -Define EmailProvider interface, Add the necessary unit or integration tests but do not run any tests.
+320. in accordance with  the KB, -Define SmsProvider interface, Add the necessary unit or integration tests but do not run any tests.
+321. in accordance with  the KB, -Implement MockEmailProvider for development/test, Add the necessary unit or integration tests but do not run any tests.
+322. in accordance with  the KB, -Implement MockSmsProvider for development/test, Add the necessary unit or integration tests but do not run any tests.
+323. in accordance with  the KB, -Implement SMTP/provider-ready email adapter placeholder, Add the necessary unit or integration tests but do not run any tests.
+324. in accordance with  the KB, -Implement provider-ready SMS adapter placeholder, Add the necessary unit or integration tests but do not run any tests.
+325. in accordance with  the KB, -Add environment flag to disable real sending unless provider configured, Add the necessary unit or integration tests but do not run any tests.
+326. in accordance with  the KB, -Implement sent event, Add the necessary unit or integration tests but do not run any tests.
+327. in accordance with  the KB, -Implement failed event, Add the necessary unit or integration tests but do not run any tests.
+328. in accordance with  the KB, -Implement opened event placeholder, Add the necessary unit or integration tests but do not run any tests.
+329. in accordance with  the KB, -Implement clicked event placeholder, Add the necessary unit or integration tests but do not run any tests.
+330. in accordance with  the KB, -Implement replied event placeholder, Add the necessary unit or integration tests but do not run any tests.
+331. in accordance with  the KB, -Implement unsubscribe event handling, Add the necessary unit or integration tests but do not run any tests.
+332. in accordance with  the KB, -Ensure unsubscribe triggers opt-out logic, Add the necessary unit or integration tests but do not run any tests.
+333. in accordance with  the KB, -Implement contact timeline endpoint, Add the necessary unit or integration tests but do not run any tests.
+334. in accordance with  the KB, -Implement retry failed send logic, Add the necessary unit or integration tests but do not run any tests.
+335. in accordance with  the KB, -Enforce maximum retry limit, Add the necessary unit or integration tests but do not run any tests.
+336. in accordance with  the KB, -Add communication logs, Add the necessary unit or integration tests but do not run any tests.
+337. in accordance with  the KB, -Build Contact History screen, Add the necessary unit or integration tests but do not run any tests.
+338. in accordance with  the KB, -Add communication timeline to Customer Details, Add the necessary unit or integration tests but do not run any tests.
+339. in accordance with  the KB, -Add contact outcome creation UI, Add the necessary unit or integration tests but do not run any tests.
+340. in accordance with  the KB, -Add event-type filter UI, Add the necessary unit or integration tests but do not run any tests.
+.
+341. in accordance with  the KB, -Contact event is created after send, Add the necessary unit or integration tests but do not run any tests.
+342. in accordance with  the KB, -Failed event is created after failed send, Add the necessary unit or integration tests but do not run any tests.
+343. in accordance with  the KB, -Retry does not exceed max retry limit, Add the necessary unit or integration tests but do not run any tests.
+344. in accordance with  the KB, -Unsubscribe event updates opt-out, Add the necessary unit or integration tests but do not run any tests.
+345. in accordance with  the KB, -Contact timeline returns events in correct order, Add the necessary unit or integration tests but do not run any tests.
+346. in accordance with  the KB, -Production sending is disabled without configured provider, Add the necessary unit or integration tests but do not run any tests.
+347. in accordance with  the KB, -Mock provider is used only in dev/test profile, Add the necessary unit or integration tests but do not run any tests.
+348. in accordance with  the KB, -Unauthorized user cannot create contact event
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+349. in accordance with  the KB, -Communication module documentation, Add the necessary unit or integration tests but do not run any tests.
+350. in accordance with  the KB, -Provider adapter documentation, Add the necessary unit or integration tests but do not run any tests.
+351. in accordance with  the KB, -Contact event model documentation, Add the necessary unit or integration tests but do not run any tests.
+352. in accordance with  the KB, -Production email/SMS configuration notes, Add the necessary unit or integration tests but do not run any tests.
+353. in accordance with  the KB, ----------------Sprint 10 review notes, Add the necessary unit or integration tests but do not run any tests.
+354. in accordance with  the KB, ----------------Sprint 10 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+355. in accordance with  the KB, -Development may use mock providers, but production must use real configured providers or disable sending until providers are configured.
+356. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 10 — Communication Tracking and Provider Adapters
+Sprint Planning:
+The sprint goal was to implement contact history and replaceable communication provider architecture. The selected work included ContactEvent entity/repository, CommunicationService, EmailProvider and SmsProvider interfaces, mock providers for development/test, provider-ready placeholders, environment flag for production sending, sent/failed/opened/clicked/replied event types, unsubscribe handling, contact timeline endpoint, retry logic, communication logs, and contact history UI.
+Daily Scrum / Execution Summary:
+The sprint focused on tracking communication outcomes without depending on a real external provider during development. Work progressed on provider abstraction, mock email/SMS providers, event creation, unsubscribe-to-opt-out behavior, retry limits, and customer contact timelines.
+Sprint Review:
+The sprint increment demonstrated contact event creation after communication attempts, failed event handling, retry limit behavior, unsubscribe updating opt-out status, and contact history visibility on customer profiles.
+Sprint Retrospective:
+What went well: the provider adapter pattern kept development/test safe while preparing for real production providers.
+What could improve: real provider integration details should remain clearly documented for production.
+Action item: ensure production sending is disabled unless real provider configuration exists.
+Roadmap Update:
+Sprint 10 completed communication tracking and provider adapters. Related epics: BWCO-16 Communication tracking; BWCO-24 Testing and QA.
+Evidence to Attach:
+Contact history screenshot, contact timeline screenshot, communication event screenshot, mock provider screenshot, unsubscribe/opt-out screenshot, retry limit test screenshot, provider config note screenshot, Sprint 10 review note, Sprint 10 retrospective note.
+---------------Sprint 11 — Follow-Up Tasks and Reminder Scheduling
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+357. in accordance with  the KB, -Implement follow-up workflows, payment reminders, Green/Yellow/Red reminder levels, and product-expiration reminders.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+358. in accordance with  the KB, -Implement FollowUpTask entity, Add the necessary unit or integration tests but do not run any tests.
+359. in accordance with  the KB, -Implement FollowUpRepository, Add the necessary unit or integration tests but do not run any tests.
+360. in accordance with  the KB, -Implement follow-up DTOs, Add the necessary unit or integration tests but do not run any tests.
+361. in accordance with  the KB, -Implement FollowUpService, Add the necessary unit or integration tests but do not run any tests.
+362. in accordance with  the KB, -Implement FollowUpController, Add the necessary unit or integration tests but do not run any tests.
+363. in accordance with  the KB, -Add create follow-up task endpoint, Add the necessary unit or integration tests but do not run any tests.
+364. in accordance with  the KB, -Add assign follow-up task endpoint, Add the necessary unit or integration tests but do not run any tests.
+365. in accordance with  the KB, -Add update follow-up status endpoint, Add the necessary unit or integration tests but do not run any tests.
+366. in accordance with  the KB, -Add complete follow-up task endpoint, Add the necessary unit or integration tests but do not run any tests.
+367. in accordance with  the KB, -Add follow-up filtering by assignee, priority, status, due date, Add the necessary unit or integration tests but do not run any tests.
+368. in accordance with  the KB, -Build Follow-Up Tasks screen, Add the necessary unit or integration tests but do not run any tests.
+369. in accordance with  the KB, -Add follow-up task tab to Customer Details, Add the necessary unit or integration tests but do not run any tests.
+370. in accordance with  the KB, -Implement ReminderSchedule entity, Add the necessary unit or integration tests but do not run any tests.
+371. in accordance with  the KB, -Implement ReminderRepository, Add the necessary unit or integration tests but do not run any tests.
+372. in accordance with  the KB, -Implement reminder DTOs, Add the necessary unit or integration tests but do not run any tests.
+373. in accordance with  the KB, -Implement ReminderService, Add the necessary unit or integration tests but do not run any tests.
+374. in accordance with  the KB, -Implement ReminderController, Add the necessary unit or integration tests but do not run any tests.
+375. in accordance with  the KB, -Implement payment due reminder generation, Add the necessary unit or integration tests but do not run any tests.
+376. in accordance with  the KB, -Implement Green first reminder, Add the necessary unit or integration tests but do not run any tests.
+377. in accordance with  the KB, -Implement Yellow second reminder, Add the necessary unit or integration tests but do not run any tests.
+378. in accordance with  the KB, -Implement Red third reminder, Add the necessary unit or integration tests but do not run any tests.
+379. in accordance with  the KB, -Implement likely default risk marking after Red reminder, Add the necessary unit or integration tests but do not run any tests.
+380. in accordance with  the KB, -Implement product-expiration reminders for 3 months, Add the necessary unit or integration tests but do not run any tests.
+381. in accordance with  the KB, -Implement product-expiration reminders for 6 months, Add the necessary unit or integration tests but do not run any tests.
+382. in accordance with  the KB, -Implement product-expiration reminders for 12 months, Add the necessary unit or integration tests but do not run any tests.
+383. in accordance with  the KB, -Prevent payment reminder if payment is completed, Add the necessary unit or integration tests but do not run any tests.
+384. in accordance with  the KB, -Apply eligibility and contact frequency rules to reminders, Add the necessary unit or integration tests but do not run any tests.
+385. in accordance with  the KB, -Add scheduler job for reminder processing, Add the necessary unit or integration tests but do not run any tests.
+386. in accordance with  the KB, -Add manual trigger for admin/test environment, Add the necessary unit or integration tests but do not run any tests.
+387. in accordance with  the KB, -Build Reminders screen, Add the necessary unit or integration tests but do not run any tests.
+388. in accordance with  the KB, -Add reminder level badges, Add the necessary unit or integration tests but do not run any tests.
+389. in accordance with  the KB, -Add scheduler logs, Add the necessary unit or integration tests but do not run any tests.
+.
+390. in accordance with  the KB, -Follow-up task can be created, Add the necessary unit or integration tests but do not run any tests.
+391. in accordance with  the KB, -Follow-up task can be assigned, Add the necessary unit or integration tests but do not run any tests.
+392. in accordance with  the KB, -Follow-up task can be completed, Add the necessary unit or integration tests but do not run any tests.
+393. in accordance with  the KB, -Payment due reminder is generated, Add the necessary unit or integration tests but do not run any tests.
+394. in accordance with  the KB, -Green reminder is first reminder, Add the necessary unit or integration tests but do not run any tests.
+395. in accordance with  the KB, -Yellow reminder is second reminder, Add the necessary unit or integration tests but do not run any tests.
+396. in accordance with  the KB, -Red reminder is third reminder, Add the necessary unit or integration tests but do not run any tests.
+397. in accordance with  the KB, -Payment reminder is not sent if payment is completed, Add the necessary unit or integration tests but do not run any tests.
+398. in accordance with  the KB, -Product-expiration reminder is generated 3 months before expiration, Add the necessary unit or integration tests but do not run any tests.
+399. in accordance with  the KB, -Product-expiration reminder is generated 6 months before expiration, Add the necessary unit or integration tests but do not run any tests.
+400. in accordance with  the KB, -Product-expiration reminder is generated 12 months before expiration, Add the necessary unit or integration tests but do not run any tests.
+401. in accordance with  the KB, -Reminder respects consent and contact limits, Add the necessary unit or integration tests but do not run any tests.
+402. in accordance with  the KB, -Scheduler logs reminder attempts
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+403. in accordance with  the KB, -Follow-up task documentation, Add the necessary unit or integration tests but do not run any tests.
+404. in accordance with  the KB, -Reminder scheduling documentation, Add the necessary unit or integration tests but do not run any tests.
+405. in accordance with  the KB, -Green/Yellow/Red reminder rules, Add the necessary unit or integration tests but do not run any tests.
+406. in accordance with  the KB, -Scheduler documentation, Add the necessary unit or integration tests but do not run any tests.
+407. in accordance with  the KB, ----------------Sprint 11 review notes, Add the necessary unit or integration tests but do not run any tests.
+408. in accordance with  the KB, ----------------Sprint 11 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+409. in accordance with  the KB, -Reminder logic must respect consent, payment status, expiration dates, and contact frequency limits.
+410. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 11 — Follow-Up Tasks and Reminder Scheduling
+Sprint Planning:
+The sprint goal was to implement follow-up workflows, payment reminders, Green/Yellow/Red reminder levels, product-expiration reminders, and scheduler logic. The selected work included FollowUpTask entity/repository/service/controller, follow-up assignment/status/completion, reminder schedule entity/repository/service/controller, payment due reminders, Green/Yellow/Red escalation, default-risk marking, 3/6/12-month product-expiration reminders, payment-complete exclusion, eligibility/contact-frequency rules, scheduler job, manual trigger, and reminders UI.
+Daily Scrum / Execution Summary:
+The sprint focused on operational follow-up and reminder workflows. Work progressed on follow-up tasks, assignment filters, reminder generation, escalation levels, payment and product-expiration conditions, scheduler logs, and UI badges.
+Sprint Review:
+The sprint increment demonstrated creating and assigning follow-up tasks, completing follow-ups, generating payment reminders, escalating Green/Yellow/Red reminders, generating product-expiration reminders, and preventing reminders when payment is already completed.
+Sprint Retrospective:
+What went well: follow-up and reminder workflows connected campaign outcomes to business action.
+What could improve: reminder rules should be configurable and transparent.
+Action item: move configurable contact/retry/uninterested limits into system settings in Sprint 14.
+Roadmap Update:
+Sprint 11 completed follow-up management and reminder scheduling. Related epics: BWCO-17 Follow-up management; BWCO-18 Reminder scheduling; BWCO-11 Product ownership and payment records; BWCO-24 Testing and QA.
+Evidence to Attach:
+Follow-up task screen screenshot, follow-up assignment screenshot, reminder screen screenshot, Green/Yellow/Red badge screenshot, payment reminder screenshot, product-expiration reminder screenshot, scheduler log screenshot, reminder test screenshot, Sprint 11 review note, Sprint 11 retrospective note.
+---------------Sprint 12 — Analytics and Reports
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+411. in accordance with  the KB, -Implement campaign analytics, dashboard metrics, reports, and export features.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+412. in accordance with  the KB, -Implement CampaignMetric entity, Add the necessary unit or integration tests but do not run any tests.
+413. in accordance with  the KB, -Implement CampaignMetricRepository, Add the necessary unit or integration tests but do not run any tests.
+414. in accordance with  the KB, -Implement analytics DTOs, Add the necessary unit or integration tests but do not run any tests.
+415. in accordance with  the KB, -Implement AnalyticsService, Add the necessary unit or integration tests but do not run any tests.
+416. in accordance with  the KB, -Implement AnalyticsController, Add the necessary unit or integration tests but do not run any tests.
+417. in accordance with  the KB, -Calculate audience size, Add the necessary unit or integration tests but do not run any tests.
+418. in accordance with  the KB, -Calculate eligible count, Add the necessary unit or integration tests but do not run any tests.
+419. in accordance with  the KB, -Calculate excluded count, Add the necessary unit or integration tests but do not run any tests.
+420. in accordance with  the KB, -Calculate sent count, Add the necessary unit or integration tests but do not run any tests.
+421. in accordance with  the KB, -Calculate opened count, Add the necessary unit or integration tests but do not run any tests.
+422. in accordance with  the KB, -Calculate clicked count, Add the necessary unit or integration tests but do not run any tests.
+423. in accordance with  the KB, -Calculate replied count, Add the necessary unit or integration tests but do not run any tests.
+424. in accordance with  the KB, -Calculate converted count, Add the necessary unit or integration tests but do not run any tests.
+425. in accordance with  the KB, -Calculate open rate, Add the necessary unit or integration tests but do not run any tests.
+426. in accordance with  the KB, -Calculate click rate, Add the necessary unit or integration tests but do not run any tests.
+427. in accordance with  the KB, -Calculate conversion rate, Add the necessary unit or integration tests but do not run any tests.
+428. in accordance with  the KB, -Calculate estimated cost, Add the necessary unit or integration tests but do not run any tests.
+429. in accordance with  the KB, -Calculate estimated revenue, Add the necessary unit or integration tests but do not run any tests.
+430. in accordance with  the KB, -Calculate estimated ROI, Add the necessary unit or integration tests but do not run any tests.
+431. in accordance with  the KB, -Implement dashboard endpoint, Add the necessary unit or integration tests but do not run any tests.
+432. in accordance with  the KB, -Implement campaign analytics endpoint, Add the necessary unit or integration tests but do not run any tests.
+433. in accordance with  the KB, -Implement product performance endpoint, Add the necessary unit or integration tests but do not run any tests.
+434. in accordance with  the KB, -Implement executive aggregate dashboard endpoint, Add the necessary unit or integration tests but do not run any tests.
+435. in accordance with  the KB, -Implement ReportExport entity if not completed, Add the necessary unit or integration tests but do not run any tests.
+436. in accordance with  the KB, -Implement ReportService, Add the necessary unit or integration tests but do not run any tests.
+437. in accordance with  the KB, -Add CSV campaign report export, Add the necessary unit or integration tests but do not run any tests.
+438. in accordance with  the KB, -Add PDF campaign report export, Add the necessary unit or integration tests but do not run any tests.
+439. in accordance with  the KB, -Store report export history, Add the necessary unit or integration tests but do not run any tests.
+440. in accordance with  the KB, -Build Dashboard screen, Add the necessary unit or integration tests but do not run any tests.
+441. in accordance with  the KB, -Build Analytics screen, Add the necessary unit or integration tests but do not run any tests.
+442. in accordance with  the KB, -Build Reports screen, Add the necessary unit or integration tests but do not run any tests.
+443. in accordance with  the KB, -Build executive dashboard screen, Add the necessary unit or integration tests but do not run any tests.
+444. in accordance with  the KB, -Add Recharts visualizations, Add the necessary unit or integration tests but do not run any tests.
+445. in accordance with  the KB, -Add report download UI, Add the necessary unit or integration tests but do not run any tests.
+.
+446. in accordance with  the KB, -Audience size is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+447. in accordance with  the KB, -Eligible count is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+448. in accordance with  the KB, -Excluded count is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+449. in accordance with  the KB, -Sent count updates after launch, Add the necessary unit or integration tests but do not run any tests.
+450. in accordance with  the KB, -Open/click/reply/conversion counts update from contact events, Add the necessary unit or integration tests but do not run any tests.
+451. in accordance with  the KB, -Open rate is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+452. in accordance with  the KB, -Click rate is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+453. in accordance with  the KB, -Conversion rate is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+454. in accordance with  the KB, -ROI is calculated correctly, Add the necessary unit or integration tests but do not run any tests.
+455. in accordance with  the KB, -CSV export works, Add the necessary unit or integration tests but do not run any tests.
+456. in accordance with  the KB, -PDF export works, Add the necessary unit or integration tests but do not run any tests.
+457. in accordance with  the KB, -Executive report uses aggregated data, Add the necessary unit or integration tests but do not run any tests.
+458. in accordance with  the KB, -Unauthorized user cannot export restricted reports
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+459. in accordance with  the KB, -Analytics documentation, Add the necessary unit or integration tests but do not run any tests.
+460. in accordance with  the KB, -Report export documentation, Add the necessary unit or integration tests but do not run any tests.
+461. in accordance with  the KB, -KPI definition document, Add the necessary unit or integration tests but do not run any tests.
+462. in accordance with  the KB, -BI Analyst user guide section, Add the necessary unit or integration tests but do not run any tests.
+463. in accordance with  the KB, -Executive Viewer guide section, Add the necessary unit or integration tests but do not run any tests.
+464. in accordance with  the KB, ----------------Sprint 12 review notes, Add the necessary unit or integration tests but do not run any tests.
+465. in accordance with  the KB, ----------------Sprint 12 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+466. in accordance with  the KB, -Reports should use aggregated data where possible, and metrics must be traceable to campaign recipients and contact events.
+467. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 12 — Analytics and Reports
+Sprint Planning:
+The sprint goal was to implement campaign analytics, dashboard metrics, reports, and export features. The selected work included CampaignMetric entity/repository, AnalyticsService/Controller, KPI calculations, dashboard endpoint, campaign analytics endpoint, product performance endpoint, executive aggregate dashboard, ReportExport entity, ReportService, CSV/PDF exports, export history, dashboard/analytics/reports screens, Recharts visualizations, and report download UI.
+Daily Scrum / Execution Summary:
+The sprint focused on turning campaign and communication data into business insight. Work progressed on KPI calculations, campaign metrics, analytics endpoints, report exports, dashboard UI, executive summaries, and restricted report access.
+Sprint Review:
+The sprint increment demonstrated dashboard metrics, campaign analytics, open/click/reply/conversion calculations, estimated cost/revenue/ROI, product performance view, executive dashboard, CSV report export, and PDF report export.
+Sprint Retrospective:
+What went well: analytics made campaign results visible and traceable.
+What could improve: metrics must clearly state whether they come from mock/demo events or real provider events.
+Action item: document KPI definitions and metric data sources.
+Roadmap Update:
+Sprint 12 completed analytics and reports. Related epics: BWCO-19 Analytics; BWCO-20 Reports; BWCO-24 Testing and QA.
+Evidence to Attach:
+Dashboard screenshot, analytics screen screenshot, campaign metrics screenshot, product performance screenshot, executive dashboard screenshot, CSV export screenshot, PDF export screenshot, KPI documentation screenshot, Sprint 12 review note, Sprint 12 retrospective note.
+---------------Sprint 13 — AI-Assisted Features
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+468. in accordance with  the KB, -Implement AI-assisted decision support without allowing AI to bypass compliance, consent, or human approval.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+469. in accordance with  the KB, -Implement AiRecommendation entity, Add the necessary unit or integration tests but do not run any tests.
+470. in accordance with  the KB, -Implement AiRecommendationRepository, Add the necessary unit or integration tests but do not run any tests.
+471. in accordance with  the KB, -Implement AI DTOs, Add the necessary unit or integration tests but do not run any tests.
+472. in accordance with  the KB, -Implement AiSearchService, Add the necessary unit or integration tests but do not run any tests.
+473. in accordance with  the KB, -Implement fuzzy/weighted customer search, Add the necessary unit or integration tests but do not run any tests.
+474. in accordance with  the KB, -Add explainScore output, Add the necessary unit or integration tests but do not run any tests.
+475. in accordance with  the KB, -Implement AiRecommendationService, Add the necessary unit or integration tests but do not run any tests.
+476. in accordance with  the KB, -Implement product recommendation rules, Add the necessary unit or integration tests but do not run any tests.
+477. in accordance with  the KB, -Implement segment suggestion rules, Add the necessary unit or integration tests but do not run any tests.
+478. in accordance with  the KB, -Implement default-risk scoring, Add the necessary unit or integration tests but do not run any tests.
+479. in accordance with  the KB, -Implement duplicate-contact risk warning, Add the necessary unit or integration tests but do not run any tests.
+480. in accordance with  the KB, -Implement CampaignCopyService, Add the necessary unit or integration tests but do not run any tests.
+481. in accordance with  the KB, -Implement campaign copy suggestion, Add the necessary unit or integration tests but do not run any tests.
+482. in accordance with  the KB, -Require human approval for campaign copy, Add the necessary unit or integration tests but do not run any tests.
+483. in accordance with  the KB, -Store recommendation explanation, Add the necessary unit or integration tests but do not run any tests.
+484. in accordance with  the KB, -Store confidence score if available, Add the necessary unit or integration tests but do not run any tests.
+485. in accordance with  the KB, -Add AI customer search endpoint, Add the necessary unit or integration tests but do not run any tests.
+486. in accordance with  the KB, -Add AI segment suggestions endpoint, Add the necessary unit or integration tests but do not run any tests.
+487. in accordance with  the KB, -Add AI product recommendations endpoint, Add the necessary unit or integration tests but do not run any tests.
+488. in accordance with  the KB, -Add AI campaign copy endpoint, Add the necessary unit or integration tests but do not run any tests.
+489. in accordance with  the KB, -Add duplicate-contact warning endpoint, Add the necessary unit or integration tests but do not run any tests.
+490. in accordance with  the KB, -Add AI recommendation UI sections, Add the necessary unit or integration tests but do not run any tests.
+491. in accordance with  the KB, -Add AI explanation display, Add the necessary unit or integration tests but do not run any tests.
+492. in accordance with  the KB, -Add human approval UI for campaign copy, Add the necessary unit or integration tests but do not run any tests.
+493. in accordance with  the KB, -Add AI audit notes where relevant, Add the necessary unit or integration tests but do not run any tests.
+.
+494. in accordance with  the KB, -Fuzzy search returns relevant customers, Add the necessary unit or integration tests but do not run any tests.
+495. in accordance with  the KB, -Search explanation is shown, Add the necessary unit or integration tests but do not run any tests.
+496. in accordance with  the KB, -Product recommendation returns explanation, Add the necessary unit or integration tests but do not run any tests.
+497. in accordance with  the KB, -Segment suggestion returns explanation, Add the necessary unit or integration tests but do not run any tests.
+498. in accordance with  the KB, -Default-risk scoring works from payment history, Add the necessary unit or integration tests but do not run any tests.
+499. in accordance with  the KB, -Duplicate-contact warning detects repeated contact risk, Add the necessary unit or integration tests but do not run any tests.
+500. in accordance with  the KB, -Campaign copy suggestion requires human approval, Add the necessary unit or integration tests but do not run any tests.
+501. in accordance with  the KB, -AI cannot approve campaign, Add the necessary unit or integration tests but do not run any tests.
+502. in accordance with  the KB, -AI cannot override consent, Add the necessary unit or integration tests but do not run any tests.
+503. in accordance with  the KB, -AI cannot bypass do-not-contact, Add the necessary unit or integration tests but do not run any tests.
+504. in accordance with  the KB, -AI cannot bypass EligibilityService, Add the necessary unit or integration tests but do not run any tests.
+505. in accordance with  the KB, -AI recommendation is stored with explanation
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+506. in accordance with  the KB, -AI feature documentation, Add the necessary unit or integration tests but do not run any tests.
+507. in accordance with  the KB, -AI limitations and human approval policy, Add the necessary unit or integration tests but do not run any tests.
+508. in accordance with  the KB, -AI decision-support explanation, Add the necessary unit or integration tests but do not run any tests.
+509. in accordance with  the KB, -AI test evidence, Add the necessary unit or integration tests but do not run any tests.
+510. in accordance with  the KB, ----------------Sprint 13 review notes, Add the necessary unit or integration tests but do not run any tests.
+511. in accordance with  the KB, ----------------Sprint 13 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+512. in accordance with  the KB, -AI must support human decision-making only and must never override compliance approval, consent, opt-out, do-not-contact, eligibility, or human approval rules.
+513. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 13 — AI-Assisted Features
+Sprint Planning:
+The sprint goal was to implement AI-assisted decision support without allowing AI to bypass compliance, consent, or human approval. The selected work included AiRecommendation entity/repository, AI DTOs, fuzzy customer search, explainScore output, product recommendation rules, segment suggestion rules, default-risk scoring, duplicate-contact risk warning, campaign copy suggestion, human approval requirement, recommendation explanation/confidence storage, AI endpoints, AI UI sections, and AI audit notes.
+Daily Scrum / Execution Summary:
+The sprint focused on safe AI support. Work progressed on rule-based or controlled AI decision-support features, explanation outputs, human approval requirements, and tests proving AI cannot override compliance or eligibility rules.
+Sprint Review:
+The sprint increment demonstrated fuzzy/weighted customer search, product recommendation explanations, segment suggestions, default-risk scoring, duplicate-contact warnings, and campaign copy suggestions requiring human approval before use.
+Sprint Retrospective:
+What went well: AI features were implemented as decision support, not autonomous decision-making.
+What could improve: AI explanations should remain understandable for non-technical business users.
+Action item: keep AI limitations documented and prove through tests that AI cannot bypass consent, do-not-contact, eligibility, or approval.
+Roadmap Update:
+Sprint 13 completed AI-assisted features. Related epics: BWCO-21 AI-assisted features; BWCO-24 Testing and QA.
+Evidence to Attach:
+AI search screenshot, product recommendation screenshot, segment suggestion screenshot, default-risk score screenshot, duplicate-contact warning screenshot, AI campaign copy screenshot, human approval screenshot, AI limitation documentation screenshot, AI tests screenshot, Sprint 13 review note, Sprint 13 retrospective note.
+---------------Sprint 14 — Audit Logging, Security Hardening, and System Settings
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+514. in accordance with  the KB, -Harden the system for production accountability, security, configurable business limits, and safe operation.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+515. in accordance with  the KB, -Implement AuditLog entity, Add the necessary unit or integration tests but do not run any tests.
+516. in accordance with  the KB, -Implement AuditLogRepository, Add the necessary unit or integration tests but do not run any tests.
+517. in accordance with  the KB, -Implement audit DTOs, Add the necessary unit or integration tests but do not run any tests.
+518. in accordance with  the KB, -Implement AuditService, Add the necessary unit or integration tests but do not run any tests.
+519. in accordance with  the KB, -Implement AuditController, Add the necessary unit or integration tests but do not run any tests.
+520. in accordance with  the KB, -Log user creation, Add the necessary unit or integration tests but do not run any tests.
+521. in accordance with  the KB, -Log role changes, Add the necessary unit or integration tests but do not run any tests.
+522. in accordance with  the KB, -Log user disable, Add the necessary unit or integration tests but do not run any tests.
+523. in accordance with  the KB, -Log customer deletion, Add the necessary unit or integration tests but do not run any tests.
+524. in accordance with  the KB, -Log consent changes, Add the necessary unit or integration tests but do not run any tests.
+525. in accordance with  the KB, -Log opt-out changes, Add the necessary unit or integration tests but do not run any tests.
+526. in accordance with  the KB, -Log do-not-contact changes, Add the necessary unit or integration tests but do not run any tests.
+527. in accordance with  the KB, -Log product changes, Add the necessary unit or integration tests but do not run any tests.
+528. in accordance with  the KB, -Log campaign submission, Add the necessary unit or integration tests but do not run any tests.
+529. in accordance with  the KB, -Log campaign approval/rejection, Add the necessary unit or integration tests but do not run any tests.
+530. in accordance with  the KB, -Log campaign launch, Add the necessary unit or integration tests but do not run any tests.
+531. in accordance with  the KB, -Log report exports, Add the necessary unit or integration tests but do not run any tests.
+532. in accordance with  the KB, -Build Audit Log screen, Add the necessary unit or integration tests but do not run any tests.
+533. in accordance with  the KB, -Build audit filters by actor, action, entity, date, Add the necessary unit or integration tests but do not run any tests.
+534. in accordance with  the KB, -Build System Settings screen, Add the necessary unit or integration tests but do not run any tests.
+535. in accordance with  the KB, -Add configurable monthly contact limit, Add the necessary unit or integration tests but do not run any tests.
+536. in accordance with  the KB, -Add configurable retry limit, Add the necessary unit or integration tests but do not run any tests.
+537. in accordance with  the KB, -Add configurable uninterested exclusion period, Add the necessary unit or integration tests but do not run any tests.
+538. in accordance with  the KB, -Add secure error responses, Add the necessary unit or integration tests but do not run any tests.
+539. in accordance with  the KB, -Hide stack traces in production, Add the necessary unit or integration tests but do not run any tests.
+540. in accordance with  the KB, -Add production CORS configuration, Add the necessary unit or integration tests but do not run any tests.
+541. in accordance with  the KB, -Add HTTPS production requirement, Add the necessary unit or integration tests but do not run any tests.
+542. in accordance with  the KB, -Add environment variable validation, Add the necessary unit or integration tests but do not run any tests.
+543. in accordance with  the KB, -Add secret presence validation on startup, Add the necessary unit or integration tests but do not run any tests.
+544. in accordance with  the KB, -Add login rate limiting or lockout strategy, Add the necessary unit or integration tests but do not run any tests.
+545. in accordance with  the KB, -Add backend security headers if applicable, Add the necessary unit or integration tests but do not run any tests.
+546. in accordance with  the KB, -Add API error logging without leaking secrets, Add the necessary unit or integration tests but do not run any tests.
+.
+547. in accordance with  the KB, -User creation creates audit log, Add the necessary unit or integration tests but do not run any tests.
+548. in accordance with  the KB, -Role change creates audit log, Add the necessary unit or integration tests but do not run any tests.
+549. in accordance with  the KB, -Consent change creates audit log, Add the necessary unit or integration tests but do not run any tests.
+550. in accordance with  the KB, -Campaign approval creates audit log, Add the necessary unit or integration tests but do not run any tests.
+551. in accordance with  the KB, -Campaign launch creates audit log, Add the necessary unit or integration tests but do not run any tests.
+552. in accordance with  the KB, -Audit log cannot be edited by normal users, Add the necessary unit or integration tests but do not run any tests.
+553. in accordance with  the KB, -Unauthorized user cannot view audit logs, Add the necessary unit or integration tests but do not run any tests.
+554. in accordance with  the KB, -Production error does not expose stack trace, Add the necessary unit or integration tests but do not run any tests.
+555. in accordance with  the KB, -Missing secret fails startup or shows safe configuration error, Add the necessary unit or integration tests but do not run any tests.
+556. in accordance with  the KB, -CORS is restricted in production, Add the necessary unit or integration tests but do not run any tests.
+557. in accordance with  the KB, -Configurable monthly contact limit is applied, Add the necessary unit or integration tests but do not run any tests.
+558. in accordance with  the KB, -Configurable retry limit is applied
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+559. in accordance with  the KB, -Audit logging documentation, Add the necessary unit or integration tests but do not run any tests.
+560. in accordance with  the KB, -Security hardening documentation, Add the necessary unit or integration tests but do not run any tests.
+561. in accordance with  the KB, -System settings documentation, Add the necessary unit or integration tests but do not run any tests.
+562. in accordance with  the KB, -System Auditor guide section, Add the necessary unit or integration tests but do not run any tests.
+563. in accordance with  the KB, -Production security checklist, Add the necessary unit or integration tests but do not run any tests.
+564. in accordance with  the KB, ----------------Sprint 14 review notes, Add the necessary unit or integration tests but do not run any tests.
+565. in accordance with  the KB, ----------------Sprint 14 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+566. in accordance with  the KB, -Sensitive actions must be auditable, and production must not expose secrets, stack traces, or unsafe configuration.
+567. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 14 — Audit Logging, Security Hardening, and System Settings
+Sprint Planning:
+The sprint goal was to harden the system for production accountability, security, configurable limits, and safe operation. The selected work included AuditLog entity/repository/service/controller, audit logs for sensitive actions, audit log screen and filters, system settings screen, configurable monthly contact limit, retry limit, uninterested exclusion period, secure error responses, hidden production stack traces, CORS configuration, HTTPS requirement, environment/secret validation, login lockout strategy, security headers, and safe API logging.
+Daily Scrum / Execution Summary:
+The sprint focused on accountability and production hardening. Work progressed on central audit logging, audit filters, system settings, security configuration, safe production errors, CORS/HTTPS assumptions, secret validation, and security-related tests.
+Sprint Review:
+The sprint increment demonstrated audit entries after user, role, consent, product, campaign, launch, and report actions. It also demonstrated system settings for business limits and production-safe error/security behavior.
+Sprint Retrospective:
+What went well: sensitive actions became traceable and system limits became configurable.
+What could improve: hardening must be verified again before production deployment.
+Action item: include audit/security checks in Sprint 16 full QA and Sprint 18 smoke testing.
+Roadmap Update:
+Sprint 14 completed audit logging, system settings, and security hardening. Related epics: BWCO-22 Audit logging; BWCO-23 Security hardening; BWCO-24 Testing and QA.
+Evidence to Attach:
+Audit log screen screenshot, audit filters screenshot, system settings screenshot, security config screenshot, production error screenshot, CORS/HTTPS config note screenshot, audit tests screenshot, security tests screenshot, Sprint 14 review note, Sprint 14 retrospective note.
+---------------Sprint 15 — Frontend Professionalization, UX, and Accessibility
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+568. in accordance with  the KB, -Make the application usable, professional, accessible, responsive, and role-aware for real business users.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+569. in accordance with  the KB, -Implement application shell layout, Add the necessary unit or integration tests but do not run any tests.
+570. in accordance with  the KB, -Implement sidebar navigation, Add the necessary unit or integration tests but do not run any tests.
+571. in accordance with  the KB, -Implement top bar and user menu, Add the necessary unit or integration tests but do not run any tests.
+572. in accordance with  the KB, -Implement role-based menu visibility, Add the necessary unit or integration tests but do not run any tests.
+573. in accordance with  the KB, -Implement breadcrumb or page heading strategy, Add the necessary unit or integration tests but do not run any tests.
+574. in accordance with  the KB, -Add loading states, Add the necessary unit or integration tests but do not run any tests.
+575. in accordance with  the KB, -Add empty states, Add the necessary unit or integration tests but do not run any tests.
+576. in accordance with  the KB, -Add error states, Add the necessary unit or integration tests but do not run any tests.
+577. in accordance with  the KB, -Add success notifications, Add the necessary unit or integration tests but do not run any tests.
+578. in accordance with  the KB, -Add form validation messages, Add the necessary unit or integration tests but do not run any tests.
+579. in accordance with  the KB, -Add confirmation dialogs for sensitive actions, Add the necessary unit or integration tests but do not run any tests.
+580. in accordance with  the KB, -Add status badges for campaigns, Add the necessary unit or integration tests but do not run any tests.
+581. in accordance with  the KB, -Add status badges for customers, Add the necessary unit or integration tests but do not run any tests.
+582. in accordance with  the KB, -Add consent status badges, Add the necessary unit or integration tests but do not run any tests.
+583. in accordance with  the KB, -Add reminder level badges, Add the necessary unit or integration tests but do not run any tests.
+584. in accordance with  the KB, -Add audit action badges, Add the necessary unit or integration tests but do not run any tests.
+585. in accordance with  the KB, -Add responsive layout for desktop and tablet, Add the necessary unit or integration tests but do not run any tests.
+586. in accordance with  the KB, -Check mobile minimum usability for internal use, Add the necessary unit or integration tests but do not run any tests.
+587. in accordance with  the KB, -Add keyboard navigation support, Add the necessary unit or integration tests but do not run any tests.
+588. in accordance with  the KB, -Add labels for form controls, Add the necessary unit or integration tests but do not run any tests.
+589. in accordance with  the KB, -Check color contrast, Add the necessary unit or integration tests but do not run any tests.
+590. in accordance with  the KB, -Add accessible table labels where possible, Add the necessary unit or integration tests but do not run any tests.
+591. in accordance with  the KB, -Improve dashboard readability, Add the necessary unit or integration tests but do not run any tests.
+592. in accordance with  the KB, -Improve campaign builder flow, Add the necessary unit or integration tests but do not run any tests.
+593. in accordance with  the KB, -Improve compliance review clarity, Add the necessary unit or integration tests but do not run any tests.
+594. in accordance with  the KB, -Improve recipient preview clarity, Add the necessary unit or integration tests but do not run any tests.
+595. in accordance with  the KB, -Add frontend component tests, Add the necessary unit or integration tests but do not run any tests.
+596. in accordance with  the KB, -Add frontend integration tests, Add the necessary unit or integration tests but do not run any tests.
+597. in accordance with  the KB, -Add Playwright happy-path E2E test, Add the necessary unit or integration tests but do not run any tests.
+.
+598. in accordance with  the KB, -Login flow works through UI, Add the necessary unit or integration tests but do not run any tests.
+599. in accordance with  the KB, -Customer creation works through UI, Add the necessary unit or integration tests but do not run any tests.
+600. in accordance with  the KB, -Consent update works through UI, Add the necessary unit or integration tests but do not run any tests.
+601. in accordance with  the KB, -Product creation works through UI, Add the necessary unit or integration tests but do not run any tests.
+602. in accordance with  the KB, -Segment creation works through UI, Add the necessary unit or integration tests but do not run any tests.
+603. in accordance with  the KB, -Campaign creation works through UI, Add the necessary unit or integration tests but do not run any tests.
+604. in accordance with  the KB, -Compliance approval works through UI, Add the necessary unit or integration tests but do not run any tests.
+605. in accordance with  the KB, -Campaign launch works through UI, Add the necessary unit or integration tests but do not run any tests.
+606. in accordance with  the KB, -Dashboard loads analytics, Add the necessary unit or integration tests but do not run any tests.
+607. in accordance with  the KB, -Role-based menu hides unauthorized features, Add the necessary unit or integration tests but do not run any tests.
+608. in accordance with  the KB, -Keyboard navigation works for core forms, Add the necessary unit or integration tests but do not run any tests.
+609. in accordance with  the KB, -Main screens pass basic accessibility checks
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+610. in accordance with  the KB, -UI style notes, Add the necessary unit or integration tests but do not run any tests.
+611. in accordance with  the KB, -Accessibility notes, Add the necessary unit or integration tests but do not run any tests.
+612. in accordance with  the KB, -Frontend testing notes, Add the necessary unit or integration tests but do not run any tests.
+613. in accordance with  the KB, -Core workflow screenshots, Add the necessary unit or integration tests but do not run any tests.
+614. in accordance with  the KB, ----------------Sprint 15 review notes, Add the necessary unit or integration tests but do not run any tests.
+615. in accordance with  the KB, ----------------Sprint 15 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+616. in accordance with  the KB, -A business user should be able to complete core workflows without developer help.
+617. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 15 — Frontend Professionalization, UX, and Accessibility
+Sprint Planning:
+The sprint goal was to make the application usable, professional, accessible, responsive, and role-aware for internal business users. The selected work included application shell layout, sidebar navigation, top bar/user menu, role-based menu visibility, breadcrumbs/page headings, loading/empty/error states, success notifications, form validation messages, confirmation dialogs, status badges, responsive layout, keyboard navigation, labels, contrast checks, dashboard/campaign/compliance/recipient preview improvements, frontend component tests, integration tests, and Playwright happy-path E2E test.
+Daily Scrum / Execution Summary:
+The sprint focused on improving the frontend from functional screens into a professional business application. Work progressed on navigation, states, badges, confirmation dialogs, accessibility basics, readability, role-aware UI behavior, and frontend tests.
+Sprint Review:
+The sprint increment demonstrated the main workflows through the UI: login, customer creation, consent update, product creation, segment creation, campaign creation, compliance approval, campaign launch, and dashboard viewing.
+Sprint Retrospective:
+What went well: the application became easier to use and more demo-ready.
+What could improve: accessibility and UI consistency should be checked again after final integration.
+Action item: include happy-path E2E evidence and core workflow screenshots in the final report appendix.
+Roadmap Update:
+Sprint 15 completed frontend professionalization and accessibility improvements. Related epics: BWCO-5 Frontend foundation; BWCO-23 Security hardening; BWCO-24 Testing and QA.
+Evidence to Attach:
+Application layout screenshot, role-based navigation screenshot, form validation screenshot, confirmation dialog screenshot, status badge screenshot, responsive layout screenshot, accessibility check screenshot, Playwright E2E screenshot, Sprint 15 review note, Sprint 15 retrospective note.
+---------------Sprint 16 — Full Test Suite and Quality Assurance
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+618. in accordance with  the KB, -Verify the system against functional, non-functional, security, business-rule, compliance, and production-readiness requirements.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+619. in accordance with  the KB, -Create master test plan, Add the necessary unit or integration tests but do not run any tests.
+620. in accordance with  the KB, -Map tests to KB functional requirements, Add the necessary unit or integration tests but do not run any tests.
+621. in accordance with  the KB, -Map tests to KB business rules, Add the necessary unit or integration tests but do not run any tests.
+622. in accordance with  the KB, -Map tests to non-functional requirements, Add the necessary unit or integration tests but do not run any tests.
+623. in accordance with  the KB, -Run backend unit tests, Add the necessary unit or integration tests but do not run any tests.
+624. in accordance with  the KB, -Run repository tests, Add the necessary unit or integration tests but do not run any tests.
+625. in accordance with  the KB, -Run integration tests with Testcontainers, Add the necessary unit or integration tests but do not run any tests.
+626. in accordance with  the KB, -Run API tests, Add the necessary unit or integration tests but do not run any tests.
+627. in accordance with  the KB, -Run role-based access tests, Add the necessary unit or integration tests but do not run any tests.
+628. in accordance with  the KB, -Run consent and eligibility tests, Add the necessary unit or integration tests but do not run any tests.
+629. in accordance with  the KB, -Run campaign workflow tests, Add the necessary unit or integration tests but do not run any tests.
+630. in accordance with  the KB, -Run reminder tests, Add the necessary unit or integration tests but do not run any tests.
+631. in accordance with  the KB, -Run analytics tests, Add the necessary unit or integration tests but do not run any tests.
+632. in accordance with  the KB, -Run report export tests, Add the necessary unit or integration tests but do not run any tests.
+633. in accordance with  the KB, -Run audit log tests, Add the necessary unit or integration tests but do not run any tests.
+634. in accordance with  the KB, -Run AI rule tests, Add the necessary unit or integration tests but do not run any tests.
+635. in accordance with  the KB, -Run frontend component tests, Add the necessary unit or integration tests but do not run any tests.
+636. in accordance with  the KB, -Run frontend integration tests, Add the necessary unit or integration tests but do not run any tests.
+637. in accordance with  the KB, -Run E2E happy-path tests, Add the necessary unit or integration tests but do not run any tests.
+638. in accordance with  the KB, -Run accessibility checks, Add the necessary unit or integration tests but do not run any tests.
+639. in accordance with  the KB, -Run performance smoke checks for search and dashboard, Add the necessary unit or integration tests but do not run any tests.
+640. in accordance with  the KB, -Run security regression tests, Add the necessary unit or integration tests but do not run any tests.
+641. in accordance with  the KB, -Fix failing tests, Add the necessary unit or integration tests but do not run any tests.
+642. in accordance with  the KB, -Re-run full test suite, Add the necessary unit or integration tests but do not run any tests.
+643. in accordance with  the KB, -Write test report, Add the necessary unit or integration tests but do not run any tests.
+644. in accordance with  the KB, -Capture test screenshots, Add the necessary unit or integration tests but do not run any tests.
+645. in accordance with  the KB, -Capture E2E screenshots, Add the necessary unit or integration tests but do not run any tests.
+646. in accordance with  the KB, -Tag release candidate if tests pass, Add the necessary unit or integration tests but do not run any tests.
+Critical Tests, Add the necessary unit or integration tests but do not run any tests.
+647. in accordance with  the KB, -Campaign cannot launch without approval, Add the necessary unit or integration tests but do not run any tests.
+648. in accordance with  the KB, -Customer with do_not_contact is excluded, Add the necessary unit or integration tests but do not run any tests.
+649. in accordance with  the KB, -Customer without valid consent is excluded, Add the necessary unit or integration tests but do not run any tests.
+650. in accordance with  the KB, -Minor beneficiary without guardian consent is excluded, Add the necessary unit or integration tests but do not run any tests.
+651. in accordance with  the KB, -Same customer cannot be duplicated in same campaign, Add the necessary unit or integration tests but do not run any tests.
+652. in accordance with  the KB, -Customer cannot exceed monthly contact limit, Add the necessary unit or integration tests but do not run any tests.
+653. in accordance with  the KB, -Product Manager cannot launch campaigns, Add the necessary unit or integration tests but do not run any tests.
+654. in accordance with  the KB, -BI Analyst cannot edit customers, Add the necessary unit or integration tests but do not run any tests.
+655. in accordance with  the KB, -Compliance Officer can approve/reject campaigns, Add the necessary unit or integration tests but do not run any tests.
+656. in accordance with  the KB, -Contact events update analytics, Add the necessary unit or integration tests but do not run any tests.
+657. in accordance with  the KB, -Soft-deleted customers do not appear in active lists, Add the necessary unit or integration tests but do not run any tests.
+658. in accordance with  the KB, -Audit log is created after consent change, Add the necessary unit or integration tests but do not run any tests.
+659. in accordance with  the KB, -Disabled user cannot log in, Add the necessary unit or integration tests but do not run any tests.
+660. in accordance with  the KB, -Payment reminder is not sent if payment is completed, Add the necessary unit or integration tests but do not run any tests.
+661. in accordance with  the KB, -AI recommendation cannot bypass consent rules, Add the necessary unit or integration tests but do not run any tests.
+662. in accordance with  the KB, -AI-generated campaign copy requires human approval, Add the necessary unit or integration tests but do not run any tests.
+663. in accordance with  the KB, -Report export is restricted to authorized roles, Add the necessary unit or integration tests but do not run any tests.
+664. in accordance with  the KB, -Production profile hides stack traces, Add the necessary unit or integration tests but do not run any tests.
+665. in accordance with  the KB, -Missing secrets are detected, Add the necessary unit or integration tests but do not run any tests.
+666. in accordance with  the KB, -Backup and restore process is documented and testable
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+667. in accordance with  the KB, -Master test plan, Add the necessary unit or integration tests but do not run any tests.
+668. in accordance with  the KB, -Test report, Add the necessary unit or integration tests but do not run any tests.
+669. in accordance with  the KB, -Critical test evidence, Add the necessary unit or integration tests but do not run any tests.
+670. in accordance with  the KB, -Requirement-to-test traceability matrix, Add the necessary unit or integration tests but do not run any tests.
+671. in accordance with  the KB, -QA summary for report, Add the necessary unit or integration tests but do not run any tests.
+672. in accordance with  the KB, ----------------Sprint 16 review notes, Add the necessary unit or integration tests but do not run any tests.
+673. in accordance with  the KB, ----------------Sprint 16 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+674. in accordance with  the KB, -No release candidate is allowed if critical business-rule, security, consent, authorization, audit, or campaign approval tests fail.
+675. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 16 — Full Test Suite and Quality Assurance
+Sprint Planning:
+The sprint goal was to verify the system against functional, non-functional, security, business-rule, compliance, and production-readiness requirements. The selected work included master test plan, backend unit tests, repository tests, integration tests, API tests, role-based access tests, consent/eligibility tests, campaign workflow tests, reminder tests, analytics tests, report export tests, audit log tests, frontend tests, E2E tests, accessibility checks, fixing failing tests, writing test report, capturing test screenshots, requirement-to-test traceability, and release-candidate tagging.
+Daily Scrum / Execution Summary:
+The sprint focused on validation rather than new feature development. Work progressed on running test suites, fixing failures, documenting critical test evidence, checking compliance/business rules, and preparing the release candidate.
+Sprint Review:
+The sprint increment demonstrated passing critical tests such as campaign cannot launch without approval, do-not-contact exclusion, missing consent exclusion, guardian consent exclusion, duplicate prevention, monthly contact limit, role restrictions, audit logging, payment reminder blocking, and AI not bypassing consent.
+Sprint Retrospective:
+What went well: quality evidence was consolidated before CI/CD and deployment.
+What could improve: any failing or weak tests should be fixed before release.
+Action item: do not proceed to production release unless critical tests pass.
+Roadmap Update:
+Sprint 16 completed full QA and release-candidate validation. Related epics: BWCO-24 Testing and quality assurance; BWCO-23 Security hardening.
+Evidence to Attach:
+Master test plan screenshot, backend test result screenshot, frontend test result screenshot, integration test screenshot, E2E test screenshot, critical tests screenshot, accessibility check screenshot, test report screenshot, release candidate screenshot, Sprint 16 review note, Sprint 16 retrospective note.
+---------------Sprint 17 — CI/CD and Deployment Automation
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+676. in accordance with  the KB, -Automate build, test, packaging, and release preparation.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+677. in accordance with  the KB, -Add GitHub Actions workflow, Add the necessary unit or integration tests but do not run any tests.
+678. in accordance with  the KB, -Add backend build job, Add the necessary unit or integration tests but do not run any tests.
+679. in accordance with  the KB, -Add backend test job, Add the necessary unit or integration tests but do not run any tests.
+680. in accordance with  the KB, -Add backend integration test job if feasible, Add the necessary unit or integration tests but do not run any tests.
+681. in accordance with  the KB, -Add frontend install job, Add the necessary unit or integration tests but do not run any tests.
+682. in accordance with  the KB, -Add frontend lint job, Add the necessary unit or integration tests but do not run any tests.
+683. in accordance with  the KB, -Add frontend test job, Add the necessary unit or integration tests but do not run any tests.
+684. in accordance with  the KB, -Add frontend build job, Add the necessary unit or integration tests but do not run any tests.
+685. in accordance with  the KB, -Add Docker backend image build, Add the necessary unit or integration tests but do not run any tests.
+686. in accordance with  the KB, -Add Docker frontend image build, Add the necessary unit or integration tests but do not run any tests.
+687. in accordance with  the KB, -Add Docker Compose validation, Add the necessary unit or integration tests but do not run any tests.
+688. in accordance with  the KB, -Add environment variable template, Add the necessary unit or integration tests but do not run any tests.
+689. in accordance with  the KB, -Add secrets documentation, Add the necessary unit or integration tests but do not run any tests.
+690. in accordance with  the KB, -Add production config validation step, Add the necessary unit or integration tests but do not run any tests.
+691. in accordance with  the KB, -Add release artifact generation, Add the necessary unit or integration tests but do not run any tests.
+692. in accordance with  the KB, -Add CI badge to README, Add the necessary unit or integration tests but do not run any tests.
+693. in accordance with  the KB, -Verify pipeline fails when tests fail, Add the necessary unit or integration tests but do not run any tests.
+694. in accordance with  the KB, -Verify pipeline passes on clean main branch, Add the necessary unit or integration tests but do not run any tests.
+695. in accordance with  the KB, -Add branch protection recommendation, Add the necessary unit or integration tests but do not run any tests.
+696. in accordance with  the KB, -Add release tagging process, Add the necessary unit or integration tests but do not run any tests.
+697. in accordance with  the KB, -Add deployment workflow placeholder, Add the necessary unit or integration tests but do not run any tests.
+.
+698. in accordance with  the KB, -CI runs on pull request, Add the necessary unit or integration tests but do not run any tests.
+699. in accordance with  the KB, -CI runs on main branch, Add the necessary unit or integration tests but do not run any tests.
+700. in accordance with  the KB, -Backend build passes, Add the necessary unit or integration tests but do not run any tests.
+701. in accordance with  the KB, -Backend tests pass, Add the necessary unit or integration tests but do not run any tests.
+702. in accordance with  the KB, -Frontend lint passes, Add the necessary unit or integration tests but do not run any tests.
+703. in accordance with  the KB, -Frontend tests pass, Add the necessary unit or integration tests but do not run any tests.
+704. in accordance with  the KB, -Frontend build passes, Add the necessary unit or integration tests but do not run any tests.
+705. in accordance with  the KB, -Docker images build successfully, Add the necessary unit or integration tests but do not run any tests.
+706. in accordance with  the KB, -Pipeline fails on intentionally broken test, Add the necessary unit or integration tests but do not run any tests.
+707. in accordance with  the KB, -Pipeline passes on clean main branch
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+708. in accordance with  the KB, -CI/CD documentation, Add the necessary unit or integration tests but do not run any tests.
+709. in accordance with  the KB, -Environment variable documentation, Add the necessary unit or integration tests but do not run any tests.
+710. in accordance with  the KB, -Secrets documentation, Add the necessary unit or integration tests but do not run any tests.
+711. in accordance with  the KB, -Release tagging guide, Add the necessary unit or integration tests but do not run any tests.
+712. in accordance with  the KB, ----------------Sprint 17 review notes, Add the necessary unit or integration tests but do not run any tests.
+713. in accordance with  the KB, ----------------Sprint 17 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+714. in accordance with  the KB, -The main branch must not be considered releasable unless CI passes.
+715. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 17 — CI/CD and Deployment Automation
+Sprint Planning:
+The sprint goal was to automate build, test, packaging, and deployment preparation. The selected work included GitHub Actions workflow, backend build/test jobs, frontend install/lint/test/build jobs, Docker backend/frontend image builds, Docker Compose validation, environment variable template, secrets documentation, deployment workflow placeholder, release artifact generation, CI badge, and pipeline failure/pass verification.
+Daily Scrum / Execution Summary:
+The sprint focused on automating repeatable delivery. Work progressed on CI pipeline setup, automated build/test checks, Docker image preparation, environment documentation, release artifacts, and validation that the pipeline fails on broken tests and passes on a clean main branch.
+Sprint Review:
+The sprint increment demonstrated a passing CI pipeline from a clean commit, automated frontend/backend checks, Docker image build preparation, and release artifact generation.
+Sprint Retrospective:
+What went well: delivery became more repeatable and less manual.
+What could improve: deployment automation can be expanded after the production environment is finalized.
+Action item: keep main branch protected by passing CI before release.
+Roadmap Update:
+Sprint 17 completed CI/CD and deployment automation preparation. Related epics: BWCO-25 CI/CD; BWCO-23 Security hardening.
+Evidence to Attach:
+GitHub Actions workflow screenshot, passing pipeline screenshot, failing pipeline test screenshot, Docker build screenshot, environment template screenshot, CI badge screenshot, release artifact screenshot, Sprint 17 review note, Sprint 17 retrospective note.
+---------------Sprint 18 — Production Deployment and Operations
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+716. in accordance with  the KB, -Deploy the system in a production-ready environment with security, backup, restore, logging, smoke testing, and rollback safeguards.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+717. in accordance with  the KB, -Create production Docker Compose file, Add the necessary unit or integration tests but do not run any tests.
+718. in accordance with  the KB, -Configure production backend environment, Add the necessary unit or integration tests but do not run any tests.
+719. in accordance with  the KB, -Configure production frontend environment, Add the necessary unit or integration tests but do not run any tests.
+720. in accordance with  the KB, -Configure PostgreSQL production volume, Add the necessary unit or integration tests but do not run any tests.
+721. in accordance with  the KB, -Configure reverse proxy with Nginx or Caddy, Add the necessary unit or integration tests but do not run any tests.
+722. in accordance with  the KB, -Configure HTTPS, Add the necessary unit or integration tests but do not run any tests.
+723. in accordance with  the KB, -Configure production CORS, Add the necessary unit or integration tests but do not run any tests.
+724. in accordance with  the KB, -Configure secure JWT/session secret, Add the necessary unit or integration tests but do not run any tests.
+725. in accordance with  the KB, -Configure database credentials through environment variables, Add the necessary unit or integration tests but do not run any tests.
+726. in accordance with  the KB, -Configure real email provider or disable sending until configured, Add the necessary unit or integration tests but do not run any tests.
+727. in accordance with  the KB, -Configure real SMS provider or disable sending until configured, Add the necessary unit or integration tests but do not run any tests.
+728. in accordance with  the KB, -Configure file storage for consent evidence, Add the necessary unit or integration tests but do not run any tests.
+729. in accordance with  the KB, -Configure production logging, Add the necessary unit or integration tests but do not run any tests.
+730. in accordance with  the KB, -Configure scheduler logging, Add the necessary unit or integration tests but do not run any tests.
+731. in accordance with  the KB, -Enable health endpoint, Add the necessary unit or integration tests but do not run any tests.
+732. in accordance with  the KB, -Create admin bootstrap process, Add the necessary unit or integration tests but do not run any tests.
+733. in accordance with  the KB, -Configure database backup, Add the necessary unit or integration tests but do not run any tests.
+734. in accordance with  the KB, -Document database restore process, Add the necessary unit or integration tests but do not run any tests.
+735. in accordance with  the KB, -Test backup creation, Add the necessary unit or integration tests but do not run any tests.
+736. in accordance with  the KB, -Test restore process in non-production environment, Add the necessary unit or integration tests but do not run any tests.
+737. in accordance with  the KB, -Create production smoke test checklist, Add the necessary unit or integration tests but do not run any tests.
+738. in accordance with  the KB, -Run smoke tests after deployment, Add the necessary unit or integration tests but do not run any tests.
+739. in accordance with  the KB, -Create rollback plan, Add the necessary unit or integration tests but do not run any tests.
+740. in accordance with  the KB, -Create incident response notes, Add the necessary unit or integration tests but do not run any tests.
+741. in accordance with  the KB, -Create operational monitoring notes, Add the necessary unit or integration tests but do not run any tests.
+742. in accordance with  the KB, -Create v1.0 release notes draft, Add the necessary unit or integration tests but do not run any tests.
+743. in accordance with  the KB, -Capture deployment screenshots, Add the necessary unit or integration tests but do not run any tests.
+Smoke Test Checklist, Add the necessary unit or integration tests but do not run any tests.
+744. in accordance with  the KB, -Application loads over HTTPS, Add the necessary unit or integration tests but do not run any tests.
+745. in accordance with  the KB, -Admin can log in, Add the necessary unit or integration tests but do not run any tests.
+746. in accordance with  the KB, -Admin can create user, Add the necessary unit or integration tests but do not run any tests.
+747. in accordance with  the KB, -Customer Service Agent can create customer, Add the necessary unit or integration tests but do not run any tests.
+748. in accordance with  the KB, -Consent can be recorded, Add the necessary unit or integration tests but do not run any tests.
+749. in accordance with  the KB, -Product Manager can create product, Add the necessary unit or integration tests but do not run any tests.
+750. in accordance with  the KB, -Campaign Manager can create segment, Add the necessary unit or integration tests but do not run any tests.
+751. in accordance with  the KB, -Campaign Manager can create campaign, Add the necessary unit or integration tests but do not run any tests.
+752. in accordance with  the KB, -Compliance Officer can approve campaign, Add the necessary unit or integration tests but do not run any tests.
+753. in accordance with  the KB, -Campaign Manager can launch approved campaign, Add the necessary unit or integration tests but do not run any tests.
+754. in accordance with  the KB, -Contact event is recorded, Add the necessary unit or integration tests but do not run any tests.
+755. in accordance with  the KB, -Analytics dashboard updates, Add the necessary unit or integration tests but do not run any tests.
+756. in accordance with  the KB, -Audit log records sensitive action, Add the necessary unit or integration tests but do not run any tests.
+757. in accordance with  the KB, -Backup exists, Add the necessary unit or integration tests but do not run any tests.
+758. in accordance with  the KB, -Logs are accessible, Add the necessary unit or integration tests but do not run any tests.
+759. in accordance with  the KB, -Unauthorized user cannot access restricted page/API
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+760. in accordance with  the KB, -Production deployment guide, Add the necessary unit or integration tests but do not run any tests.
+761. in accordance with  the KB, -Backup guide, Add the necessary unit or integration tests but do not run any tests.
+762. in accordance with  the KB, -Restore guide, Add the necessary unit or integration tests but do not run any tests.
+763. in accordance with  the KB, -Smoke test checklist, Add the necessary unit or integration tests but do not run any tests.
+764. in accordance with  the KB, -Rollback plan, Add the necessary unit or integration tests but do not run any tests.
+765. in accordance with  the KB, -Operations guide, Add the necessary unit or integration tests but do not run any tests.
+766. in accordance with  the KB, -Incident notes, Add the necessary unit or integration tests but do not run any tests.
+767. in accordance with  the KB, -v1.0 release notes, Add the necessary unit or integration tests but do not run any tests.
+768. in accordance with  the KB, ----------------Sprint 18 review notes, Add the necessary unit or integration tests but do not run any tests.
+769. in accordance with  the KB, ----------------Sprint 18 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+770. in accordance with  the KB, -Production release is allowed only after smoke tests, backups, security configuration, environment configuration, provider configuration policy, rollback plan, and critical workflows pass.
+771. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 18 — Production Deployment and Operations
+Sprint Planning:
+The sprint goal was to deploy the system in a production-ready environment with operational safeguards. The selected work included production Docker Compose, backend/frontend production environments, PostgreSQL production volume, reverse proxy, HTTPS, production CORS, secure JWT/session secret, real email provider or disabled sending, file storage for consent evidence, database backup/restore, health endpoint, application/scheduler logs, admin bootstrap, smoke test checklist, smoke tests, rollback plan, release creation, deployment guide, backup guide, restore guide, operations guide, and incident notes.
+Daily Scrum / Execution Summary:
+The sprint focused on operational readiness. Work progressed on production configuration, deployment setup, database persistence, reverse proxy/HTTPS assumptions, provider configuration safety, logging, backup/restore documentation, smoke testing, and rollback planning.
+Sprint Review:
+The sprint increment demonstrated production deployment or production-like deployment, health endpoint availability, application logs, scheduler logs, backup evidence, restore documentation, smoke test completion, and v1.0 release preparation.
+Sprint Retrospective:
+What went well: deployment and operations were documented instead of being treated as informal setup.
+What could improve: real external provider integration remains a production configuration concern.
+Action item: keep production sending disabled unless real provider credentials and compliance approvals are configured.
+Roadmap Update:
+Sprint 18 completed production deployment and operations readiness. Related epics: BWCO-26 Production deployment; BWCO-23 Security hardening.
+Evidence to Attach:
+Production Docker Compose screenshot, deployment running screenshot, reverse proxy/HTTPS screenshot or config note, health endpoint screenshot, application logs screenshot, scheduler logs screenshot, backup screenshot, smoke test checklist screenshot, rollback plan screenshot, release screenshot, Sprint 18 review note, Sprint 18 retrospective note.
+---------------Sprint 19 — Final Documentation, Demo, University Report, and Launch Evidence
+---------------Sprint Goal, Add the necessary unit or integration tests but do not run any tests.
+772. in accordance with  the KB, -Prepare the final delivery package, production launch evidence, user documentation, technical documentation, diagrams, Scrum evidence, testing evidence, and university report.
+---------------Sprint Backlog, Add the necessary unit or integration tests but do not run any tests.
+773. in accordance with  the KB, -Update README, Add the necessary unit or integration tests but do not run any tests.
+774. in accordance with  the KB, -Write setup guide, Add the necessary unit or integration tests but do not run any tests.
+775. in accordance with  the KB, -Write deployment guide, Add the necessary unit or integration tests but do not run any tests.
+776. in accordance with  the KB, -Write user manual, Add the necessary unit or integration tests but do not run any tests.
+777. in accordance with  the KB, -Write admin manual, Add the necessary unit or integration tests but do not run any tests.
+778. in accordance with  the KB, -Write operations manual, Add the necessary unit or integration tests but do not run any tests.
+779. in accordance with  the KB, -Write API documentation, Add the necessary unit or integration tests but do not run any tests.
+780. in accordance with  the KB, -Export OpenAPI/Swagger documentation, Add the necessary unit or integration tests but do not run any tests.
+781. in accordance with  the KB, -Prepare final demo dataset, Add the necessary unit or integration tests but do not run any tests.
+782. in accordance with  the KB, -Create final demo script, Add the necessary unit or integration tests but do not run any tests.
+783. in accordance with  the KB, -Capture screenshots of login, Add the necessary unit or integration tests but do not run any tests.
+784. in accordance with  the KB, -Capture screenshots of user management, Add the necessary unit or integration tests but do not run any tests.
+785. in accordance with  the KB, -Capture screenshots of customer management, Add the necessary unit or integration tests but do not run any tests.
+786. in accordance with  the KB, -Capture screenshots of beneficiary management, Add the necessary unit or integration tests but do not run any tests.
+787. in accordance with  the KB, -Capture screenshots of consent management, Add the necessary unit or integration tests but do not run any tests.
+788. in accordance with  the KB, -Capture screenshots of product management, Add the necessary unit or integration tests but do not run any tests.
+789. in accordance with  the KB, -Capture screenshots of segmentation, Add the necessary unit or integration tests but do not run any tests.
+790. in accordance with  the KB, -Capture screenshots of campaign builder, Add the necessary unit or integration tests but do not run any tests.
+791. in accordance with  the KB, -Capture screenshots of recipient preview, Add the necessary unit or integration tests but do not run any tests.
+792. in accordance with  the KB, -Capture screenshots of compliance review, Add the necessary unit or integration tests but do not run any tests.
+793. in accordance with  the KB, -Capture screenshots of campaign launch, Add the necessary unit or integration tests but do not run any tests.
+794. in accordance with  the KB, -Capture screenshots of contact history, Add the necessary unit or integration tests but do not run any tests.
+795. in accordance with  the KB, -Capture screenshots of reminders, Add the necessary unit or integration tests but do not run any tests.
+796. in accordance with  the KB, -Capture screenshots of analytics, Add the necessary unit or integration tests but do not run any tests.
+797. in accordance with  the KB, -Capture screenshots of reports, Add the necessary unit or integration tests but do not run any tests.
+798. in accordance with  the KB, -Capture screenshots of AI features, Add the necessary unit or integration tests but do not run any tests.
+799. in accordance with  the KB, -Capture screenshots of audit logs, Add the necessary unit or integration tests but do not run any tests.
+800. in accordance with  the KB, -Capture screenshots of Jira backlog, Add the necessary unit or integration tests but do not run any tests.
+801. in accordance with  the KB, -Capture screenshots of Jira ---------------Sprint board, Add the necessary unit or integration tests but do not run any tests.
+802. in accordance with  the KB, -Capture screenshots of Jira completed ---------------Sprint, Add the necessary unit or integration tests but do not run any tests.
+803. in accordance with  the KB, -Capture screenshots of Jira release plan, Add the necessary unit or integration tests but do not run any tests.
+804. in accordance with  the KB, -Capture ---------------Sprint review notes, Add the necessary unit or integration tests but do not run any tests.
+805. in accordance with  the KB, -Capture retrospective notes, Add the necessary unit or integration tests but do not run any tests.
+806. in accordance with  the KB, -Capture test results, Add the necessary unit or integration tests but do not run any tests.
+807. in accordance with  the KB, -Prepare use-case diagram, Add the necessary unit or integration tests but do not run any tests.
+808. in accordance with  the KB, -Prepare campaign creation activity diagram, Add the necessary unit or integration tests but do not run any tests.
+809. in accordance with  the KB, -Prepare consent and eligibility activity diagram, Add the necessary unit or integration tests but do not run any tests.
+810. in accordance with  the KB, -Prepare campaign launch sequence diagram, Add the necessary unit or integration tests but do not run any tests.
+811. in accordance with  the KB, -Prepare ERD, Add the necessary unit or integration tests but do not run any tests.
+812. in accordance with  the KB, -Prepare backend class diagram, Add the necessary unit or integration tests but do not run any tests.
+813. in accordance with  the KB, -Prepare system architecture diagram, Add the necessary unit or integration tests but do not run any tests.
+814. in accordance with  the KB, -Prepare deployment diagram, Add the necessary unit or integration tests but do not run any tests.
+815. in accordance with  the KB, -Prepare release plan evidence, Add the necessary unit or integration tests but do not run any tests.
+816. in accordance with  the KB, -Prepare product backlog evidence, Add the necessary unit or integration tests but do not run any tests.
+817. in accordance with  the KB, -Prepare user-story map evidence, Add the necessary unit or integration tests but do not run any tests.
+818. in accordance with  the KB, -Prepare risk register, Add the necessary unit or integration tests but do not run any tests.
+819. in accordance with  the KB, -Prepare decision log, Add the necessary unit or integration tests but do not run any tests.
+820. in accordance with  the KB, -Write final university project report, Add the necessary unit or integration tests but do not run any tests.
+821. in accordance with  the KB, -Add implementation evidence to appendices, Add the necessary unit or integration tests but do not run any tests.
+822. in accordance with  the KB, -Add testing evidence to appendices, Add the necessary unit or integration tests but do not run any tests.
+823. in accordance with  the KB, -Add Scrum process evidence to appendices, Add the necessary unit or integration tests but do not run any tests.
+824. in accordance with  the KB, -Add deployment evidence to appendices, Add the necessary unit or integration tests but do not run any tests.
+825. in accordance with  the KB, -Add release evidence to appendices, Add the necessary unit or integration tests but do not run any tests.
+826. in accordance with  the KB, -Add diagram evidence to appendices, Add the necessary unit or integration tests but do not run any tests.
+827. in accordance with  the KB, -Proofread final report, Add the necessary unit or integration tests but do not run any tests.
+828. in accordance with  the KB, -Verify final submission package, Add the necessary unit or integration tests but do not run any tests.
+829. in accordance with  the KB, -Tag final v1.0 release, Add the necessary unit or integration tests but do not run any tests.
+830. in accordance with  the KB, -Prepare final handover checklist, Add the necessary unit or integration tests but do not run any tests.
+Final Demo Flow, Add the necessary unit or integration tests but do not run any tests.
+831. in accordance with  the KB, -Admin logs in, Add the necessary unit or integration tests but do not run any tests.
+832. in accordance with  the KB, -Admin creates internal users and assigns roles, Add the necessary unit or integration tests but do not run any tests.
+833. in accordance with  the KB, -Customer Service Agent creates a policyholder, Add the necessary unit or integration tests but do not run any tests.
+834. in accordance with  the KB, -Customer Service Agent creates a beneficiary/grandchild, Add the necessary unit or integration tests but do not run any tests.
+835. in accordance with  the KB, -Customer Service Agent records consent, Add the necessary unit or integration tests but do not run any tests.
+836. in accordance with  the KB, -Product Manager creates homeowner insurance and investment fund products, Add the necessary unit or integration tests but do not run any tests.
+837. in accordance with  the KB, -Customer Service Agent assigns existing product ownership, Add the necessary unit or integration tests but do not run any tests.
+838. in accordance with  the KB, -Campaign Manager creates a segment, Add the necessary unit or integration tests but do not run any tests.
+839. in accordance with  the KB, -System previews eligible and excluded contacts, Add the necessary unit or integration tests but do not run any tests.
+840. in accordance with  the KB, -Campaign Manager creates campaign, Add the necessary unit or integration tests but do not run any tests.
+841. in accordance with  the KB, -Campaign Manager submits campaign for approval, Add the necessary unit or integration tests but do not run any tests.
+842. in accordance with  the KB, -Compliance Officer reviews recipients and consent, Add the necessary unit or integration tests but do not run any tests.
+843. in accordance with  the KB, -Compliance Officer approves campaign, Add the necessary unit or integration tests but do not run any tests.
+844. in accordance with  the KB, -Campaign Manager launches campaign, Add the necessary unit or integration tests but do not run any tests.
+845. in accordance with  the KB, -System records contact events, Add the necessary unit or integration tests but do not run any tests.
+846. in accordance with  the KB, -System prevents duplicate/excessive contact, Add the necessary unit or integration tests but do not run any tests.
+847. in accordance with  the KB, -Sales/Customer Service creates follow-up task, Add the necessary unit or integration tests but do not run any tests.
+848. in accordance with  the KB, -Reminder schedule is generated, Add the necessary unit or integration tests but do not run any tests.
+849. in accordance with  the KB, -BI Analyst views campaign analytics, Add the necessary unit or integration tests but do not run any tests.
+850. in accordance with  the KB, -Executive Viewer views aggregated report, Add the necessary unit or integration tests but do not run any tests.
+851. in accordance with  the KB, -Auditor views audit logs
+Documentation, Add the necessary unit or integration tests but do not run any tests.
+852. in accordance with  the KB, -README, Add the necessary unit or integration tests but do not run any tests.
+853. in accordance with  the KB, -Setup guide, Add the necessary unit or integration tests but do not run any tests.
+854. in accordance with  the KB, -Deployment guide, Add the necessary unit or integration tests but do not run any tests.
+855. in accordance with  the KB, -User manual, Add the necessary unit or integration tests but do not run any tests.
+856. in accordance with  the KB, -Admin manual, Add the necessary unit or integration tests but do not run any tests.
+857. in accordance with  the KB, -Operations manual, Add the necessary unit or integration tests but do not run any tests.
+858. in accordance with  the KB, -API documentation, Add the necessary unit or integration tests but do not run any tests.
+859. in accordance with  the KB, -Demo script, Add the necessary unit or integration tests but do not run any tests.
+860. in accordance with  the KB, -Final report, Add the necessary unit or integration tests but do not run any tests.
+861. in accordance with  the KB, -Final delivery package checklist, Add the necessary unit or integration tests but do not run any tests.
+862. in accordance with  the KB, ----------------Sprint 19 review notes, Add the necessary unit or integration tests but do not run any tests.
+863. in accordance with  the KB, ----------------Sprint 19 retrospective notes
+Production Gate, Add the necessary unit or integration tests but do not run any tests.
+864. in accordance with  the KB, -Documentation must allow another developer, evaluator, or operations person to understand, run, test, deploy, review, and maintain the system.
+865. IN accordance with the KB , Run the full local suite of unit and integration tests , if the suite fails to run or produced failed tests ,analyze the errors’ root cause , correct them , and rerun the suite.
+Sprint 19 — Documentation, Demo, University Report Evidence, and Final Delivery
+Sprint Planning:
+The sprint goal was to finalize documentation, demo evidence, university report material, diagrams, release notes, and delivery package. The selected work included README finalization, setup/deployment/user/admin/operations/API docs, demo script, screenshots of all core modules, Jira evidence, release evidence, test evidence, diagrams, final report appendix evidence, traceability matrix, risk register, decision log, source code cleanup, final ZIP/source package, and submission checklist.
+Daily Scrum / Execution Summary:
+The sprint focused on final delivery and academic evidence consolidation. Work progressed on final documentation, screenshot capture, diagram completion, demo flow verification, evidence organization, final report appendix preparation, and source/package review.
+Sprint Review:
+The sprint increment demonstrated the final end-to-end workflow: admin login, user/role management, customer/beneficiary/consent management, product ownership, segmentation, campaign creation, compliance approval, recipient preview, launch, contact events, follow-ups, reminders, analytics, reports, audit logs, AI assistance, deployment evidence, and final documentation.
+Sprint Retrospective:
+What went well: the final package connected Agile planning, requirements, implementation, testing, deployment, and evidence.
+What could improve: future versions should use longer real-world sprint durations and a larger team for deeper validation.
+Action item: submit the report with selected screenshots directly in the appendix and provide the full evidence package as a ZIP.
+Roadmap Update:
+Sprint 19 completed final documentation, demo, and university report evidence. Related epics: BWCO-1 Agile planning and product documentation; BWCO-27 Documentation and university report.
+Evidence to Attach:
+Final Jira roadmap screenshot, final backlog screenshot, completed board screenshot, release/version screenshot, final demo screenshots, final diagrams, test report screenshot, deployment evidence screenshot, evidence folder screenshot, final report screenshot, final ZIP/package screenshot, Sprint 19 review note, Sprint 19 retrospective note.
+Final Production-Readiness Checklist
+Functional Readiness, Add the necessary unit or integration tests but do not run any tests.
+866. in accordance with  the KB, -Login works, Add the necessary unit or integration tests but do not run any tests.
+867. in accordance with  the KB, -Admin can create users, Add the necessary unit or integration tests but do not run any tests.
+868. in accordance with  the KB, -Role-based access works, Add the necessary unit or integration tests but do not run any tests.
+869. in accordance with  the KB, -Customers/prospects can be managed, Add the necessary unit or integration tests but do not run any tests.
+870. in accordance with  the KB, -Beneficiaries can be linked, Add the necessary unit or integration tests but do not run any tests.
+871. in accordance with  the KB, -Consent can be recorded, Add the necessary unit or integration tests but do not run any tests.
+872. in accordance with  the KB, -Opt-outs are enforced, Add the necessary unit or integration tests but do not run any tests.
+873. in accordance with  the KB, -Do-not-contact is enforced, Add the necessary unit or integration tests but do not run any tests.
+874. in accordance with  the KB, -Products can be managed, Add the necessary unit or integration tests but do not run any tests.
+875. in accordance with  the KB, -Product ownership can be tracked, Add the necessary unit or integration tests but do not run any tests.
+876. in accordance with  the KB, -Payment records can be tracked, Add the necessary unit or integration tests but do not run any tests.
+877. in accordance with  the KB, -Segments can be created, Add the necessary unit or integration tests but do not run any tests.
+878. in accordance with  the KB, -Segment preview shows eligible/excluded counts, Add the necessary unit or integration tests but do not run any tests.
+879. in accordance with  the KB, -Campaigns can be created, Add the necessary unit or integration tests but do not run any tests.
+880. in accordance with  the KB, -Campaigns can be submitted, Add the necessary unit or integration tests but do not run any tests.
+881. in accordance with  the KB, -Campaigns can be approved/rejected, Add the necessary unit or integration tests but do not run any tests.
+882. in accordance with  the KB, -Only approved campaigns can launch, Add the necessary unit or integration tests but do not run any tests.
+883. in accordance with  the KB, -Contact history is recorded, Add the necessary unit or integration tests but do not run any tests.
+884. in accordance with  the KB, -Follow-up tasks work, Add the necessary unit or integration tests but do not run any tests.
+885. in accordance with  the KB, -Payment reminders work, Add the necessary unit or integration tests but do not run any tests.
+886. in accordance with  the KB, -Product-expiration reminders work, Add the necessary unit or integration tests but do not run any tests.
+887. in accordance with  the KB, -Analytics dashboard works, Add the necessary unit or integration tests but do not run any tests.
+888. in accordance with  the KB, -Reports export works, Add the necessary unit or integration tests but do not run any tests.
+889. in accordance with  the KB, -AI-assisted features work, Add the necessary unit or integration tests but do not run any tests.
+890. in accordance with  the KB, -Audit log works
+Security Readiness, Add the necessary unit or integration tests but do not run any tests.
+891. in accordance with  the KB, -Passwords are hashed, Add the necessary unit or integration tests but do not run any tests.
+892. in accordance with  the KB, -JWT/session secret is not hardcoded, Add the necessary unit or integration tests but do not run any tests.
+893. in accordance with  the KB, -Backend enforces role authorization, Add the necessary unit or integration tests but do not run any tests.
+894. in accordance with  the KB, -Frontend protects routes, Add the necessary unit or integration tests but do not run any tests.
+895. in accordance with  the KB, -CORS is restricted in production, Add the necessary unit or integration tests but do not run any tests.
+896. in accordance with  the KB, -HTTPS is configured, Add the necessary unit or integration tests but do not run any tests.
+897. in accordance with  the KB, -Stack traces are hidden in production, Add the necessary unit or integration tests but do not run any tests.
+898. in accordance with  the KB, -Sensitive actions are audited, Add the necessary unit or integration tests but do not run any tests.
+899. in accordance with  the KB, -Disabled users cannot log in, Add the necessary unit or integration tests but do not run any tests.
+900. in accordance with  the KB, -Environment secrets are not committed
+Compliance Readiness, Add the necessary unit or integration tests but do not run any tests.
+901. in accordance with  the KB, -Consent records include purpose, source, status, and timestamp, Add the necessary unit or integration tests but do not run any tests.
+902. in accordance with  the KB, -Opt-outs are respected immediately, Add the necessary unit or integration tests but do not run any tests.
+903. in accordance with  the KB, -Do-not-contact overrides marketing, Add the necessary unit or integration tests but do not run any tests.
+904. in accordance with  the KB, -Guardian consent is checked where required, Add the necessary unit or integration tests but do not run any tests.
+905. in accordance with  the KB, -AI requires human approval, Add the necessary unit or integration tests but do not run any tests.
+906. in accordance with  the KB, -Campaign approval is mandatory, Add the necessary unit or integration tests but do not run any tests.
+907. in accordance with  the KB, -Exclusion reasons are stored, Add the necessary unit or integration tests but do not run any tests.
+908. in accordance with  the KB, -Audit logs are retained, Add the necessary unit or integration tests but do not run any tests.
+909. in accordance with  the KB, -Reports use aggregation where possible
+Operational Readiness, Add the necessary unit or integration tests but do not run any tests.
+910. in accordance with  the KB, -Docker production setup exists, Add the necessary unit or integration tests but do not run any tests.
+911. in accordance with  the KB, -PostgreSQL backup exists, Add the necessary unit or integration tests but do not run any tests.
+912. in accordance with  the KB, -Restore process is documented, Add the necessary unit or integration tests but do not run any tests.
+913. in accordance with  the KB, -Health endpoint works, Add the necessary unit or integration tests but do not run any tests.
+914. in accordance with  the KB, -Logs are available, Add the necessary unit or integration tests but do not run any tests.
+915. in accordance with  the KB, -CI pipeline passes, Add the necessary unit or integration tests but do not run any tests.
+916. in accordance with  the KB, -Deployment guide exists, Add the necessary unit or integration tests but do not run any tests.
+917. in accordance with  the KB, -Rollback plan exists, Add the necessary unit or integration tests but do not run any tests.
+918. in accordance with  the KB, -Smoke test checklist exists
+Quality Readiness, Add the necessary unit or integration tests but do not run any tests.
+919. in accordance with  the KB, -Backend unit tests pass, Add the necessary unit or integration tests but do not run any tests.
+920. in accordance with  the KB, -Integration tests pass, Add the necessary unit or integration tests but do not run any tests.
+921. in accordance with  the KB, -Security tests pass, Add the necessary unit or integration tests but do not run any tests.
+922. in accordance with  the KB, -Frontend tests pass, Add the necessary unit or integration tests but do not run any tests.
+923. in accordance with  the KB, -E2E tests pass, Add the necessary unit or integration tests but do not run any tests.
+924. in accordance with  the KB, -Critical business-rule tests pass, Add the necessary unit or integration tests but do not run any tests.
+925. in accordance with  the KB, -Accessibility checks pass or issues are documented, Add the necessary unit or integration tests but do not run any tests.
+926. in accordance with  the KB, -Test report exists
+Final Delivery Package, Add the necessary unit or integration tests but do not run any tests.
+927. in accordance with  the KB, -The finished project must contain:, Add the necessary unit or integration tests but do not run any tests.
+928. in accordance with  the KB, -GitHub repository, Add the necessary unit or integration tests but do not run any tests.
+929. in accordance with  the KB, -Frontend source code, Add the necessary unit or integration tests but do not run any tests.
+930. in accordance with  the KB, -Backend source code, Add the necessary unit or integration tests but do not run any tests.
+931. in accordance with  the KB, -Database migrations, Add the necessary unit or integration tests but do not run any tests.
+932. in accordance with  the KB, -Docker Compose files, Add the necessary unit or integration tests but do not run any tests.
+933. in accordance with  the KB, -Environment variable template, Add the necessary unit or integration tests but do not run any tests.
+934. in accordance with  the KB, -README, Add the necessary unit or integration tests but do not run any tests.
+935. in accordance with  the KB, -Setup guide, Add the necessary unit or integration tests but do not run any tests.
+936. in accordance with  the KB, -Deployment guide, Add the necessary unit or integration tests but do not run any tests.
+937. in accordance with  the KB, -User manual, Add the necessary unit or integration tests but do not run any tests.
+938. in accordance with  the KB, -Admin manual, Add the necessary unit or integration tests but do not run any tests.
+939. in accordance with  the KB, -Operations manual, Add the necessary unit or integration tests but do not run any tests.
+940. in accordance with  the KB, -API documentation, Add the necessary unit or integration tests but do not run any tests.
+941. in accordance with  the KB, -Architecture diagrams, Add the necessary unit or integration tests but do not run any tests.
+942. in accordance with  the KB, -ERD, Add the necessary unit or integration tests but do not run any tests.
+943. in accordance with  the KB, -UML diagrams, Add the necessary unit or integration tests but do not run any tests.
+944. in accordance with  the KB, -Product backlog, Add the necessary unit or integration tests but do not run any tests.
+945. in accordance with  the KB, ----------------Sprint plan, Add the necessary unit or integration tests but do not run any tests.
+946. in accordance with  the KB, ----------------Sprint review notes, Add the necessary unit or integration tests but do not run any tests.
+947. in accordance with  the KB, -Retrospective notes, Add the necessary unit or integration tests but do not run any tests.
+948. in accordance with  the KB, -Test plan, Add the necessary unit or integration tests but do not run any tests.
+949. in accordance with  the KB, -Test report, Add the necessary unit or integration tests but do not run any tests.
+950. in accordance with  the KB, -Screenshots, Add the necessary unit or integration tests but do not run any tests.
+951. in accordance with  the KB, -Demo script, Add the necessary unit or integration tests but do not run any tests.
+952. in accordance with  the KB, -Release notes, Add the necessary unit or integration tests but do not run any tests.
+953. in accordance with  the KB, -Risk register, Add the necessary unit or integration tests but do not run any tests.
+954. in accordance with  the KB, -Decision log, Add the necessary unit or integration tests but do not run any tests.
+955. in accordance with  the KB, -Final university project report
+Final Rule, Add the necessary unit or integration tests but do not run any tests.
+956. in accordance with  the KB, -The project is complete only when the application is:, Add the necessary unit or integration tests but do not run any tests.
+957. in accordance with  the KB, -implemented according to the Knowledge Base,, Add the necessary unit or integration tests but do not run any tests.
+958. in accordance with  the KB, -delivered through solo-adapted Scrum,, Add the necessary unit or integration tests but do not run any tests.
+959. in accordance with  the KB, -organized and evidenced in Jira,, Add the necessary unit or integration tests but do not run any tests.
+960. in accordance with  the KB, -tested against critical business rules,, Add the necessary unit or integration tests but do not run any tests.
+961. in accordance with  the KB, -secured with role-based access control,, Add the necessary unit or integration tests but do not run any tests.
+962. in accordance with  the KB, -compliant with consent and opt-out rules,, Add the necessary unit or integration tests but do not run any tests.
+963. in accordance with  the KB, -auditable,, Add the necessary unit or integration tests but do not run any tests.
+964. in accordance with  the KB, -deployable,, Add the necessary unit or integration tests but do not run any tests.
+965. in accordance with  the KB, -backed up,, Add the necessary unit or integration tests but do not run any tests.
+966. in accordance with  the KB, -restorable,, Add the necessary unit or integration tests but do not run any tests.
+967. in accordance with  the KB, -documented,, Add the necessary unit or integration tests but do not run any tests.
+968. in accordance with  the KB, -and demonstrable through a complete business workflow., Add the necessary unit or integration tests but do not run any tests.
+969. in accordance with  the KB, -Core production logic must not be simulated. Mocking is allowed only in development/test mode or for replaceable external integrations before real provider configuration.

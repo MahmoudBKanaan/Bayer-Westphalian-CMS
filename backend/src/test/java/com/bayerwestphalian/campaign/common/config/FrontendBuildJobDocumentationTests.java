@@ -53,7 +53,7 @@ class FrontendBuildJobDocumentationTests {
             String yaml = Files.readString(CI_WORKFLOW, StandardCharsets.UTF_8);
 
             int buildJobIndex = indexOfJob(yaml, "frontend-build:");
-            assertThat(buildJobIndex).isNonNegative();
+            assertThat(buildJobIndex).isGreaterThanOrEqualTo(0);
 
             // Frontend build ends at Docker backend job (685) when present.
             int nextJobIndex = yaml.indexOf("\n  docker-backend:");

@@ -1,10 +1,13 @@
 package com.bayerwestphalian.campaign.auth;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -67,7 +70,10 @@ class AuthControllerTests {
                                 Instant.parse("2026-07-03T12:15:00Z"),
                                 "refresh-token",
                                 Instant.parse("2026-07-10T12:00:00Z")));
-        when(authService.loginSession("advisor@bayer-westphalian.test", "StrongPassword!2026"))
+        when(authService.loginSession(
+                        eq("advisor@bayer-westphalian.test"),
+                        eq("StrongPassword!2026"),
+                        any()))
                 .thenReturn(session);
 
         mockMvc.perform(
@@ -84,7 +90,8 @@ class AuthControllerTests {
                 .andExpect(jsonPath("$.data.tokens.refreshToken").value("refresh-token"))
                 .andExpect(jsonPath("$.data.user.passwordHash").doesNotExist());
 
-        verify(authService).loginSession("advisor@bayer-westphalian.test", "StrongPassword!2026");
+        verify(authService)
+                .loginSession(eq("advisor@bayer-westphalian.test"), eq("StrongPassword!2026"), any());
     }
 
     @Test
@@ -100,7 +107,10 @@ class AuthControllerTests {
 
     @Test
     void loginEndpointReturnsUnauthorizedForInvalidCredentials() throws Exception {
-        when(authService.loginSession("advisor@bayer-westphalian.test", "StrongPassword!2026"))
+        when(authService.loginSession(
+                        eq("advisor@bayer-westphalian.test"),
+                        eq("StrongPassword!2026"),
+                        any()))
                 .thenThrow(new UnauthorizedException("Invalid email or password"));
 
         mockMvc.perform(
@@ -114,7 +124,10 @@ class AuthControllerTests {
 
     @Test
     void loginEndpointReturnsUnauthorizedForDisabledUser() throws Exception {
-        when(authService.loginSession("advisor@bayer-westphalian.test", "StrongPassword!2026"))
+        when(authService.loginSession(
+                        eq("advisor@bayer-westphalian.test"),
+                        eq("StrongPassword!2026"),
+                        any()))
                 .thenThrow(new UnauthorizedException("User account is not active"));
 
         mockMvc.perform(
@@ -128,22 +141,33 @@ class AuthControllerTests {
     }
 
     @Test
-    void loginEndpointReturnsUnauthorizedWhenLoginAttemptsAreThrottled() throws Exception {
-        when(authService.loginSession("advisor@bayer-westphalian.test", "StrongPassword!2026"))
-                .thenThrow(
-                        new UnauthorizedException(
-                                "Too many failed login attempts. Try again later"));
+    void loginEndpointReturnsTooManyRequestsWhenLoginAttemptsAreThrottled() throws Exception {
+        when(authService.loginSession(
+                        eq("advisor@bayer-westphalian.test"),
+                        eq("StrongPassword!2026"),
+                        any()))
+                .thenThrow(new LoginLockoutException(Instant.now().plusSeconds(120), 120L));
 
         mockMvc.perform(
                         post("/api/auth/login")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(LOGIN_JSON))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value("UNAUTHORIZED"))
+                                .content(LOGIN_JSON)
+                                .with(
+                                        request -> {
+                                            request.setRemoteAddr("198.51.100.10");
+                                            return request;
+                                        }))
+                .andExpect(status().isTooManyRequests())
+                .andExpect(jsonPath("$.code").value(LoginLockoutException.CODE))
                 .andExpect(
                         jsonPath("$.message")
-                                .value("Too many failed login attempts. Try again later"))
-                .andExpect(jsonPath("$.path").value("/api/auth/login"));
+                                .value(LoginLockoutException.DEFAULT_MESSAGE))
+                .andExpect(jsonPath("$.path").value("/api/auth/login"))
+                .andExpect(header().string("Retry-After", "120"));
+
+        verify(authService)
+                .loginSession(
+                        "advisor@bayer-westphalian.test", "StrongPassword!2026", "198.51.100.10");
     }
 
     @Test

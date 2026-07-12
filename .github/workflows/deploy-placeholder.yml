@@ -30,6 +30,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 concurrency:
   group: deploy-placeholder-${{ github.ref }}
@@ -44,6 +45,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      # Item 714: fail unless the exact main commit has a completed successful CI push run.
+      - name: Require successful CI for exact main commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          RELEASE_BRANCH: ${{ github.ref_name }}
+        run: bash scripts/assert-main-ci-success.sh
 
       - name: Record placeholder deployment intent
         id: deploy-placeholder

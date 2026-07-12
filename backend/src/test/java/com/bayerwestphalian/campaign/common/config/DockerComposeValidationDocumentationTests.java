@@ -88,7 +88,7 @@ class DockerComposeValidationDocumentationTests {
             String yaml = Files.readString(CI_WORKFLOW, StandardCharsets.UTF_8);
 
             int jobIndex = indexOfJob(yaml, "docker-compose-validate:");
-            assertThat(jobIndex).isNonNegative();
+            assertThat(jobIndex).isGreaterThanOrEqualTo(0);
             int nextJobIndex = yaml.indexOf("\n  production-config-validate:");
             String jobBlock =
                     nextJobIndex > jobIndex

@@ -10,6 +10,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.bayerwestphalian.campaign.audit.AuditService;
+import com.bayerwestphalian.campaign.auth.AuthorizationExpressions;
 import com.bayerwestphalian.campaign.common.api.PageResponse;
 import com.bayerwestphalian.campaign.common.domain.BaseEntity;
 import com.bayerwestphalian.campaign.common.exception.ResourceNotFoundException;
@@ -34,8 +35,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 class CustomerServiceTests {
 
     private static final UUID CUSTOMER_ID = UUID.fromString("20000000-0000-0000-0000-000000000001");
+    private static final UUID ADMIN_ID = UUID.fromString("10000000-0000-0000-0000-000000000001");
 
     @Mock private CustomerRepository customerRepository;
+
+    @Mock private AuthorizationExpressions authorizationExpressions;
 
     @Mock private AuditService auditService;
 
@@ -46,9 +50,16 @@ class CustomerServiceTests {
         assertPreAuthorize("createCustomer", CreateCustomerCommand.class);
         assertPreAuthorize("updateCustomer", UUID.class, UpdateCustomerCommand.class);
         assertPreAuthorize("softDeleteCustomer", UUID.class);
-        assertPreAuthorize("findById", UUID.class);
-        assertPreAuthorize("searchCustomers", CustomerSearchCriteria.class);
-        assertPreAuthorize("searchCustomers", CustomerSearchCriteria.class, int.class, int.class);
+        assertPreAuthorizeWithExpression(
+                "findById", new Class<?>[] {UUID.class}, "@authz.canReadCustomers()");
+        assertPreAuthorizeWithExpression(
+                "searchCustomers",
+                new Class<?>[] {CustomerSearchCriteria.class},
+                "@authz.canReadCustomers()");
+        assertPreAuthorizeWithExpression(
+                "searchCustomers",
+                new Class<?>[] {CustomerSearchCriteria.class, int.class, int.class},
+                "@authz.canReadCustomers()");
         assertPreAuthorize(
                 "importCustomers", org.springframework.web.multipart.MultipartFile.class);
     }
@@ -94,26 +105,29 @@ class CustomerServiceTests {
         assertThat(saved.getStatus()).isEqualTo(CustomerStatus.INTERESTED);
         assertThat(saved.getSource()).isEqualTo("LIFE_INSURANCE_BENEFICIARY");
         assertThat(view.fullName()).isEqualTo("Lena Mueller");
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> createPayloadCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
                 .logCreate(
                         eq((UUID) null),
                         eq("customers"),
                         eq(CUSTOMER_ID),
-                        eq(
-                                Map.ofEntries(
-                                        Map.entry("customerType", "PROSPECT"),
-                                        Map.entry("firstName", "Lena"),
-                                        Map.entry("lastName", "Mueller"),
-                                        Map.entry("email", "lena.mueller@bayer-westphalian.test"),
-                                        Map.entry("phone", "+49-555-0200"),
-                                        Map.entry("city", "Munich"),
-                                        Map.entry("country", "Germany"),
-                                        Map.entry("ageGroup", "AGE_26_40"),
-                                        Map.entry("status", "INTERESTED"),
-                                        Map.entry("doNotContact", false),
-                                        Map.entry("active", false),
-                                        Map.entry("deleted", false),
-                                        Map.entry("source", "LIFE_INSURANCE_BENEFICIARY"))));
+                        createPayloadCaptor.capture());
+        assertThat(createPayloadCaptor.getValue())
+                .containsEntry("id", CUSTOMER_ID.toString())
+                .containsEntry("customerType", "PROSPECT")
+                .containsEntry("firstName", "Lena")
+                .containsEntry("lastName", "Mueller")
+                .containsEntry("email", "lena.mueller@bayer-westphalian.test")
+                .containsEntry("phone", "+49-555-0200")
+                .containsEntry("city", "Munich")
+                .containsEntry("country", "Germany")
+                .containsEntry("ageGroup", "AGE_26_40")
+                .containsEntry("status", "INTERESTED")
+                .containsEntry("doNotContact", false)
+                .containsEntry("active", false)
+                .containsEntry("deleted", false)
+                .containsEntry("source", "LIFE_INSURANCE_BENEFICIARY");
     }
 
     @Test
@@ -145,6 +159,7 @@ class CustomerServiceTests {
     @Test
     void updatesCustomerProfileStatusAndContactPreference() throws Exception {
         Customer customer = customer();
+        when(authorizationExpressions.currentUserId()).thenReturn(ADMIN_ID);
         when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
         when(customerRepository.save(customer)).thenReturn(customer);
 
@@ -171,16 +186,19 @@ class CustomerServiceTests {
         assertThat(view.contactable()).isFalse();
         assertThat(view.source()).isEqualTo("CUSTOMER_SERVICE_UPDATE");
         verify(customerRepository).save(customer);
-        ArgumentCaptor<Map> oldValueCaptor = ArgumentCaptor.forClass(Map.class);
-        ArgumentCaptor<Map> newValueCaptor = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> oldValueCaptor = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> newValueCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
                 .logUpdate(
-                        eq((UUID) null),
+                        eq(ADMIN_ID),
                         eq("customers"),
                         eq(CUSTOMER_ID),
                         oldValueCaptor.capture(),
                         newValueCaptor.capture());
         assertThat(oldValueCaptor.getValue())
+                .containsEntry("id", CUSTOMER_ID.toString())
                 .containsEntry("customerType", "CUSTOMER")
                 .containsEntry("status", "ACTIVE")
                 .containsEntry("doNotContact", false);
@@ -189,12 +207,22 @@ class CustomerServiceTests {
                 .containsEntry("status", "CONVERTED")
                 .containsEntry("doNotContact", true)
                 .containsEntry("source", "CUSTOMER_SERVICE_UPDATE");
+        // Item 526: dedicated UPDATE_DO_NOT_CONTACT with actor and identity fields.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> dncOld = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> dncNew = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
                 .logDoNotContactUpdate(
-                        eq((UUID) null),
-                        eq(CUSTOMER_ID),
-                        eq(Map.of("doNotContact", false)),
-                        eq(Map.of("doNotContact", true)));
+                        eq(ADMIN_ID), eq(CUSTOMER_ID), dncOld.capture(), dncNew.capture());
+        assertThat(dncOld.getValue())
+                .containsEntry("id", CUSTOMER_ID.toString())
+                .containsEntry("doNotContact", false)
+                .containsEntry("firstName", "Ada")
+                .containsEntry("lastName", "Client");
+        assertThat(dncNew.getValue())
+                .containsEntry("doNotContact", true)
+                .containsEntry("email", "ada.client@bayer-westphalian.test");
     }
 
     @Test
@@ -236,6 +264,7 @@ class CustomerServiceTests {
     @Test
     void softDeletesCustomerAndHidesDeletedRecordsFromLookup() throws Exception {
         Customer customer = customer();
+        when(authorizationExpressions.currentUserId()).thenReturn(ADMIN_ID);
         when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
         when(customerRepository.save(customer)).thenReturn(customer);
 
@@ -243,17 +272,26 @@ class CustomerServiceTests {
 
         assertThat(deleted.deletedAt()).isNotNull();
         assertThat(deleted.active()).isFalse();
-        ArgumentCaptor<Map> oldValueCaptor = ArgumentCaptor.forClass(Map.class);
-        ArgumentCaptor<Map> newValueCaptor = ArgumentCaptor.forClass(Map.class);
+        // Item 523: soft delete logs DELETE with Admin actor and deleted flag transition.
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> oldValueCaptor = ArgumentCaptor.forClass(Map.class);
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Map<String, Object>> newValueCaptor = ArgumentCaptor.forClass(Map.class);
         verify(auditService)
                 .logDelete(
-                        eq((UUID) null),
+                        eq(ADMIN_ID),
                         eq("customers"),
                         eq(CUSTOMER_ID),
                         oldValueCaptor.capture(),
                         newValueCaptor.capture());
-        assertThat(oldValueCaptor.getValue()).containsEntry("deleted", false);
-        assertThat(newValueCaptor.getValue()).containsEntry("deleted", true);
+        assertThat(oldValueCaptor.getValue())
+                .containsEntry("id", CUSTOMER_ID.toString())
+                .containsEntry("deleted", false)
+                .containsEntry("active", true);
+        assertThat(newValueCaptor.getValue())
+                .containsEntry("deleted", true)
+                .containsEntry("active", false)
+                .containsKey("deletedAt");
 
         when(customerRepository.findById(CUSTOMER_ID)).thenReturn(Optional.of(customer));
 
@@ -504,6 +542,15 @@ class CustomerServiceTests {
         Method method = CustomerService.class.getMethod(methodName, parameterTypes);
 
         assertThat(method.isAnnotationPresent(PreAuthorize.class)).isTrue();
+    }
+
+    private static void assertPreAuthorizeWithExpression(
+            String methodName, Class<?>[] parameterTypes, String expectedExpression)
+            throws Exception {
+        Method method = CustomerService.class.getMethod(methodName, parameterTypes);
+
+        assertThat(method.isAnnotationPresent(PreAuthorize.class)).isTrue();
+        assertThat(method.getAnnotation(PreAuthorize.class).value()).isEqualTo(expectedExpression);
     }
 
     private static Customer customer() throws Exception {

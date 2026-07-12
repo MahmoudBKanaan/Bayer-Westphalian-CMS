@@ -3,6 +3,7 @@ package com.bayerwestphalian.campaign.auth;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -14,6 +15,7 @@ import com.bayerwestphalian.campaign.user.SystemRoleName;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -22,6 +24,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -65,6 +68,19 @@ class ProtectedEndpointSecurityTests {
                                 .header("Authorization", "Bearer campaign-manager-token"))
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(not(containsString("protected user data"))));
+    }
+
+    @Test
+    @DisplayName("553 Unauthorized user cannot view audit logs")
+    void unauthorizedUserCannotViewAuditLogs() throws Exception {
+        when(jwtService.validateToken("campaign-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(campaignManagerClaims());
+
+        mockMvc.perform(
+                        get("/api/audit-logs/protected-check")
+                                .header("Authorization", "Bearer campaign-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("protected audit data"))));
     }
 
     @Test
@@ -206,6 +222,7 @@ class ProtectedEndpointSecurityTests {
         List<String> protectedResources =
                 List.of(
                         "/api/products/protected-check",
+                        "/api/segments/protected-check",
                         "/api/beneficiaries/protected-check",
                         "/api/consents/protected-check",
                         "/api/campaigns/protected-check",
@@ -218,7 +235,11 @@ class ProtectedEndpointSecurityTests {
         for (String protectedResource : protectedResources) {
             mockMvc.perform(get(protectedResource))
                     .andExpect(status().is4xxClientError())
-                    .andExpect(content().string(not(containsString("protected"))));
+                    // Auth errors must not leak the protected resource payload string.
+                    // (The request path may still appear in secure error JSON.)
+                    .andExpect(content().string(not(containsString("protected product data"))))
+                    .andExpect(content().string(not(containsString("protected segment data"))))
+                    .andExpect(content().string(not(containsString("protected-check-payload"))));
         }
     }
 
@@ -361,6 +382,30 @@ class ProtectedEndpointSecurityTests {
     }
 
     @Test
+    void contactEventCreationRequiresKbContactWriteRole() throws Exception {
+        when(jwtService.validateToken("bi-analyst-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.BI_ANALYST));
+        when(jwtService.validateToken("customer-service-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.CUSTOMER_SERVICE_AGENT));
+
+        mockMvc.perform(
+                        post("/api/contact-events")
+                                .header("Authorization", "Bearer bi-analyst-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("contact event recorded"))));
+
+        mockMvc.perform(
+                        post("/api/contact-events")
+                                .header("Authorization", "Bearer customer-service-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("contact event recorded"));
+    }
+
+    @Test
     void unauthorizedRoleCannotApproveComplianceCampaign() throws Exception {
         UUID campaignId = UUID.fromString("50000000-0000-0000-0000-000000000101");
         when(jwtService.validateToken("campaign-manager-token", JwtTokenType.ACCESS))
@@ -382,6 +427,266 @@ class ProtectedEndpointSecurityTests {
     }
 
     @Test
+    void unauthorizedRoleCannotRecordComplianceReviewNotes() throws Exception {
+        UUID campaignId = UUID.fromString("50000000-0000-0000-0000-000000000101");
+        when(jwtService.validateToken("campaign-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(campaignManagerClaims());
+        when(jwtService.validateToken("compliance-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.COMPLIANCE_OFFICER));
+        when(jwtService.validateToken("admin-token", JwtTokenType.ACCESS))
+                .thenReturn(adminClaims());
+
+        mockMvc.perform(
+                        put("/api/campaigns/{id}/compliance-review-notes", campaignId)
+                                .header("Authorization", "Bearer campaign-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"complianceReviewNotes\":\"Draft notes\"}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("compliance notes recorded"))));
+
+        mockMvc.perform(
+                        put("/api/campaigns/{id}/compliance-review-notes", campaignId)
+                                .header("Authorization", "Bearer compliance-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"complianceReviewNotes\":\"Pending legal review\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("compliance notes recorded"));
+
+        mockMvc.perform(
+                        put("/api/campaigns/{id}/compliance-review-notes", campaignId)
+                                .header("Authorization", "Bearer admin-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{\"complianceReviewNotes\":\"Admin notes\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("compliance notes recorded"));
+    }
+
+    @Test
+    void segmentEndpointsFollowKbRoleRules() throws Exception {
+        UUID segmentId = UUID.fromString("42000000-0000-0000-0000-000000000001");
+        when(jwtService.validateToken("bi-analyst-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.BI_ANALYST));
+        when(jwtService.validateToken("campaign-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(campaignManagerClaims());
+        when(jwtService.validateToken("compliance-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.COMPLIANCE_OFFICER));
+        when(jwtService.validateToken("product-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.PRODUCT_MANAGER));
+        when(jwtService.validateToken("admin-token", JwtTokenType.ACCESS))
+                .thenReturn(adminClaims());
+
+        mockMvc.perform(
+                        get("/api/segments/protected-check")
+                                .header("Authorization", "Bearer bi-analyst-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("protected segment data"));
+
+        mockMvc.perform(
+                        get("/api/segments/protected-check")
+                                .header("Authorization", "Bearer compliance-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("protected segment data"));
+
+        mockMvc.perform(
+                        get("/api/segments/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("protected segment data"))));
+
+        mockMvc.perform(
+                        get("/api/segments/{id}", segmentId)
+                                .header("Authorization", "Bearer bi-analyst-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("segment details loaded"));
+
+        mockMvc.perform(
+                        get("/api/segments/{id}", segmentId)
+                                .header("Authorization", "Bearer compliance-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("segment details loaded"));
+
+        mockMvc.perform(
+                        get("/api/segments/{id}", segmentId)
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("segment details loaded"))));
+
+        mockMvc.perform(
+                        post("/api/segments/preview")
+                                .header("Authorization", "Bearer bi-analyst-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("segment preview loaded"));
+
+        mockMvc.perform(
+                        post("/api/segments/preview")
+                                .header("Authorization", "Bearer compliance-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("segment preview loaded"))));
+
+        mockMvc.perform(
+                        post("/api/segments")
+                                .header("Authorization", "Bearer bi-analyst-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("segment created"))));
+
+        mockMvc.perform(
+                        post("/api/segments")
+                                .header("Authorization", "Bearer campaign-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("segment created"));
+
+        mockMvc.perform(
+                        post("/api/segments")
+                                .header("Authorization", "Bearer admin-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("segment created"));
+
+        mockMvc.perform(
+                        put("/api/segments/{id}", segmentId)
+                                .header("Authorization", "Bearer bi-analyst-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("segment updated"))));
+
+        mockMvc.perform(
+                        delete("/api/segments/{id}", segmentId)
+                                .header("Authorization", "Bearer bi-analyst-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("segment deleted"))));
+
+        mockMvc.perform(
+                        delete("/api/segments/{id}", segmentId)
+                                .header("Authorization", "Bearer admin-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("segment deleted"));
+    }
+
+    @Test
+    void productManagerPermissionsFollowKbRules() throws Exception {
+        when(jwtService.validateToken("product-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.PRODUCT_MANAGER));
+
+        mockMvc.perform(
+                        get("/api/customers/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("protected customer data"));
+
+        mockMvc.perform(
+                        post("/api/customers")
+                                .header("Authorization", "Bearer product-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("customer created"))));
+
+        mockMvc.perform(
+                        put(
+                                        "/api/customers/{id}",
+                                        UUID.fromString("20000000-0000-0000-0000-000000000001"))
+                                .header("Authorization", "Bearer product-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(customerUpdatePayload()))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("customer updated"))));
+
+        mockMvc.perform(
+                        get("/api/products/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("protected product data"));
+
+        mockMvc.perform(
+                        post("/api/products")
+                                .header("Authorization", "Bearer product-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("product created"));
+
+        mockMvc.perform(
+                        post("/api/product-ownerships")
+                                .header("Authorization", "Bearer product-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("product ownership assigned"));
+
+        mockMvc.perform(
+                        get("/api/payment-records/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("protected payment data"))));
+
+        mockMvc.perform(
+                        get("/api/campaigns/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("protected campaign data"));
+
+        mockMvc.perform(
+                        post("/api/campaigns/{id}/approve", UUID.randomUUID())
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("campaign approved"))));
+
+        mockMvc.perform(
+                        post("/api/campaigns/{id}/launch", UUID.randomUUID())
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("campaign launched"))));
+
+        mockMvc.perform(
+                        get("/api/users/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("protected user data"))));
+
+        mockMvc.perform(
+                        get("/api/audit-logs/protected-check")
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("protected audit data"))));
+    }
+
+    @Test
+    void productManagerCannotLaunchCampaign() throws Exception {
+        UUID campaignId = UUID.fromString("50000000-0000-0000-0000-000000000305");
+        when(jwtService.validateToken("product-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.PRODUCT_MANAGER));
+
+        mockMvc.perform(
+                        post("/api/campaigns/{id}/launch", campaignId)
+                                .header("Authorization", "Bearer product-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("campaign launched"))));
+    }
+
+    @Test
+    void campaignManagerCanLaunchCampaignEndpoint() throws Exception {
+        UUID campaignId = UUID.fromString("50000000-0000-0000-0000-000000000306");
+        when(jwtService.validateToken("campaign-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(campaignManagerClaims());
+
+        mockMvc.perform(
+                        post("/api/campaigns/{id}/launch", campaignId)
+                                .header("Authorization", "Bearer campaign-manager-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("campaign launched"));
+    }
+
+    @Test
     void protectedReminderReadRequiresKbReminderReadRole() throws Exception {
         when(jwtService.validateToken("product-manager-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.PRODUCT_MANAGER));
@@ -399,6 +704,96 @@ class ProtectedEndpointSecurityTests {
                                 .header("Authorization", "Bearer campaign-manager-token"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("protected reminder data"));
+    }
+
+    @Test
+    void paymentRecordUpdateRequiresKbPaymentMutationRole() throws Exception {
+        when(jwtService.validateToken("product-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.PRODUCT_MANAGER));
+        when(jwtService.validateToken("customer-service-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.CUSTOMER_SERVICE_AGENT));
+
+        UUID paymentId = UUID.fromString("43000000-0000-0000-0000-000000000001");
+
+        mockMvc.perform(
+                        put("/api/payment-records/{id}", paymentId)
+                                .header("Authorization", "Bearer product-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("payment record updated"))));
+
+        mockMvc.perform(
+                        put("/api/payment-records/{id}", paymentId)
+                                .header("Authorization", "Bearer customer-service-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("payment record updated"));
+    }
+
+    @Test
+    void followUpTaskEndpointsRequireKbFollowUpRoles() throws Exception {
+        when(jwtService.validateToken("product-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.PRODUCT_MANAGER));
+        when(jwtService.validateToken("campaign-manager-token", JwtTokenType.ACCESS))
+                .thenReturn(campaignManagerClaims());
+        when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
+
+        UUID taskId = UUID.fromString("70000000-0000-0000-0000-000000000365");
+
+        mockMvc.perform(
+                        post("/api/follow-up-tasks")
+                                .header("Authorization", "Bearer product-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("follow-up task created"))));
+
+        mockMvc.perform(
+                        post("/api/follow-up-tasks")
+                                .header("Authorization", "Bearer campaign-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("follow-up task created"));
+
+        mockMvc.perform(
+                        put("/api/follow-up-tasks/{id}/status", taskId)
+                                .header("Authorization", "Bearer campaign-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("follow-up task status updated"))));
+
+        mockMvc.perform(
+                        put("/api/follow-up-tasks/{id}/assign", taskId)
+                                .header("Authorization", "Bearer campaign-manager-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("follow-up task assigned"));
+
+        mockMvc.perform(
+                        put("/api/follow-up-tasks/{id}/status", taskId)
+                                .header("Authorization", "Bearer sales-token")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("follow-up task status updated"));
+
+        mockMvc.perform(
+                        put("/api/follow-up-tasks/{id}/complete", taskId)
+                                .header("Authorization", "Bearer campaign-manager-token"))
+                .andExpect(status().isForbidden())
+                .andExpect(content().string(not(containsString("follow-up task completed"))));
+
+        mockMvc.perform(
+                        put("/api/follow-up-tasks/{id}/complete", taskId)
+                                .header("Authorization", "Bearer sales-token"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("follow-up task completed"));
     }
 
     @Test
@@ -520,6 +915,16 @@ class ProtectedEndpointSecurityTests {
             return "role assigned";
         }
 
+        @GetMapping("/api/customers/protected-check")
+        String protectedCustomers() {
+            return "protected customer data";
+        }
+
+        @PostMapping("/api/customers")
+        String createCustomer() {
+            return "customer created";
+        }
+
         @PutMapping("/api/customers/{id}")
         String updateCustomer() {
             return "customer updated";
@@ -528,6 +933,56 @@ class ProtectedEndpointSecurityTests {
         @GetMapping("/api/products/protected-check")
         String protectedProducts() {
             return "protected product data";
+        }
+
+        @GetMapping("/api/segments/protected-check")
+        String protectedSegments() {
+            return "protected segment data";
+        }
+
+        @GetMapping("/api/segments/{id}")
+        String loadSegmentDetails() {
+            return "segment details loaded";
+        }
+
+        @PostMapping("/api/segments/preview")
+        String previewSegment() {
+            return "segment preview loaded";
+        }
+
+        @PostMapping("/api/segments")
+        String createSegment() {
+            return "segment created";
+        }
+
+        @PutMapping("/api/segments/{id}")
+        String updateSegment() {
+            return "segment updated";
+        }
+
+        @DeleteMapping("/api/segments/{id}")
+        String deleteSegment() {
+            return "segment deleted";
+        }
+
+        @PostMapping("/api/products")
+        String createProduct() {
+            return "product created";
+        }
+
+        @PostMapping("/api/product-ownerships")
+        String assignProductOwnership() {
+            return "product ownership assigned";
+        }
+
+        @GetMapping("/api/payment-records/protected-check")
+        String protectedPaymentRecords() {
+            return "protected payment data";
+        }
+
+        @PutMapping("/api/payment-records/{id}")
+        String updatePaymentRecord() {
+            return "payment record updated";
         }
 
         @GetMapping("/api/beneficiaries/protected-check")
@@ -560,14 +1015,49 @@ class ProtectedEndpointSecurityTests {
             return "protected campaign data";
         }
 
+        @PostMapping("/api/contact-events")
+        String recordContactEvent() {
+            return "contact event recorded";
+        }
+
         @PostMapping("/api/campaigns/{id}/approve")
         String approveCampaign() {
             return "campaign approved";
         }
 
+        @PutMapping("/api/campaigns/{id}/compliance-review-notes")
+        String recordComplianceReviewNotes() {
+            return "compliance notes recorded";
+        }
+
+        @PostMapping("/api/campaigns/{id}/launch")
+        String launchCampaign() {
+            return "campaign launched";
+        }
+
         @GetMapping("/api/reminders/protected-check")
         String protectedReminders() {
             return "protected reminder data";
+        }
+
+        @PostMapping("/api/follow-up-tasks")
+        String createFollowUpTask() {
+            return "follow-up task created";
+        }
+
+        @PutMapping("/api/follow-up-tasks/{id}/status")
+        String updateFollowUpTaskStatus() {
+            return "follow-up task status updated";
+        }
+
+        @PutMapping("/api/follow-up-tasks/{id}/assign")
+        String assignFollowUpTask() {
+            return "follow-up task assigned";
+        }
+
+        @PutMapping("/api/follow-up-tasks/{id}/complete")
+        String completeFollowUpTask() {
+            return "follow-up task completed";
         }
 
         @GetMapping("/api/analytics/protected-check")

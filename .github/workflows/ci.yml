@@ -18,6 +18,13 @@
 # Item 695 — Branch protection recommendation (docs: docs/deployment/branch-protection.md)
 # Item 696 — Release tagging process (docs: docs/deployment/release-tagging.md)
 # Item 697 — Deployment workflow placeholder (.github/workflows/deploy-placeholder.yml)
+# Item 698 — CI runs on pull request (pull_request → main/dev)
+# Item 699 — CI runs on main branch (push → main; see pass-on-green 694)
+# Item 700 — Backend build passes (backend-build Maven package + JAR assert)
+# Item 701 — Backend tests pass (backend-test full Maven Surefire suite)
+# Item 706 — Pipeline fails on intentionally broken test (runtime evidence script, no committed broken test)
+# Item 707 — Pipeline passes on clean main branch (runtime evidence script; clean main only)
+# Item 708 — CI/CD documentation (docs/deployment/ci-cd.md)
 #
 # Automates build, test, packaging, and release preparation on pull requests and
 # protected branches (KB epic CI/CD / E25). Deploy placeholder is a separate workflow.
@@ -29,8 +36,11 @@ on:
     branches:
       # Pass-on-green (694): clean commits on main run the full job matrix without path filters
       # or job-level if: skips. A green suite on a clean main tree yields a green workflow.
+      # Item 707: runtime evidence is recorded by the clean-main parity script after this suite is green.
+      # Item 699: CI runs on main branch (and dev) via push.
       - main
       - dev
+  # Item 698: CI runs on pull request targeting main or dev (acceptance gate before merge).
   pull_request:
     branches:
       - main
@@ -46,6 +56,7 @@ permissions:
 # Pass-on-green (694): all jobs below run for every matching push/PR (no workflow-level if: false).
 jobs:
   # --- Item 678: Backend build job ---
+  # Item 700: Backend build passes — green when Maven package + JAR assert succeed (no soft-fail).
   backend-build:
     name: Backend build
     runs-on: ubuntu-latest
@@ -67,10 +78,12 @@ jobs:
 
       # Compile and package the Spring Boot backend without running the test suite.
       # Tests are a separate concern (item 679); package validates the build graph.
+      # Item 700: non-zero Maven exit fails this job (backend build does not pass).
       - name: Build backend (Maven package, skip tests)
         id: backend-build
         run: mvn -B -DskipTests package
 
+      # Item 700: missing JAR fails the job — "Backend build passes" requires a real artifact.
       - name: Assert backend JAR artifact was produced
         run: |
           set -e
@@ -97,6 +110,7 @@ jobs:
 
   # --- Item 679: Backend test job ---
   # Item 693: fail-on-red — non-zero Maven Surefire exit fails this job and the workflow (no continue-on-error).
+  # Item 701: Backend tests pass — green only when the full Maven Surefire suite succeeds.
   backend-test:
     name: Backend test
     runs-on: ubuntu-latest
@@ -118,7 +132,7 @@ jobs:
 
       # Run the full Maven Surefire suite (unit + integration). Testcontainers uses Docker.
       # Separate from backend-build so packaging (678) and full-suite signal (679) stay independent.
-      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      # Fail-on-red (693) / pass signal (701): default step failure propagates.
       - name: Run backend tests (Maven test)
         id: backend-test
         run: mvn -B test
@@ -147,7 +161,7 @@ jobs:
       # Feasible because integration classes use the *IntegrationTests naming convention and
       # Testcontainers PostgreSQL (Docker available on ubuntu-latest). Explicit integration signal
       # separate from the full suite (679).
-      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      # Fail-on-red (693): default step failure propagates.
       - name: Run backend integration tests (Maven, *IntegrationTests)
         id: backend-integration-test
         run: mvn -B test -Dtest='*IntegrationTests'
@@ -211,7 +225,7 @@ jobs:
         run: npm ci
 
       # ESLint static analysis only — Vitest and production build stay on items 683–684.
-      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      # Fail-on-red (693): default step failure propagates.
       - name: Lint frontend (npm run lint)
         id: frontend-lint
         run: npm run lint
@@ -240,7 +254,8 @@ jobs:
         run: npm ci
 
       # Vitest unit/component suite only — production build stays on item 684.
-      # Fail-on-red (693): default step failure propagates; do not add continue-on-error or || true.
+      # Fail-on-red (693/706): default step failure propagates. Runtime evidence script creates a
+      # temporary intentionally broken test and confirms this npm test command exits non-zero.
       - name: Run frontend unit tests (npm test)
         id: frontend-test
         run: npm test
@@ -406,8 +421,8 @@ jobs:
           post_processor="backend/src/main/java/com/bayerwestphalian/campaign/common/config/ProductionEnvironmentPostProcessor.java"
           root_env=".env.example"
           backend_env="backend/.env.example"
-          secrets_doc="docs/deployment/secrets.md"
-          env_doc="docs/deployment/environment-variables.md"
+          secrets_doc="docs/deployment/secrets.md" # Item 710: secrets documentation
+          env_doc="docs/deployment/environment-variables.md" # Item 709: environment variable documentation
           checklist="docs/deployment/production-security-checklist.md"
 
           for f in "$prod_yml" "$env_validator" "$secret_validator" "$post_processor" \

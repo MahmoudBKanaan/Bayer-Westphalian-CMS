@@ -79,6 +79,33 @@ available.
 Consent withdrawal is audited with old and new consent values. The consent withdrawal event remains
 reviewable for compliance and system audit users.
 
+Item 524 (log consent changes):
+
+- Successful `POST /api/consents` writes a `CREATE` row on entity type `consent_records` with the
+  acting principal (or explicit `createdBy`) and the full consent payload.
+- Successful `POST /api/consents/withdraw` writes `WITHDRAW_CONSENT` with before/after status
+  (`GIVEN` → `WITHDRAWN`) and the authenticated actor.
+- Validation failures and missing consent records do not create audit rows.
+
+Sprint 16 critical test item **658** (*Audit log is created after consent change*):
+
+- Restates item 524 / **NFR-008** / **FR-033** as a release-blocking audit rule.
+- Primary backend suite: `AuditLogIsCreatedAfterConsentChangeTests` (companion:
+  `ConsentChangeCreatesAuditLogTests` for detailed item 524/525 coverage).
+- Frontend catalog: `frontend/src/features/customers/auditLogIsCreatedAfterConsentChange.ts`.
+- Asserts `CREATE` after record, `WITHDRAW_CONSENT` (and marketing `OPT_OUT`) after withdraw,
+  entity type `consent_records`, actor + payloads present; failed mutations write no audit row.
+
+Item 525 (log opt-out changes / COMP-002):
+
+- Marketing channel consents (`MARKETING_EMAIL`, `MARKETING_PHONE`, `MARKETING_SMS`) recorded as
+  `REJECTED` or `WITHDRAWN` also write an `OPT_OUT` audit row (via `AuditService.logOptOutChange`)
+  with `optOut=true` and `marketingConsent=true`.
+- Withdrawing a prior marketing grant writes both `WITHDRAW_CONSENT` and `OPT_OUT` (before
+  `optOut=false`, after `optOut=true`).
+- Non-marketing types (e.g. `GUARDIAN`, `DATA_PROCESSING`) and marketing grants (`GIVEN`) do not
+  produce `OPT_OUT` rows.
+
 Consent changes must be audit-log ready because compliance officers and system auditors need to
 review consent history, opt-outs, guardian consent, and campaign eligibility decisions.
 

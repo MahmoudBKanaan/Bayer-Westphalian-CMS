@@ -32,10 +32,7 @@ class ProductRepositoryTests {
 
     @Test
     void declaresKbActiveProductFinderThatExcludesSoftDeletedProducts() throws Exception {
-        assertThat(
-                        ProductRepository.class
-                                .getMethod("findActive")
-                                .getGenericReturnType())
+        assertThat(ProductRepository.class.getMethod("findActive").getGenericReturnType())
                 .isEqualTo(productList());
         assertThat(
                         ProductRepository.class

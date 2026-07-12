@@ -1,0 +1,32 @@
+---
+pid: 17444
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location \"D:\\Documents\\IU\\AgileApp\\backend\"; & \"D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd\" -q test 2>&1 | Select-Object -Last 25"
+started_at: 2026-07-08T10:59:26.699Z
+running_for_ms: 2470062  
+---
+2026-07-08T14:02:42.078+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:02:42.118+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:02:42.118+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:02:42.118+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:02:42.135+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:02:42.135+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:02:42.135+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+2026-07-08T14:02:42.148+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.mock.web.MockServletContext          : Initializing Spring TestDispatcherServlet ''
+2026-07-08T14:02:42.148+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Initializing Servlet ''
+2026-07-08T14:02:42.148+03:00  INFO 4260 --- [bayer-westphalian-campaign-platform] [           main] o.s.t.web.servlet.TestDispatcherServlet  : Completed initialization in 0 ms
+[ERROR] Failures: 
+[ERROR]   JwtServiceTests.rejectsTamperedTokenSignature:100 
+Expecting code to raise a throwable.
+[ERROR] Tests run: 970, Failures: 1, Errors: 0, Skipped: 30
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.3:test (default-test) on project campaign: There are test failures.
+[ERROR] 
+[ERROR] See D:\Documents\IU\AgileApp\backend\target\surefire-reports for the individual test results.
+[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

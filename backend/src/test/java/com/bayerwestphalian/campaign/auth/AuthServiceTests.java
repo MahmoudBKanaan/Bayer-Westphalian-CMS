@@ -2,6 +2,8 @@ package com.bayerwestphalian.campaign.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -25,6 +27,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+/**
+ * Auth service unit tests. Sprint 16 critical restatement of disabled-login: item <b>659</b> —
+ * {@link DisabledUserCannotLogInTests}.
+ */
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTests {
 
@@ -54,8 +60,8 @@ class AuthServiceTests {
 
         assertThat(authenticatedUser).isSameAs(user);
         verify(passwordHashingService).matches(RAW_PASSWORD, PASSWORD_HASH);
-        verify(loginAttemptTracker).ensureAllowed(EMAIL);
-        verify(loginAttemptTracker).recordSuccess(EMAIL);
+        verify(loginAttemptTracker).ensureAllowed(eq(EMAIL), isNull());
+        verify(loginAttemptTracker).recordSuccess(eq(EMAIL), isNull());
     }
 
     @Test
@@ -67,18 +73,18 @@ class AuthServiceTests {
                 .hasMessage("Invalid email or password");
 
         verify(passwordHashingService, never()).matches(RAW_PASSWORD, PASSWORD_HASH);
-        verify(loginAttemptTracker).recordFailure(EMAIL);
+        verify(loginAttemptTracker).recordFailure(eq(EMAIL), isNull());
     }
 
     @Test
     void rejectsThrottledLoginBeforeCredentialLookup() {
-        doThrow(new UnauthorizedException("Too many failed login attempts. Try again later"))
+        doThrow(new LoginLockoutException(java.time.Instant.now().plusSeconds(60), 60L))
                 .when(loginAttemptTracker)
-                .ensureAllowed(EMAIL);
+                .ensureAllowed(eq(EMAIL), isNull());
 
         assertThatThrownBy(() -> authService.validateCredentials(EMAIL, RAW_PASSWORD))
-                .isInstanceOf(UnauthorizedException.class)
-                .hasMessage("Too many failed login attempts. Try again later");
+                .isInstanceOf(LoginLockoutException.class)
+                .hasMessage(LoginLockoutException.DEFAULT_MESSAGE);
 
         verify(userRepository, never()).findByEmailIgnoreCase(EMAIL);
         verify(passwordHashingService, never()).matches(RAW_PASSWORD, PASSWORD_HASH);
@@ -94,8 +100,20 @@ class AuthServiceTests {
                 .isInstanceOf(UnauthorizedException.class)
                 .hasMessage("Invalid email or password");
 
-        verify(loginAttemptTracker).recordFailure(EMAIL);
-        verify(loginAttemptTracker, never()).recordSuccess(EMAIL);
+        verify(loginAttemptTracker).recordFailure(eq(EMAIL), isNull());
+        verify(loginAttemptTracker, never()).recordSuccess(eq(EMAIL), isNull());
+    }
+
+    @Test
+    void passesClientIpToLoginAttemptTracker() {
+        User user = user();
+        when(userRepository.findByEmailIgnoreCase(EMAIL)).thenReturn(Optional.of(user));
+        when(passwordHashingService.matches(RAW_PASSWORD, PASSWORD_HASH)).thenReturn(true);
+
+        authService.validateCredentials(EMAIL, RAW_PASSWORD, "203.0.113.10");
+
+        verify(loginAttemptTracker).ensureAllowed(EMAIL, "203.0.113.10");
+        verify(loginAttemptTracker).recordSuccess(EMAIL, "203.0.113.10");
     }
 
     @Test

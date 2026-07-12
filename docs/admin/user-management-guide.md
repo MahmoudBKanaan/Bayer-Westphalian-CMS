@@ -20,6 +20,8 @@ Admin user-management permissions include:
 - Assign roles
 - Reset passwords
 - View the user-management screen
+- Open **Settings** (`/settings`, item 534) to configure monthly contact limit, send retry limit,
+  and uninterested exclusion period
 
 Campaign Managers, BI Analysts, Product Managers, Compliance Officers, Customer Service Agents,
 and extended enterprise roles cannot manage users unless they also have `ADMIN`.
@@ -48,7 +50,8 @@ Supported account statuses are:
 - `DISABLED`
 - `LOCKED`
 
-Disabled or locked users cannot log in.
+Disabled or locked users cannot log in (Sprint 16 critical item **659** —
+`DisabledUserCannotLogInTests`; status must be `ACTIVE` for `POST /api/auth/login`).
 
 ## Disable A User
 
@@ -58,6 +61,10 @@ Disabled or locked users cannot log in.
 
 Disable is the normal account-removal workflow. Permanent deletion is not part of the MVP.
 
+Item 522: successful disable (`PATCH /api/users/{id}/disable`) writes a `DISABLE_USER` audit row on
+entity type `users` with the Admin actor and before/after `status` (plus email and full name).
+Disabling an already-disabled account is a no-op and does not create another audit entry.
+
 ## Assign A Role
 
 1. Select an employee from the user selector.
@@ -66,7 +73,10 @@ Disable is the normal account-removal workflow. Permanent deletion is not part o
 4. Choose `Assign role`.
 
 The UI disables duplicate role choices. The backend enforces role assignment rules and records
-role-change audit activity.
+role-change audit activity (item 521): each successful new role assignment writes an
+`ASSIGN_ROLE` audit row on entity type `users` with the Admin actor, previous role set, and new
+role set (including `assignedRole` / `roleId`). Re-assigning an existing role is a no-op and does
+not create another audit entry.
 
 ## Reset A Password
 
@@ -89,7 +99,10 @@ The password reset stores a new BCrypt hash and never exposes the raw password a
 
 The following actions are sensitive and must be auditable:
 
-- User creation
-- User disable
-- Role assignment
+- User creation (item 520): successful `POST /api/users` writes a `CREATE` row on entity type
+  `users` with the Admin actor, email, full name, and status — never the password or hash
+- User disable (item 522): successful `PATCH /api/users/{id}/disable` writes `DISABLE_USER` with
+  before/after status via `AuditService.logUserDisable`
+- Role assignment (item 521): successful `POST /api/users/{id}/roles` writes `ASSIGN_ROLE` with
+  old/new `roles` lists via `AuditService.logRoleChange`
 - Password reset

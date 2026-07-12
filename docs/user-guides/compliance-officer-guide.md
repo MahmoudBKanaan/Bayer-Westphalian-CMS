@@ -64,20 +64,64 @@ Compliance Officers can use compliance review to:
 - Check campaign name, objective, target segment, product, message, schedule, and owner.
 - Confirm recipient preview and eligibility results.
 - Approve campaigns that satisfy consent, opt-out, eligibility, and audit requirements.
-- Reject campaigns that fail compliance checks.
-- Request changes and add review notes when campaign details or recipient evidence are incomplete.
+- Reject campaigns that fail compliance checks with a required formal rejection reason
+  (`rejectionReason` on `POST /api/campaigns/{id}/reject`; stored as `campaigns.rejection_reason`).
+- Request changes and add review notes when campaign details or recipient evidence are incomplete
+  (`complianceReviewNotes` on approve/reject, or `PUT /api/campaigns/{id}/compliance-review-notes`).
 
 Campaigns cannot launch before Compliance Officer approval. Unauthorized roles cannot approve
 compliance-controlled campaigns.
 
+## Campaign Review Steps
+
+For each submitted campaign, Compliance Officers should:
+
+1. Open the Compliance Review page (`/compliance`) — the queue already filters to `SUBMITTED` campaigns.
+2. Use the on-page checklist (message, audience, eligibility, products, schedule, decision record).
+3. Select a campaign, review structured details, and open **recipient preview** when eligibility evidence is needed.
+4. Confirm the campaign owner is not the reviewer before making an approval or rejection decision.
+5. Approve (optional notes) or reject (required formal reason) and confirm the decision dialog.
+3. Check the campaign objective, channel, message subject, message body, selected products,
+   selected segment, start date, and end date.
+4. Review recipient preview totals, eligible recipients, excluded recipients, and exclusion
+   reasons before approval.
+5. Confirm consent, opt-out, do-not-contact, guardian consent, duplicate-recipient, and monthly
+   contact-limit evidence.
+6. Approve the campaign only when the campaign is compliant and ready to launch.
+7. Reject the campaign when compliance evidence is incomplete or messaging is not acceptable; a
+   non-blank `rejectionReason` is required.
+8. Add `complianceReviewNotes` when the Campaign Manager needs actionable revision guidance.
+9. Verify that approval or rejection appears in the audit log as `APPROVE` or `REJECT` for
+   `entityType=campaigns`.
+
+Relevant endpoints:
+
+- `POST /api/campaigns/{id}/approve`
+- `POST /api/campaigns/{id}/reject`
+- `PUT /api/campaigns/{id}/compliance-review-notes`
+- `GET /api/audit-logs`
+
 ## Audit Log And Reports
+
+Compliance Officers open **Audit** in the application shell (`/audit`, items 532–533) for a
+read-only sensitive-action history. The screen lists newest events first, shows
+action/entity/actor/time/IP summaries, and a **Selected entry** panel with previous/new JSON
+values. Use **Filters** to narrow by actor, action, entity type/id, and recorded date range
+(Apply / Reset). Selecting a row with an entity id also loads **Entity history** for that
+record. Entries cannot be edited or deleted (COMP-008).
 
 Compliance Officers can use the audit log and reports to:
 
 - Review consent changes, consent withdrawals, opt-outs, and guardian consent updates.
-- Review campaign approval and rejection history.
+- Review campaign creation history (`action=CREATE`, `entityType=campaigns`) as well as later
+  lifecycle updates.
+- Review campaign approval history (`action=APPROVE`, `entityType=campaigns`) including approver and
+  status transition evidence.
+- Review campaign rejection history.
 - Review sensitive customer and campaign actions.
 - Use compliance reports to support auditability and university report evidence.
+
+Related API: `GET /api/audit-logs`, `GET /api/audit-logs/entity-history`.
 
 Consent changes, approvals, rejections, and other sensitive compliance actions must be audit-log
 ready.
@@ -105,7 +149,10 @@ This guide preserves the KB Compliance Officer expectations:
   campaigns, view audit logs, and view compliance reports.
 - Screens: Dashboard, Consent Management, Customer Details, Compliance Review, Recipient Preview,
   Campaigns, Audit Log, and Reports.
+- Compliance review steps: verify campaign details, preview eligibility, consent evidence,
+  owner/reviewer separation, approval/rejection decision, reviewer notes, and audit evidence.
 - `FR-059`: Compliance Officer can approve or reject campaigns.
 - `BR-005`: Campaigns cannot launch before Compliance Officer approval.
 - `COMP-006`: Campaigns require compliance approval.
-- `TC-011`: Compliance Officer can approve or reject campaigns.
+- `TC-011` / Sprint 16 item **655**: Compliance Officer can approve or reject campaigns
+  (`ComplianceOfficerCanApproveRejectCampaignsTests`).

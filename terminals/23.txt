@@ -1,0 +1,15 @@
+---
+pid: 10888
+cwd: "D:\Documents\IU\AgileApp"
+command: "Start-Sleep -Seconds 25; Get-Content D:\\Documents\\IU\\AgileApp\\terminals\\22.txt -Tail 8"
+started_at: 2026-07-08T09:56:47.722Z
+running_for_ms: 1059992  
+---
+
+2026-07-08T12:56:57.364+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-07-08T12:56:57.961+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 2 endpoints beneath base path '/actuator'
+2026-07-08T12:56:58.792+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-07-08T12:56:58.811+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [           main] c.b.campaign.CampaignApplication         : Started CampaignApplication in 12.535 seconds (process running for 12.988)
+2026-07-08T12:56:58.871+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-07-08T12:56:58.872+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-07-08T12:56:58.875+03:00  INFO 10424 --- [bayer-westphalian-campaign-platform] [nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms

@@ -18,7 +18,15 @@
 **Sprint 17 item 694** — Verify pipeline passes on clean main branch.  
 **Sprint 17 item 695** — Add branch protection recommendation.  
 **Sprint 17 item 696** — Add release tagging process.  
-**Sprint 17 item 697** — Add deployment workflow placeholder.
+**Sprint 17 item 697** — Add deployment workflow placeholder.  
+**Sprint 17 item 698** — CI runs on pull request.  
+**Sprint 17 item 699** — CI runs on main branch.  
+**Sprint 17 item 700** — Backend build passes.  
+**Sprint 17 item 701** — Backend tests pass.  
+**Sprint 17 item 706** — Pipeline fails on intentionally broken test.  
+**Sprint 17 item 707** — Pipeline passes on clean main branch.  
+**Sprint 17 item 708** — CI/CD documentation.  
+**Sprint 17 item 711** — Release tagging guide.
 
 The Bayer-Westphalian Campaign Management Platform uses **GitHub Actions** to automate build,
 test, packaging, and release preparation (KB DevOps: Docker + GitHub Actions; epic **E25** /
@@ -53,15 +61,23 @@ Automated documentation evidence:
 | **695** | `BranchProtectionRecommendationDocumentationTests` | `branchProtectionRecommendation.ts` |
 | **696** | `ReleaseTaggingProcessDocumentationTests` | `releaseTaggingProcess.ts` |
 | **697** | `DeploymentWorkflowPlaceholderDocumentationTests` | `deploymentWorkflowPlaceholder.ts` |
+| **698** | `CiRunsOnPullRequestDocumentationTests` | `CI_RUNS_ON_PULL_REQUEST` / `workflowYamlDefinesCiRunsOnPullRequest` |
+| **699** | `CiRunsOnMainBranchDocumentationTests` | `CI_RUNS_ON_MAIN_BRANCH` / `workflowYamlDefinesCiRunsOnMainBranch` |
+| **700** | `BackendBuildPassesDocumentationTests` | `BACKEND_BUILD_PASSES` / `workflowYamlDefinesBackendBuildPasses` |
+| **701** | `BackendTestsPassDocumentationTests` | `BACKEND_TESTS_PASS` / `workflowYamlDefinesBackendTestsPass` |
+| **706** | `PipelineFailsOnIntentionallyBrokenTestDocumentationTests` | `PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST` / `scriptDefinesPipelineFailsOnIntentionallyBrokenTest` |
+| **707** | `PipelinePassesOnCleanMainRuntimeDocumentationTests` | `PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME` / `scriptDefinesPipelinePassesOnCleanMainRuntime` |
+| **708** | `CiCdDocumentationExpansionTests` | `CI_CD_DOCUMENTATION` / `markdownDefinesCiCdDocumentation` |
+| **711** | `ReleaseTaggingGuideDocumentationTests` | `RELEASE_TAGGING_GUIDE_REQUIRED_MARKERS` / `releaseTaggingDocDefinesGuideMarkers` |
 
 ## Triggers
 
 The `CI` workflow runs when:
 
-| Event | Branches |
-| --- | --- |
-| `push` | `main`, `dev` |
-| `pull_request` | targeting `main` or `dev` |
+| Event | Branches | Backlog |
+| --- | --- | --- |
+| `push` | `main`, `dev` | **699** (main), **694** |
+| `pull_request` | targeting `main` or `dev` | **698** |
 
 Concurrency: one active run per workflow + ref; newer runs cancel in-progress ones on the same ref.
 
@@ -71,8 +87,8 @@ Permissions: `contents: read` only (no write tokens required for CI).
 
 | Job id | Name | Purpose | Related backlog |
 | --- | --- | --- | --- |
-| `backend-build` | Backend build | Java 21 + Maven package (skip tests); upload JAR artifact | **678**, **691** |
-| `backend-test` | Backend test | Java 21 + full Maven Surefire suite | **679** |
+| `backend-build` | Backend build | Java 21 + Maven package (skip tests); upload JAR; pass = **700** | **678**, **691**, **700** |
+| `backend-test` | Backend test | Java 21 + full Maven Surefire suite; pass = **701** | **679**, **701** |
 | `backend-integration-test` | Backend integration test | Surefire filter `*IntegrationTests` | **680** |
 | `frontend-install` | Frontend install | Node 22 + `npm ci` (lockfile install only) | **681** |
 | `frontend-lint` | Frontend lint | Node 22 + `npm ci` + `npm run lint` | **682** |
@@ -441,6 +457,26 @@ This item does **not** commit a deliberately broken test. Intentional break evid
 item **706**. Local parity of fail-on-red (optional manual check): temporarily break a unit test,
 run `mvn -B test` or `npm test`, confirm non-zero exit, then revert.
 
+### Pipeline fails on intentionally broken test (item **706**)
+
+Runtime evidence for **706** is local and repeatable without committing a failing test:
+
+```powershell
+.\scripts\verify-pipeline-fails-on-broken-test.ps1
+```
+
+The script creates `frontend/src/__pipeline_broken__.test.ts`, runs
+`npm test -- --reporter=dot --silent=true src/__pipeline_broken__.test.ts`, and expects a
+non-zero exit code. If the broken test unexpectedly passes, the script exits non-zero and reports
+the failure. A `finally` block removes the temporary probe, so no intentionally broken test is
+committed or left behind after the check.
+
+Evidence tests:
+
+- Backend: `PipelineFailsOnIntentionallyBrokenTestDocumentationTests`
+- Frontend catalog: `PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST` /
+  `scriptDefinesPipelineFailsOnIntentionallyBrokenTest`
+
 ### Verify pipeline passes on clean main branch (item **694**)
 
 **Pass-on-green** is the complementary configuration contract to fail-on-red (**693**): when the
@@ -466,6 +502,33 @@ on `main` is covered by acceptance items **699** / **707** when a clean commit i
 parity: run the approximate suite in [Local parity](#local-parity-full-approximate) on a clean
 checkout; non-zero exit means main would not go green until fixed (item **715** full suite).
 
+### Pipeline passes on clean main branch (item **707**)
+
+Runtime evidence for **707** is recorded from a clean `main` branch with a clean worktree only:
+
+```powershell
+.\scripts\verify-pipeline-passes-on-clean-main.ps1
+```
+
+The script refuses to run unless `git branch --show-current` returns `main` and
+`git status --porcelain` is empty. It then runs the local CI parity gates: backend package, backend
+tests, backend integration test filter, frontend install/lint/test/build, Docker backend/frontend
+image builds, Docker Compose validation, and production configuration file presence checks. A
+non-zero command exits the script non-zero, so a completed script run is the local evidence that a
+clean `main` tree can pass the pipeline.
+
+Use `-PlanOnly` to inspect the command list without claiming runtime pass evidence:
+
+```powershell
+.\scripts\verify-pipeline-passes-on-clean-main.ps1 -PlanOnly
+```
+
+Evidence tests:
+
+- Backend: `PipelinePassesOnCleanMainRuntimeDocumentationTests`
+- Frontend catalog: `PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME` /
+  `scriptDefinesPipelinePassesOnCleanMainRuntime`
+
 ### Branch protection recommendation (item **695**)
 
 GitHub **branch protection** / **rulesets** for releasable **`main`** are documented in
@@ -479,7 +542,7 @@ GitHub **branch protection** / **rulesets** for releasable **`main`** are docume
 Rules are applied in the GitHub UI (not by application code). Evidence tests:
 `BranchProtectionRecommendationDocumentationTests` and `branchProtectionRecommendation.ts`.
 
-### Release tagging process (item **696**)
+### Release tagging process and guide (items **696** / **711**)
 
 Git **release tags** for KB versions (`v0.1` … `v1.0`) are documented in
 [release-tagging.md](release-tagging.md). Summary:
@@ -488,8 +551,11 @@ Git **release tags** for KB versions (`v0.1` … `v1.0`) are documented in
 - Prefer **annotated** tags (`git tag -a v0.9 -m "..."`) aligned with the KB release plan.
 - Do not force-move published tags; optional GitHub Release notes without secrets.
 - Preconditions: CI green, branch protection when available, artifacts **691** when needed.
+- Item **711** expands the guide with release roles, verification commands, release notes template,
+  evidence capture, and troubleshooting.
 
-Evidence tests: `ReleaseTaggingProcessDocumentationTests` and `releaseTaggingProcess.ts`.
+Evidence tests: `ReleaseTaggingProcessDocumentationTests`, `ReleaseTaggingGuideDocumentationTests`,
+and `releaseTaggingProcess.ts`.
 
 ### Deployment workflow placeholder (item **697**)
 
@@ -512,17 +578,153 @@ means the manual workflow executed documentation steps only — **not** that pro
 Evidence tests: `DeploymentWorkflowPlaceholderDocumentationTests` and
 `deploymentWorkflowPlaceholder.ts` / `workflowYamlDefinesDeploymentPlaceholder`.
 
+### CI runs on pull request (item **698**)
+
+Acceptance: opening or updating a **pull request** that targets **`main`** or **`dev`** starts the
+**CI** workflow (`.github/workflows/ci.yml`).
+
+| Check | Expectation |
+| --- | --- |
+| Event | `on.pull_request` is defined |
+| Target branches | `main`, `dev` |
+| Scope | No `paths` / `paths-ignore` filters that skip PR CI |
+| Jobs | Full quality matrix runs (build, test, lint, Docker, prod config, …) |
+| Merge gate | Aligns with branch protection required checks (**695**) and fail-on-red (**693**) |
+
+Verification is **static** (workflow + docs tests). Runtime PR evidence is produced when a PR is
+opened against GitHub. Backend: `CiRunsOnPullRequestDocumentationTests`. Frontend:
+`workflowYamlDefinesCiRunsOnPullRequest`.
+
+### CI runs on main branch (item **699**)
+
+Acceptance: a **push** to releasable **`main`** starts the **CI** workflow (also configured for
+`dev`). Complements pass-on-green (**694**) and the README badge on `branch=main` (**692**).
+
+| Check | Expectation |
+| --- | --- |
+| Event | `on.push` is defined |
+| Branches | includes **`main`** (and `dev`) |
+| Scope | No `paths` / `paths-ignore` that skip push CI on main |
+| Jobs | Full quality matrix (build, test, lint, Docker, prod config, …) |
+| Visibility | Root README CI badge tracks `main` status |
+
+Verification is **static**. Runtime green evidence on `main` is item **707** when a clean commit is
+pushed. Backend: `CiRunsOnMainBranchDocumentationTests`. Frontend:
+`workflowYamlDefinesCiRunsOnMainBranch`.
+
+### Backend build passes (item **700**)
+
+Acceptance: the **`backend-build`** job is green only when packaging succeeds.
+
+| Check | Expectation |
+| --- | --- |
+| Job | `backend-build` / **Backend build** (item **678**) |
+| Command | `mvn -B -DskipTests package` (Java 21 / Temurin) |
+| Artifact | Assert at least one `backend/target/*.jar` (excludes `*.jar.original`) |
+| Soft-fail | No `continue-on-error: true` / `\|\| true` on package |
+| Scope | Does **not** run `mvn test` (that is **701** / job **679**) |
+| Artifacts | Optional upload `bwc-backend-jar` (**691**) after a successful package |
+
+Local parity:
+
+```powershell
+cd backend
+mvn -B -DskipTests package
+Get-ChildItem target\*.jar | Where-Object { $_.Name -notlike '*.jar.original' }
+```
+
+Evidence tests: `BackendBuildPassesDocumentationTests` and `workflowYamlDefinesBackendBuildPasses`.
+
+### Backend tests pass (item **701**)
+
+Acceptance: the **`backend-test`** job is green only when the full Maven Surefire suite succeeds.
+
+| Check | Expectation |
+| --- | --- |
+| Job | `backend-test` / **Backend test** (item **679**) |
+| Command | `mvn -B test` (Java 21 / Temurin; unit + integration via Surefire) |
+| Soft-fail | No `continue-on-error: true` / `\|\| true` (fail-on-red **693**) |
+| Forbidden | `-DskipTests`, package-only, or `*IntegrationTests` filter (integration-only is **680**) |
+| Scope | Separate from `backend-build` packaging (**700** / **678**) |
+
+Local parity:
+
+```powershell
+cd backend
+mvn -B test
+```
+
+Evidence tests: `BackendTestsPassDocumentationTests` and `workflowYamlDefinesBackendTestsPass`.
+
+## CI/CD documentation (item **708**)
+
+This page is the CI/CD operating guide and evidence index. It documents what the pipeline does,
+how to reproduce the checks locally, what the pipeline deliberately does not do, and which tests
+guard the documentation.
+
+### Coverage
+
+| Area | Documented here |
+| --- | --- |
+| Workflow identity | `.github/workflows/ci.yml`, workflow name **CI**, branch triggers, concurrency, permissions |
+| Job matrix | Backend build/test/integration, frontend install/lint/test/build, Docker image build, Compose validation, production config validation |
+| Quality gates | Fail-on-red (**693**), pass-on-green (**694**), PR/main trigger evidence (**698-699**) |
+| Artifacts | `bwc-backend-jar`, `bwc-frontend-dist`, retention, no registry push |
+| Runtime evidence | Intentionally broken test script (**706**) and clean-main parity script (**707**) |
+| Local parity | PowerShell/Maven/npm/Docker commands that mirror CI expectations |
+| Security notes | Least-privilege workflow permissions, no production secrets, no deployment in CI |
+
+### Boundaries
+
+- CI builds, tests, packages, validates Docker/Compose configuration, and uploads short-lived build artifacts.
+- CI does not deploy production, does not push images to a registry, and does not embed production secrets.
+- The deployment placeholder remains manual documentation-only until the Sprint 18 deployment work.
+- Runtime green evidence must come from a clean `main` tree through item **707**; dirty worktrees can use `-PlanOnly` for inspection only.
+
+### Related Docs
+
+- [Developer setup](../development/developer-setup.md) for local tools and setup.
+- [Environment variables](environment-variables.md) and [secrets](secrets.md) for configuration and secret handling.
+- [Branch protection](branch-protection.md) for merge gates aligned to required checks.
+- [Release tagging](release-tagging.md) for annotating green release commits.
+- [Production security checklist](production-security-checklist.md) for production hardening expectations.
+
+### Troubleshooting
+
+| Symptom | First checks |
+| --- | --- |
+| Backend build red | Run `mvn -B -DskipTests package`; inspect missing JAR or compilation errors |
+| Backend test red | Run `mvn -B test`; inspect Surefire reports under `backend/target/surefire-reports` |
+| Frontend lint/test/build red | Run `npm run lint`, `npm test`, or `npm run build` in `frontend/` |
+| Docker build red | Run the matching `docker build` command locally and inspect Dockerfile/context errors |
+| Compose validation red | Run `.\scripts\test-docker-compose-config.ps1` or `docker compose -f docker-compose.yml config` |
+| Production config validation red | Check `application-prod.yml`, validators, templates, and secret documentation |
+
+### Maintenance checklist
+
+- Update `.github/workflows/ci.yml`, this guide, `.github/README.md`, and the frontend CI catalog together.
+- Add or update a backend documentation test whenever a CI/CD acceptance item gains a new contract.
+- Keep local parity commands aligned with CI step commands.
+- Keep runtime evidence scripts non-destructive and explicit about when evidence is or is not recorded.
+- Preserve least-privilege `permissions: contents: read` unless a future workflow has a documented need.
+
+Evidence tests: `CiCdDocumentationExpansionTests` and `markdownDefinesCiCdDocumentation`.
+
 ## Later Sprint 17 items
 
 | Item | Topic |
 | --- | --- |
 | **688** | Environment variable template — [environment-variables.md](environment-variables.md) |
 | **689** | Secrets documentation — [secrets.md](secrets.md) |
-| **698–699** | Acceptance: CI on PR and main |
+| **702** | Frontend lint passes |
+| **703** | Frontend tests pass |
+| **704** | Frontend build passes |
+| **705** | Docker images build successfully |
 | **706** | Pipeline fails on intentionally broken test (runtime evidence) |
 | **707** | Pipeline passes on clean main branch (runtime evidence) |
-| **708** | Full CI/CD documentation expansion |
-| **711** | Release tagging guide expansion |
+| **709** | Environment variable documentation — [environment-variables.md](environment-variables.md) |
+| **710** | Secrets documentation — [secrets.md](secrets.md) |
+| **711** | Release tagging guide — [release-tagging.md](release-tagging.md) |
 
 ## Local parity (full approximate)
 

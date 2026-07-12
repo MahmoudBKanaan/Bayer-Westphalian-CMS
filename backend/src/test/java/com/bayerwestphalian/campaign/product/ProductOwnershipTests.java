@@ -41,8 +41,7 @@ class ProductOwnershipTests {
 
     @Test
     void providesProtectedNoArgsConstructorForJpa() throws Exception {
-        Constructor<ProductOwnership> constructor =
-                ProductOwnership.class.getDeclaredConstructor();
+        Constructor<ProductOwnership> constructor = ProductOwnership.class.getDeclaredConstructor();
 
         assertThat(Modifier.isProtected(constructor.getModifiers())).isTrue();
     }
@@ -88,9 +87,7 @@ class ProductOwnershipTests {
     void declaresKbOwnershipStatusValues() {
         assertThat(OwnershipStatus.values())
                 .containsExactly(
-                        OwnershipStatus.ACTIVE,
-                        OwnershipStatus.EXPIRED,
-                        OwnershipStatus.CANCELLED);
+                        OwnershipStatus.ACTIVE, OwnershipStatus.EXPIRED, OwnershipStatus.CANCELLED);
     }
 
     @Test
@@ -145,6 +142,29 @@ class ProductOwnershipTests {
 
         assertThat(ownership.getStatus()).isEqualTo(OwnershipStatus.CANCELLED);
         assertThat(ownership.isActive()).isFalse();
+    }
+
+    @Test
+    void updatesSavedExpirationDateForKbExpirationCampaignSupport() {
+        LocalDate startDate = LocalDate.parse("2026-01-01");
+        LocalDate initialExpiration = startDate.plusMonths(6);
+        ProductOwnership ownership =
+                ProductOwnership.create(
+                        Customer.create(CustomerType.CUSTOMER, "Eva", "Owner"),
+                        Product.create(
+                                "Life Protection",
+                                ProductType.LIFE_INSURANCE,
+                                new BigDecimal("129.99"),
+                                24),
+                        startDate,
+                        initialExpiration);
+
+        assertThat(ownership.getExpirationDate()).isEqualTo(initialExpiration);
+
+        LocalDate revisedExpiration = LocalDate.parse("2028-12-31");
+        ownership.updateExpirationDate(revisedExpiration);
+
+        assertThat(ownership.getExpirationDate()).isEqualTo(revisedExpiration);
     }
 
     @Test

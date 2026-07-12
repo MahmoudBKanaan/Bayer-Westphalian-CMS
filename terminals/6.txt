@@ -1,0 +1,27 @@
+---
+pid: 22128
+cwd: "D:\Documents\IU\AgileApp"
+command: "$env:JAVA_HOME = \"C:\\Users\\mbk73\\.jdks\\temurin-21\"; $env:Path = \"$env:JAVA_HOME\\bin;D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin;\" + $env:Path; cd D:\\Documents\\IU\\AgileApp\\backend; mvn -q compile test-compile -DskipTests 2>&1"
+started_at: 2026-07-08T08:35:36.298Z
+running_for_ms: 800002   
+---
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: D:\Documents\IU\AgileApp\.tools\apache-maven-3.9.11
+Java version: 21.0.11, vendor: Eclipse Adoptium, runtime: C:\Users\mbk73\.jdks\temurin-21
+Default locale: en_US, platform encoding: UTF-8
+OS name: "windows 10", version: "10.0", arch: "amd64", family: "windows"
+[ERROR] COMPILATION ERROR : 
+[ERROR] /D:/Documents/IU/AgileApp/backend/src/test/java/com/bayerwestphalian/campaign/segment/SegmentCriteriaEntityIntegrationTests.java:[86,9] cannot find symbol
+  symbol:   class UUID
+  location: class com.bayerwestphalian.campaign.segment.SegmentCriteriaEntityIntegrationTests
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.0:testCompile (default-testCompile) on project campaign: Compilation failure
+[ERROR] /D:/Documents/IU/AgileApp/backend/src/test/java/com/bayerwestphalian/campaign/segment/SegmentCriteriaEntityIntegrationTests.java:[86,9] cannot find symbol
+[ERROR]   symbol:   class UUID
+[ERROR]   location: class com.bayerwestphalian.campaign.segment.SegmentCriteriaEntityIntegrationTests
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

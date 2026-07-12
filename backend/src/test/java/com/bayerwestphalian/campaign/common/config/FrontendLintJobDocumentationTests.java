@@ -58,7 +58,7 @@ class FrontendLintJobDocumentationTests {
             if (nextJobIndex < 0) {
                 nextJobIndex = yaml.indexOf("\n  frontend:");
             }
-            assertThat(lintJobIndex).isNonNegative();
+            assertThat(lintJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(nextJobIndex).isGreaterThan(lintJobIndex);
 
             String lintBlock = yaml.substring(lintJobIndex, nextJobIndex);

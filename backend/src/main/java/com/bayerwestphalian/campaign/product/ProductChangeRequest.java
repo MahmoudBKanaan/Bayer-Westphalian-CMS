@@ -43,10 +43,7 @@ public class ProductChangeRequest extends BaseEntity {
     protected ProductChangeRequest() {}
 
     private ProductChangeRequest(
-            Product product,
-            User requestedBy,
-            ProductChangeType requestType,
-            String description) {
+            Product product, User requestedBy, ProductChangeType requestType, String description) {
         this.product = product;
         this.requestedBy = requestedBy;
         this.requestType = requestType;
@@ -54,10 +51,7 @@ public class ProductChangeRequest extends BaseEntity {
     }
 
     public static ProductChangeRequest create(
-            Product product,
-            User requestedBy,
-            ProductChangeType requestType,
-            String description) {
+            Product product, User requestedBy, ProductChangeType requestType, String description) {
         return new ProductChangeRequest(product, requestedBy, requestType, description);
     }
 

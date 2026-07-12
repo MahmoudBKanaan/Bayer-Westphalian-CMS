@@ -23,18 +23,24 @@ Install these tools before starting:
 The backend currently supports a local Maven installation. A Maven wrapper can be added later for fully pinned build execution.
 
 Continuous integration runs the same major build/test steps via GitHub Actions (Sprint 17 items
-**677–687**, **690–697**: workflow, backend package/tests/integration, frontend
+**677–687**, **690–701**: workflow, backend package/tests/integration, frontend
 install/lint/test/build, Docker images, Compose validation, production config static checks,
 release artifact uploads for the backend JAR and frontend `dist/`, a **CI** status badge on the
 root README, fail-on-red / pass-on-green contracts, **branch protection** for releasable **`main`**,
-a **release tagging** process for KB versions `v0.1`…`v1.0`, and a **deployment workflow
-placeholder** that does not update hosts). Environment variable templates are item **688**
+a **release tagging** process for KB versions `v0.1`…`v1.0`, a **deployment workflow placeholder**,
+**CI on pull request** / **push to main**, and acceptance that **backend build** and **backend tests
+pass**). Environment variable templates are item **688**
 ([environment-variables.md](../deployment/environment-variables.md)); secrets ops guide is item
 **689** ([secrets.md](../deployment/secrets.md)); branch protection is item **695**
 ([branch-protection.md](../deployment/branch-protection.md)); release tagging is item **696**
 ([release-tagging.md](../deployment/release-tagging.md)); deploy placeholder is item **697**
 ([ci-cd.md](../deployment/ci-cd.md#deployment-workflow-placeholder-item-697) /
-[`.github/workflows/deploy-placeholder.yml`](../../.github/workflows/deploy-placeholder.yml)). See
+[`.github/workflows/deploy-placeholder.yml`](../../.github/workflows/deploy-placeholder.yml));
+PR CI is item **698**
+([ci-cd.md](../deployment/ci-cd.md#ci-runs-on-pull-request-item-698)); main-branch CI is item **699**
+([ci-cd.md](../deployment/ci-cd.md#ci-runs-on-main-branch-item-699)); backend build pass is item **700**
+([ci-cd.md](../deployment/ci-cd.md#backend-build-passes-item-700)); backend tests pass is item **701**
+([ci-cd.md](../deployment/ci-cd.md#backend-tests-pass-item-701)). See
 [CI/CD — GitHub Actions](../deployment/ci-cd.md) and
 [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml).
 

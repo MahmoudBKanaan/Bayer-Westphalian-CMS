@@ -13,6 +13,28 @@ export const RELEASE_TAGGING_GUIDE_ITEM = 711;
 
 export const RELEASE_TAGGING_GUIDE_STATEMENT = "Release tagging guide";
 
+export const MAIN_CI_RELEASE_GATE_ITEM = 714;
+
+export const MAIN_CI_RELEASE_GATE_STATEMENT =
+  "The main branch must not be considered releasable unless CI passes";
+
+export type CiRunEvidence = {
+  branch: string;
+  headSha: string;
+  expectedSha: string;
+  status: string;
+  conclusion: string | null;
+};
+
+export function isMainCommitReleasable(evidence: CiRunEvidence): boolean {
+  return (
+    evidence.branch === "main" &&
+    evidence.headSha === evidence.expectedSha &&
+    evidence.status === "completed" &&
+    evidence.conclusion === "success"
+  );
+}
+
 export const RELEASE_TAGGING_DOC_PATH = "docs/deployment/release-tagging.md";
 
 export const CI_CD_DOC_PATH = "docs/deployment/ci-cd.md";

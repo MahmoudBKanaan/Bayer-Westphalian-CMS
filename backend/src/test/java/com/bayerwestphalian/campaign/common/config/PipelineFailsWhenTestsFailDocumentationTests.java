@@ -146,7 +146,7 @@ class PipelineFailsWhenTestsFailDocumentationTests {
     private static String jobBlock(String yaml, String jobKey, String nextJobKey) {
         int start = indexOfJob(yaml, jobKey);
         int end = indexOfJob(yaml, nextJobKey);
-        assertThat(start).as(jobKey).isNonNegative();
+        assertThat(start).as(jobKey).isGreaterThanOrEqualTo(0);
         assertThat(end).as(nextJobKey).isGreaterThan(start);
         return yaml.substring(start, end);
     }

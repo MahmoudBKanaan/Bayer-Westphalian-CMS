@@ -1105,7 +1105,14 @@ class FlywayMigrationResourceTests {
                         "V1__create_initial_schema.sql",
                         "V16__seed_kb_roles.sql",
                         "V17__seed_mvp_role_users.sql",
-                        "V18__reset_admin_password.sql")
+                        "V18__reset_admin_password.sql",
+                        "V19__reset_demo_login_passwords.sql",
+                        "V20__reset_all_test_account_passwords.sql",
+                        "V21__seed_all_role_test_accounts_and_reset_password.sql",
+                        "V22__add_campaign_compliance_review_notes.sql",
+                        "V23__add_ai_recommendation_review_notes.sql",
+                        "V24__create_system_settings_table.sql",
+                        "V25__add_customer_status_changed_at.sql")
                 .doesNotContain("R__controlled_demo_data.sql");
 
         assertThat(Arrays.stream(demoMigrations).map(Resource::getFilename))
@@ -1159,7 +1166,14 @@ class FlywayMigrationResourceTests {
                         "V15__add_kb_search_filter_indexes.sql",
                         "V16__seed_kb_roles.sql",
                         "V17__seed_mvp_role_users.sql",
-                        "V18__reset_admin_password.sql")
+                        "V18__reset_admin_password.sql",
+                        "V19__reset_demo_login_passwords.sql",
+                        "V20__reset_all_test_account_passwords.sql",
+                        "V21__seed_all_role_test_accounts_and_reset_password.sql",
+                        "V22__add_campaign_compliance_review_notes.sql",
+                        "V23__add_ai_recommendation_review_notes.sql",
+                        "V24__create_system_settings_table.sql",
+                        "V25__add_customer_status_changed_at.sql")
                 .doesNotContain("R__controlled_demo_data.sql");
 
         assertThat(
@@ -1168,7 +1182,7 @@ class FlywayMigrationResourceTests {
                                 .map(this::versionFrom)
                                 .mapToInt(Integer::parseInt)
                                 .max())
-                .hasValue(18);
+                .hasValue(25);
     }
 
     @Test
@@ -1188,7 +1202,70 @@ class FlywayMigrationResourceTests {
                                                         Integer.parseInt(right))))
                 .containsExactly(
                         "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14",
-                        "15", "16", "17", "18");
+                        "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25");
+    }
+
+    @Test
+    void v22AddsCampaignComplianceReviewNotesColumn() throws Exception {
+        ClassPathResource migration =
+                new ClassPathResource("db/migration/V22__add_campaign_compliance_review_notes.sql");
+
+        assertThat(migration.exists()).isTrue();
+
+        String sql = migration.getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(sql)
+                .contains("alter table campaigns")
+                .contains("compliance_review_notes")
+                .contains("text");
+    }
+
+    @Test
+    void v23AddsAiRecommendationReviewNotesColumn() throws Exception {
+        ClassPathResource migration =
+                new ClassPathResource(
+                        "db/migration/V23__add_ai_recommendation_review_notes.sql");
+
+        assertThat(migration.exists()).isTrue();
+
+        String sql = migration.getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(sql)
+                .contains("alter table ai_recommendations")
+                .contains("review_notes")
+                .contains("text");
+    }
+
+    @Test
+    void v24CreatesSystemSettingsTableForAdminScreen() throws Exception {
+        ClassPathResource migration =
+                new ClassPathResource("db/migration/V24__create_system_settings_table.sql");
+
+        assertThat(migration.exists()).isTrue();
+
+        String sql = migration.getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(sql)
+                .contains("create table system_settings")
+                .contains("monthly_contact_limit")
+                .contains("send_retry_limit")
+                .contains("uninterested_exclusion_days")
+                .contains("a1000000-0000-0000-0000-000000000001");
+    }
+
+    @Test
+    void v25AddsCustomerStatusChangedAtForUninterestedExclusionPeriod() throws Exception {
+        ClassPathResource migration =
+                new ClassPathResource("db/migration/V25__add_customer_status_changed_at.sql");
+
+        assertThat(migration.exists()).isTrue();
+
+        String sql = migration.getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(sql)
+                .contains("alter table customers")
+                .contains("status_changed_at")
+                .contains("timestamptz");
     }
 
     @Test

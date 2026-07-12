@@ -30,10 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 @ExtendWith(MockitoExtension.class)
 class ConsentControllerTests {
 
-    private static final UUID CONSENT_ID =
-            UUID.fromString("22000000-0000-0000-0000-000000000001");
-    private static final UUID CUSTOMER_ID =
-            UUID.fromString("20000000-0000-0000-0000-000000000101");
+    private static final UUID CONSENT_ID = UUID.fromString("22000000-0000-0000-0000-000000000001");
+    private static final UUID CUSTOMER_ID = UUID.fromString("20000000-0000-0000-0000-000000000101");
     private static final UUID CREATED_BY_ID =
             UUID.fromString("10000000-0000-0000-0000-000000000101");
 
@@ -157,10 +155,7 @@ class ConsentControllerTests {
 
     @Test
     void rejectsInvalidRecordConsentRequest() throws Exception {
-        mockMvc.perform(
-                        post("/api/consents")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("{}"))
+        mockMvc.perform(post("/api/consents").contentType(MediaType.APPLICATION_JSON).content("{}"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_FAILED"))
                 .andExpect(jsonPath("$.path").value("/api/consents"));

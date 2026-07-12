@@ -95,7 +95,7 @@ Core variables:
 | --- | --- |
 | `SPRING_PROFILES_ACTIVE` | Selects `dev`, `test`, or `prod` |
 | `SERVER_PORT` | Backend HTTP port |
-| `CORS_ALLOWED_ORIGINS` | Allowed frontend origins |
+| `CORS_ALLOWED_ORIGINS` | Allowed frontend origins (required in `prod`; no localhost defaults) |
 | `DB_URL` | PostgreSQL JDBC URL |
 | `DB_USERNAME` | PostgreSQL username |
 | `DB_PASSWORD` | PostgreSQL password |
@@ -107,7 +107,13 @@ Core variables:
 | `SMS_PROVIDER_MODE` | `mock` for dev/test or real provider mode |
 | `FILE_STORAGE_MODE` | Local or external file storage mode |
 
-Production must provide `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, and `JWT_SECRET` through the deployment environment or secret manager.
+Production must provide `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `JWT_SECRET`, and
+`CORS_ALLOWED_ORIGINS` (comma-separated **https://** frontend origins, no wildcards) through the
+deployment environment or secret manager. These keys are validated at startup when `SPRING_PROFILES_ACTIVE=prod` (item **542** —
+`EnvironmentVariableValidator`). Secrets (`JWT_SECRET` ≥32 chars, `DB_PASSWORD` ≥8 chars, not
+placeholders) are validated by item **543** (`SecretPresenceValidator`). Terminate TLS at the
+reverse proxy and forward `X-Forwarded-Proto: https` (item 541). Optional: `HTTPS_REQUIRED`
+(default true in prod).
 
 The `dev` profile defaults to the local Docker PostgreSQL database:
 

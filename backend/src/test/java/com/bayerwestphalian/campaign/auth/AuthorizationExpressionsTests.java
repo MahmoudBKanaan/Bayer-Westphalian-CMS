@@ -51,8 +51,13 @@ class AuthorizationExpressionsTests {
         assertThat(authorizationExpressions.canManageUsers()).isTrue();
         assertThat(authorizationExpressions.canManageRoles()).isTrue();
         assertThat(authorizationExpressions.canManageCampaigns()).isTrue();
+        assertThat(authorizationExpressions.canManageSegments()).isTrue();
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+        assertThat(authorizationExpressions.canReadSegments()).isTrue();
+        assertThat(authorizationExpressions.canPreviewSegments()).isTrue();
         assertThat(authorizationExpressions.canManageProducts()).isTrue();
         assertThat(authorizationExpressions.canApproveCampaigns()).isTrue();
+        assertThat(authorizationExpressions.canReviewCampaigns()).isTrue();
         assertThat(authorizationExpressions.canViewAuditLogs()).isTrue();
         assertThat(authorizationExpressions.canViewReports()).isTrue();
     }
@@ -62,9 +67,103 @@ class AuthorizationExpressionsTests {
         authenticate(SystemRoleName.CAMPAIGN_MANAGER);
 
         assertThat(authorizationExpressions.canManageCampaigns()).isTrue();
+        assertThat(authorizationExpressions.canReadCampaigns()).isTrue();
+        assertThat(authorizationExpressions.canManageSegments()).isTrue();
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+        assertThat(authorizationExpressions.canReadSegments()).isTrue();
+        assertThat(authorizationExpressions.canPreviewSegments()).isTrue();
         assertThat(authorizationExpressions.canViewReports()).isTrue();
         assertThat(authorizationExpressions.canManageUsers()).isFalse();
         assertThat(authorizationExpressions.canApproveCampaigns()).isFalse();
+        assertThat(authorizationExpressions.canReviewCampaigns()).isFalse();
+        assertThat(authorizationExpressions.canManageProducts()).isFalse();
+    }
+
+    @Test
+    void mapsKbCampaignManagerSegmentCreationPermissions() {
+        // KB FR-077 / item 201: Campaign Manager can create reusable segments.
+        authenticate(SystemRoleName.CAMPAIGN_MANAGER);
+
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+        assertThat(authorizationExpressions.canManageSegments()).isTrue();
+    }
+
+    @Test
+    void segmentCreationPermissionsMatchManageRolesForAdminAndCampaignManager() {
+        authenticate(SystemRoleName.ADMIN);
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+
+        authenticate(SystemRoleName.CAMPAIGN_MANAGER);
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+    }
+
+    @Test
+    void unauthorizedRolesCannotManageProducts() {
+        authenticate(SystemRoleName.BI_ANALYST);
+        assertThat(authorizationExpressions.canManageProducts()).isFalse();
+
+        authenticate(SystemRoleName.CUSTOMER_SERVICE_AGENT);
+        assertThat(authorizationExpressions.canManageProducts()).isFalse();
+
+        authenticate(SystemRoleName.SALES_AGENT);
+        assertThat(authorizationExpressions.canManageProducts()).isFalse();
+    }
+
+    @Test
+    void mapsKbSegmentReadPermissionsForBiAnalystAndComplianceOfficer() {
+        authenticate(SystemRoleName.BI_ANALYST);
+
+        assertThat(authorizationExpressions.canReadSegments()).isTrue();
+        assertThat(authorizationExpressions.canPreviewSegments()).isTrue();
+        assertThat(authorizationExpressions.canManageSegments()).isFalse();
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.COMPLIANCE_OFFICER);
+
+        assertThat(authorizationExpressions.canReadSegments()).isTrue();
+        assertThat(authorizationExpressions.canPreviewSegments()).isFalse();
+        assertThat(authorizationExpressions.canManageSegments()).isFalse();
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+    }
+
+    @Test
+    void biAnalystCannotEditSegmentUnlessAlsoGrantedManageRole() {
+        // KB item 200: BI alone denied; dual-role with CAMPAIGN_MANAGER or ADMIN is allowed.
+        authenticate(SystemRoleName.BI_ANALYST);
+        assertThat(authorizationExpressions.canManageSegments()).isFalse();
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.BI_ANALYST, SystemRoleName.CAMPAIGN_MANAGER);
+        assertThat(authorizationExpressions.canManageSegments()).isTrue();
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+
+        authenticate(SystemRoleName.BI_ANALYST, SystemRoleName.ADMIN);
+        assertThat(authorizationExpressions.canManageSegments()).isTrue();
+        assertThat(authorizationExpressions.canCreateSegments()).isTrue();
+    }
+
+    @Test
+    void nonCampaignRolesCannotCreateSegments() {
+        authenticate(SystemRoleName.BI_ANALYST);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.PRODUCT_MANAGER);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.CUSTOMER_SERVICE_AGENT);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.SALES_AGENT);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.EXECUTIVE_VIEWER);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.SYSTEM_AUDITOR);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
+
+        authenticate(SystemRoleName.MARKETING_ANALYST);
+        assertThat(authorizationExpressions.canCreateSegments()).isFalse();
     }
 
     @Test
@@ -72,6 +171,7 @@ class AuthorizationExpressionsTests {
         authenticate(SystemRoleName.COMPLIANCE_OFFICER);
 
         assertThat(authorizationExpressions.canApproveCampaigns()).isTrue();
+        assertThat(authorizationExpressions.canReviewCampaigns()).isTrue();
         assertThat(authorizationExpressions.canViewAuditLogs()).isTrue();
         assertThat(authorizationExpressions.canManageProducts()).isFalse();
 
@@ -79,6 +179,7 @@ class AuthorizationExpressionsTests {
 
         assertThat(authorizationExpressions.canViewAuditLogs()).isTrue();
         assertThat(authorizationExpressions.canApproveCampaigns()).isFalse();
+        assertThat(authorizationExpressions.canReviewCampaigns()).isFalse();
     }
 
     @Test
@@ -86,12 +187,34 @@ class AuthorizationExpressionsTests {
         authenticate(SystemRoleName.PRODUCT_MANAGER);
 
         assertThat(authorizationExpressions.canManageProducts()).isTrue();
+        assertThat(authorizationExpressions.canManageProductOwnership()).isTrue();
+        assertThat(authorizationExpressions.canReadCustomers()).isTrue();
         assertThat(authorizationExpressions.canManageCampaigns()).isFalse();
+        assertThat(authorizationExpressions.canApproveCampaigns()).isFalse();
+        assertThat(authorizationExpressions.canReviewCampaigns()).isFalse();
+        assertThat(authorizationExpressions.canManageUsers()).isFalse();
+        assertThat(authorizationExpressions.canViewAuditLogs()).isFalse();
+        assertThat(authorizationExpressions.canViewReports()).isFalse();
 
         authenticate(SystemRoleName.EXECUTIVE_VIEWER);
 
         assertThat(authorizationExpressions.canViewReports()).isTrue();
         assertThat(authorizationExpressions.canViewAuditLogs()).isFalse();
+
+        // KB item 458: Marketing Analyst is authorized for restricted campaign report export.
+        authenticate(SystemRoleName.MARKETING_ANALYST);
+        assertThat(authorizationExpressions.canViewReports()).isTrue();
+        assertThat(authorizationExpressions.canViewAuditLogs()).isFalse();
+
+        // KB item 458: unauthorized roles cannot export restricted campaign reports.
+        authenticate(SystemRoleName.COMPLIANCE_OFFICER);
+        assertThat(authorizationExpressions.canViewReports()).isFalse();
+        authenticate(SystemRoleName.CUSTOMER_SERVICE_AGENT);
+        assertThat(authorizationExpressions.canViewReports()).isFalse();
+        authenticate(SystemRoleName.SALES_AGENT);
+        assertThat(authorizationExpressions.canViewReports()).isFalse();
+        authenticate(SystemRoleName.SYSTEM_AUDITOR);
+        assertThat(authorizationExpressions.canViewReports()).isFalse();
     }
 
     @Test

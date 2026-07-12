@@ -38,7 +38,12 @@ import org.junit.jupiter.api.Test;
  * protection recommendation — see {@link BranchProtectionRecommendationDocumentationTests}. Item
  * <b>696</b> specializes release tagging process — see {@link
  * ReleaseTaggingProcessDocumentationTests}. Item <b>697</b> specializes the deployment workflow
- * placeholder — see {@link DeploymentWorkflowPlaceholderDocumentationTests}.
+ * placeholder — see {@link DeploymentWorkflowPlaceholderDocumentationTests}. Item <b>698</b>
+ * specializes CI on pull request — see {@link CiRunsOnPullRequestDocumentationTests}. Item
+ * <b>699</b> specializes CI on main branch — see {@link CiRunsOnMainBranchDocumentationTests}.
+ * Item <b>700</b> specializes backend build passes — see {@link
+ * BackendBuildPassesDocumentationTests}. Item <b>701</b> specializes backend tests pass — see
+ * {@link BackendTestsPassDocumentationTests}.
  */
 @DisplayName("677 Add GitHub Actions workflow")
 class GitHubActionsWorkflowDocumentationTests {

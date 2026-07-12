@@ -1,0 +1,16 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5432/bwc_campaign_test}
+    username: ${TEST_DB_USERNAME:bwc_app}
+    password: ${TEST_DB_PASSWORD:bwc_app}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: false
+    locations: classpath:db/migration,classpath:db/demo
+
+logging:
+  level:
+    com.bayerwestphalian.campaign: INFO

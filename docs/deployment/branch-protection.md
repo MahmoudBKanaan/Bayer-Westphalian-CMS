@@ -73,10 +73,10 @@ CI still runs on `push` to `dev` and on PRs targeting `dev` ([ci-cd.md](ci-cd.md
 
 ## How this interacts with the pipeline
 
-1. Open a PR into `main` → GitHub Actions **CI** runs (**698**).
+1. Open a PR into `main` → GitHub Actions **CI** runs on pull request (**698**).
 2. Fail-on-red (**693**): any red quality-gate job blocks merge when checks are required.
 3. Pass-on-green (**694**): a clean tree can go green; only then should merge proceed.
-4. After merge, push to `main` runs CI again (**699**); badge tracks `main` (**692**).
+4. After merge, push to `main` runs CI again on the main branch (**699**); badge tracks `main` (**692**).
 5. Main is not releasable unless CI passes (**714**).
 
 ## Setup checklist (operator)

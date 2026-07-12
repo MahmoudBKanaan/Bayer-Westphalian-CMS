@@ -103,9 +103,9 @@ deployment, and university report evidence.
 
 - [Production Security Checklist](deployment/production-security-checklist.md)
 - [Backup and Restore Process](deployment/backup-and-restore.md) (item **666** / NFR-013)
-- [CI/CD — GitHub Actions](deployment/ci-cd.md) (item **677**)
-- [Environment Variable Template](deployment/environment-variables.md) (item **688**)
-- [Secrets Documentation](deployment/secrets.md) (item **689**)
+- [CI/CD — GitHub Actions](deployment/ci-cd.md) (items **677** / **708**)
+- [Environment Variable Template](deployment/environment-variables.md) (items **688** / **709**)
+- [Secrets Documentation](deployment/secrets.md) (items **689** / **710**)
 - [Branch Protection Recommendation](deployment/branch-protection.md) (item **695**)
-- [Release Tagging Process](deployment/release-tagging.md) (item **696**)
+- [Release Tagging Process](deployment/release-tagging.md) (items **696** / **711**)
 - [CI/CD — deployment workflow placeholder](deployment/ci-cd.md#deployment-workflow-placeholder-item-697) (item **697**)

@@ -38,6 +38,13 @@ Rules:
 
 Repeatable Flyway migrations are not part of the current Sprint 2 baseline. Add them only after a documented architecture decision.
 
+## Relationship to backup and restore (item **666** / NFR-013)
+
+Logical PostgreSQL dumps capture data **and** the Flyway history table. After restore, the
+application must start against the same migration set that produced that history. Do not edit
+applied migrations to “fix” a restored environment — add a new versioned script if the schema must
+change. Full operator dump/restore steps: [Backup and Restore Process](../deployment/backup-and-restore.md).
+
 ## Verification
 
 The backend test suite enforces this convention by checking the migration directory, validating unique version numbers, and confirming the scripts recorded by Flyway follow the same naming rule.

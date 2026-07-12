@@ -77,8 +77,35 @@ public class AuditLog {
             UUID entityId,
             Map<String, ?> oldValue,
             Map<String, ?> newValue) {
+        return recordAction(actorUserId, action, entityType, entityId, oldValue, newValue, null);
+    }
+
+    public static AuditLog recordAction(
+            UUID actorUserId,
+            String action,
+            String entityType,
+            UUID entityId,
+            Map<String, ?> oldValue,
+            Map<String, ?> newValue,
+            String ipAddress) {
         return new AuditLog(
-                actorUserId, action, entityType, entityId, copy(oldValue), copy(newValue), null);
+                actorUserId,
+                action,
+                entityType,
+                entityId,
+                copy(oldValue),
+                copy(newValue),
+                copyIp(ipAddress));
+    }
+
+    public static AuditLog recordChange(
+            UUID actorUserId,
+            String action,
+            String entityType,
+            UUID entityId,
+            Map<String, ?> oldValue,
+            Map<String, ?> newValue) {
+        return recordAction(actorUserId, action, entityType, entityId, oldValue, newValue);
     }
 
     public UUID getId() {
@@ -129,5 +156,13 @@ public class AuditLog {
 
     private static Map<String, Object> copy(Map<String, ?> value) {
         return value == null || value.isEmpty() ? null : new LinkedHashMap<>(value);
+    }
+
+    private static String copyIp(String ipAddress) {
+        if (ipAddress == null) {
+            return null;
+        }
+        String trimmed = ipAddress.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

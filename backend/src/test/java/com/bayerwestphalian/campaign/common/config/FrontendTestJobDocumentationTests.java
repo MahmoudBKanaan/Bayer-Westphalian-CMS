@@ -57,7 +57,7 @@ class FrontendTestJobDocumentationTests {
             if (nextJobIndex < 0) {
                 nextJobIndex = yaml.indexOf("\n  frontend:");
             }
-            assertThat(testJobIndex).isNonNegative();
+            assertThat(testJobIndex).isGreaterThanOrEqualTo(0);
             assertThat(nextJobIndex).isGreaterThan(testJobIndex);
 
             String testBlock = yaml.substring(testJobIndex, nextJobIndex);

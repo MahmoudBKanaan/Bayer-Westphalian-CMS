@@ -55,7 +55,7 @@ class CiBadgeDocumentationTests {
             int badgeIndex = readme.indexOf("[![CI](");
             int identityIndex = readme.indexOf("## Project Identity");
 
-            assertThat(titleIndex).isNonNegative();
+            assertThat(titleIndex).isGreaterThanOrEqualTo(0);
             assertThat(badgeIndex).isGreaterThan(titleIndex);
             assertThat(identityIndex).isGreaterThan(badgeIndex);
         }

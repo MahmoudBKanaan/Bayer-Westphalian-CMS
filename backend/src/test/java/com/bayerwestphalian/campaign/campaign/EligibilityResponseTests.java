@@ -23,8 +23,7 @@ class EligibilityResponseTests {
     void mapsExcludedDecisionToExcludedStatusWithStructuredReason() {
         EligibilityResponse response =
                 EligibilityResponse.from(
-                        EligibilityDecision.excluded(
-                                EligibilityExclusionReason.MARKETING_OPT_OUT));
+                        EligibilityDecision.excluded(EligibilityExclusionReason.MARKETING_OPT_OUT));
 
         assertThat(response.status()).isEqualTo(EligibilityResponse.STATUS_EXCLUDED);
         assertThat(response.eligible()).isFalse();
@@ -43,8 +42,7 @@ class EligibilityResponseTests {
     void excludedDecisionReturnsReasonFieldsReadyForRecipientStorage() {
         EligibilityResponse response =
                 EligibilityResponse.from(
-                        EligibilityDecision.excluded(
-                                EligibilityExclusionReason.DO_NOT_CONTACT));
+                        EligibilityDecision.excluded(EligibilityExclusionReason.DO_NOT_CONTACT));
 
         Map<String, String> storageColumns =
                 Map.of(
@@ -56,8 +54,7 @@ class EligibilityResponseTests {
         assertThat(response.status()).isEqualTo(EligibilityResponse.STATUS_EXCLUDED);
         assertThat(storageColumns)
                 .containsEntry("exclusion_reason", EligibilityExclusionReason.CODE_DO_NOT_CONTACT)
-                .containsEntry(
-                        "eligibility_explanation", "Customer has do-not-contact enabled");
+                .containsEntry("eligibility_explanation", "Customer has do-not-contact enabled");
         assertThat(storageColumns.values()).allSatisfy(value -> assertThat(value).isNotBlank());
     }
 

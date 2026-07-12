@@ -1,0 +1,44 @@
+---
+pid: 7584
+cwd: "D:\Documents\IU\AgileApp"
+command: "Set-Location \"D:\\Documents\\IU\\AgileApp\\backend\"; & \"D:\\Documents\\IU\\AgileApp\\.tools\\apache-maven-3.9.11\\bin\\mvn.cmd\" test \"-Dtest=PaymentRecord*,ProductService*,ProductOwnershipService*,ProductChangesCreateAuditLog*,ProductModuleDocumentation*,ProductAndOwnershipDownstreamSupportTests\" 2>&1 | Select-String -Pattern \"FAILURE|ERROR|Tests run|BUILD\""
+started_at: 2026-07-08T10:58:27.679Z
+running_for_ms: 2529954  
+---
+
+[INFO] Building campaign 0.1.0-SNAPSHOT
+Mockito is currently self-attaching to enable the inline-mock-maker. This will no longer work in future releases of 
+the JDK. Please add Mockito as an agent to your build as described in Mockito's documentation: 
+https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.353 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordCanBeCreatedTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.258 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordCanBeMarkedPaidTests
+[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.934 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordControllerTests
+[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.017 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordDocumentationTests
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.182 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordDtoTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.008 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordRepositoryTests
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.634 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordServiceTests
+[INFO] Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.030 s -- in 
+com.bayerwestphalian.campaign.product.PaymentRecordTests
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.287 s -- in 
+com.bayerwestphalian.campaign.product.ProductAndOwnershipDownstreamSupportTests
+[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.015 s -- in 
+com.bayerwestphalian.campaign.product.ProductChangesCreateAuditLogDocumentationTests
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.286 s -- in 
+com.bayerwestphalian.campaign.product.ProductChangesCreateAuditLogTests
+[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.013 s -- in 
+com.bayerwestphalian.campaign.product.ProductModuleDocumentationTests
+[INFO] Tests run: 9, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.041 s -- in 
+com.bayerwestphalian.campaign.product.ProductOwnershipServiceTests
+[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.080 s -- in 
+com.bayerwestphalian.campaign.product.ProductServiceTests
+[INFO] Tests run: 131, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
+
+

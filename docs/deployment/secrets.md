@@ -1,5 +1,7 @@
 # Secrets Documentation
 
+**Sprint 17 item 710** - Secrets documentation.
+
 **Sprint 17 item 689** — Add secrets documentation.
 
 The Bayer-Westphalian Campaign Management Platform treats credentials and signing keys as **secrets**.
@@ -51,6 +53,19 @@ Runtime validation details: [security-hardening.md](../architecture/security-har
 `.gitignore` excludes `.env`, `.env.*` (with `!.env.example` exceptions), `*.pem`, `*.key`,
 `secrets/`.
 
+## Secret ownership and access
+
+| Responsibility | Owner | Rules |
+| --- | --- | --- |
+| Secret creation | Platform/admin operator | Generate values outside Git with approved tooling |
+| Secret storage | Deployment operator | Store in a secret manager or platform secret store only |
+| Secret use | Application runtime | Read through environment variables at startup/runtime |
+| Secret review | System Auditor / admin | Verify names, access policy, and audit evidence, not values |
+
+Access is least privilege: only operators who deploy or rotate production credentials should see
+secret values. Use break-glass access only for incidents, record who accessed the secret, and revoke
+temporary access after the incident.
+
 ## Local development
 
 1. Copy templates (item **688**):
@@ -82,6 +97,24 @@ Before enabling the `prod` profile against real customer data:
    JWT secret rotation.
 
 Also complete [production-security-checklist.md](production-security-checklist.md).
+
+## Provisioning checklist
+
+1. Generate `JWT_SECRET` using a cryptographically secure random source.
+2. Create database credentials and set `DB_PASSWORD` in the secret manager.
+3. Add provider secrets (`SMTP_PASSWORD`, `SMS_API_KEY`) only when real providers are enabled.
+4. Bind secret names into the deployment environment; do not copy values into Git, CI YAML, Docker
+   files, docs, screenshots, or tickets.
+5. Run a production startup smoke check and verify missing/weak secrets fail closed.
+
+## Rotation schedule
+
+| Secret | Minimum rotation trigger | Notes |
+| --- | --- | --- |
+| `JWT_SECRET` | Suspected leak, staff change, or scheduled policy | Invalidate active sessions after rotation |
+| `DB_PASSWORD` | Suspected leak, staff change, database user change, or scheduled policy | Rotate database and app environment together |
+| `SMTP_PASSWORD` | Provider policy, staff change, or suspected leak | Disable real sending until replacement is verified |
+| `SMS_API_KEY` | Provider policy, staff change, or suspected leak | Verify provider quota/rate settings after rotation |
 
 ## Application enforcement
 
@@ -130,11 +163,37 @@ See [ci-cd.md](ci-cd.md) security notes (items **677+**).
 3. **Provider key leak**: rotate at the provider console; disable real sending until keys are
    replaced.
 
+## Leak response runbook
+
+1. Stop using the suspected value immediately.
+2. Rotate the affected secret in the source system and update the deployment secret store.
+3. Redeploy/restart services that cache the value.
+4. Invalidate sessions or credentials affected by the secret.
+5. Search Git history, CI logs, exported reports, screenshots, and shared tickets for copies.
+6. Record an audit note with the secret name, owner, time, impact, and remediation status.
+
+## Backup and restore handling
+
+Backups may contain customer data, but they must not be the source of runtime secrets. After a
+restore, re-apply `JWT_SECRET`, database credentials, and provider keys from the secret manager.
+Never store secret manager exports inside database dumps. See [backup-and-restore.md](backup-and-restore.md).
+
+## Audit evidence
+
+Keep evidence that secrets are controlled without exposing values:
+
+- Secret names and owners.
+- Rotation dates and ticket/reference ids.
+- Deployment environment names where the secret is mounted.
+- Startup validation result showing required names are present.
+- Confirmation that CI, Docker images, and docs do not include secret values.
+
 ## Automated documentation evidence
 
 | Item | Backend test | Frontend catalog |
 | --- | --- | --- |
 | **689** | `SecretsDocumentationTests` | `secretsDocumentation.ts` |
+| **710** | `SecretsDocumentationExpansionTests` | `SECRETS_DOCUMENTATION_EXPANSION_REQUIRED_MARKERS` / `secretsDocDefinesExpansionMarkers` |
 
 ## Related backlog and docs
 
@@ -150,6 +209,10 @@ See [ci-cd.md](ci-cd.md) security notes (items **677+**).
 | **695** | [Branch protection recommendation](branch-protection.md) |
 | **696** | [Release tagging process](release-tagging.md) |
 | **697** | [Deployment workflow placeholder](ci-cd.md#deployment-workflow-placeholder-item-697) |
+| **698** | [CI runs on pull request](ci-cd.md#ci-runs-on-pull-request-item-698) |
+| **699** | [CI runs on main branch](ci-cd.md#ci-runs-on-main-branch-item-699) |
+| **700** | [Backend build passes](ci-cd.md#backend-build-passes-item-700) |
+| **701** | [Backend tests pass](ci-cd.md#backend-tests-pass-item-701) |
 | **542–543** / **665** | Runtime validation and critical tests |
 | [security-hardening.md](../architecture/security-hardening.md) | Technical validation detail |
 | [production-security-checklist.md](production-security-checklist.md) | Pre-release checklist |
