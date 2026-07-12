@@ -5,6 +5,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_BASE_URL } from "@/api/client";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { AUTH_STORAGE_KEYS } from "@/auth/sessionStorageStrategy";
+import {
+  LOGIN_GENERIC_FAILURE_MESSAGE,
+  LOGIN_INVALID_CREDENTIALS_MESSAGE,
+  LOGIN_PAGE_TITLE,
+  LOGIN_PANEL_HEADING,
+  LOGIN_RATE_LIMITED_MESSAGE,
+  loginFormValidationMessages,
+} from "@/features/auth/loginFlow";
 import { LoginPage } from "@/pages/LoginPage";
 
 type LoginInitialEntry =
@@ -57,9 +65,9 @@ describe("LoginPage", () => {
   it("renders the internal employee login form", () => {
     renderLoginPage();
 
-    expect(
-      screen.getByRole("heading", { name: "Bayer-Westphalian Campaign Management" }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: LOGIN_PAGE_TITLE })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: LOGIN_PANEL_HEADING })).toBeInTheDocument();
+    expect(screen.getByRole("form", { name: "Employee sign-in" })).toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toBeInTheDocument();
     expect(screen.getByLabelText("Password")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Sign in" })).toBeInTheDocument();
@@ -149,8 +157,10 @@ describe("LoginPage", () => {
     await userEvent.type(screen.getByLabelText("Password"), "short");
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
-    expect(await screen.findByText("Enter a valid internal email address.")).toBeInTheDocument();
-    expect(screen.getByText("Password must be at least 8 characters.")).toBeInTheDocument();
+    expect(
+      await screen.findByText(loginFormValidationMessages.emailInvalid),
+    ).toBeInTheDocument();
+    expect(screen.getByText(loginFormValidationMessages.passwordMinLength)).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
@@ -171,8 +181,8 @@ describe("LoginPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Login failed. Check your credentials or account status.",
+      expect(screen.getByTestId("login-error")).toHaveTextContent(
+        LOGIN_INVALID_CREDENTIALS_MESSAGE,
       );
     });
     expect(screen.queryByRole("heading", { name: "Campaign Performance" })).not.toBeInTheDocument();
@@ -198,14 +208,36 @@ describe("LoginPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Login failed. Check your credentials or account status.",
+      expect(screen.getByTestId("login-error")).toHaveTextContent(
+        LOGIN_INVALID_CREDENTIALS_MESSAGE,
       );
     });
     expect(screen.queryByRole("heading", { name: "Campaign Performance" })).not.toBeInTheDocument();
     expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
     expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
     expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+  });
+
+  it("shows a rate-limit message when login is temporarily locked", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 429,
+      json: async () => ({
+        code: "LOGIN_RATE_LIMITED",
+        message: "Too many failed attempts",
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderLoginPage();
+    await userEvent.type(screen.getByLabelText("Email"), "admin@bayer-westphalian.test");
+    await userEvent.type(screen.getByLabelText("Password"), "StrongPassword!2026");
+    await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("login-error")).toHaveTextContent(LOGIN_RATE_LIMITED_MESSAGE);
+    });
+    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
   });
 
   it("shows a generic login error when the backend is unavailable", async () => {
@@ -225,9 +257,7 @@ describe("LoginPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Sign in" }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toHaveTextContent(
-        "Login failed. Try again or contact an administrator.",
-      );
+      expect(screen.getByTestId("login-error")).toHaveTextContent(LOGIN_GENERIC_FAILURE_MESSAGE);
     });
   });
 });

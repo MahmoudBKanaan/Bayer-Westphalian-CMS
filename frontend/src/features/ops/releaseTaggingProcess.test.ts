@@ -7,11 +7,16 @@ import {
   KB_RELEASE_TAGS,
   RELEASE_TAGGING_DOC_PATH,
   RELEASE_TAGGING_DOC_REQUIRED_MARKERS,
+  RELEASE_TAGGING_GUIDE_ITEM,
+  RELEASE_TAGGING_GUIDE_REQUIRED_MARKERS,
+  RELEASE_TAGGING_GUIDE_STATEMENT,
+  RELEASE_TAGGING_GUIDE_TEST_CLASS,
   RELEASE_TAGGING_PROCESS,
   RELEASE_TAGGING_PROCESS_ITEM,
   RELEASE_TAGGING_PROCESS_STATEMENT,
   RELEASE_TAG_BRANCH,
   isKbStyleReleaseTag,
+  releaseTaggingDocDefinesGuideMarkers,
   releaseTaggingDocDefinesRequiredMarkers,
   releaseTaggingDocListsKbTags,
   releaseTaggingDocRequiresGreenMain,
@@ -23,10 +28,12 @@ function readRepoFile(relativeFromRepo: string): string {
   return readFileSync(path.join(repoRoot, relativeFromRepo), "utf8");
 }
 
-describe("releaseTaggingProcess (item 696)", () => {
+describe("releaseTaggingProcess (items 696, 711)", () => {
   it("locks the release tagging process identity", () => {
     expect(RELEASE_TAGGING_PROCESS_ITEM).toBe(696);
     expect(RELEASE_TAGGING_PROCESS_STATEMENT).toBe("Add release tagging process");
+    expect(RELEASE_TAGGING_GUIDE_ITEM).toBe(711);
+    expect(RELEASE_TAGGING_GUIDE_STATEMENT).toBe("Release tagging guide");
     expect(RELEASE_TAGGING_DOC_PATH).toBe("docs/deployment/release-tagging.md");
     expect(RELEASE_TAG_BRANCH).toBe("main");
     expect(RELEASE_TAGGING_PROCESS.preferAnnotatedTags).toBe(true);
@@ -40,7 +47,11 @@ describe("releaseTaggingProcess (item 696)", () => {
     expect(BACKEND_DOCUMENTATION_TEST_CLASS).toContain(
       "ReleaseTaggingProcessDocumentationTests",
     );
+    expect(RELEASE_TAGGING_GUIDE_TEST_CLASS).toContain(
+      "ReleaseTaggingGuideDocumentationTests",
+    );
     expect(RELEASE_TAGGING_DOC_REQUIRED_MARKERS).toContain("696");
+    expect(RELEASE_TAGGING_GUIDE_REQUIRED_MARKERS).toContain("Evidence capture");
     expect(isKbStyleReleaseTag("v0.9")).toBe(true);
     expect(isKbStyleReleaseTag("v1.0")).toBe(true);
     expect(isKbStyleReleaseTag("release-1")).toBe(false);
@@ -55,6 +66,7 @@ describe("releaseTaggingProcess (item 696)", () => {
 
     const doc = readRepoFile(RELEASE_TAGGING_DOC_PATH);
     expect(releaseTaggingDocDefinesRequiredMarkers(doc)).toBe(true);
+    expect(releaseTaggingDocDefinesGuideMarkers(doc)).toBe(true);
     expect(releaseTaggingDocListsKbTags(doc)).toBe(true);
     expect(releaseTaggingDocRequiresGreenMain(doc)).toBe(true);
 

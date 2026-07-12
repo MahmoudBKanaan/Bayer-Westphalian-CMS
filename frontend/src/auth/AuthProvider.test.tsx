@@ -4,7 +4,12 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_BASE_URL } from "@/api/client";
 import type { AuthenticatedUser } from "@/api/auth";
 import { AuthProvider, useAuth } from "@/auth/AuthProvider";
-import { AUTH_STORAGE_KEYS } from "@/auth/sessionStorageStrategy";
+import {
+  AUTH_SESSION_CHANGED_EVENT,
+  AUTH_STORAGE_KEYS,
+  clearAuthSession,
+  saveAuthSession,
+} from "@/auth/sessionStorageStrategy";
 
 const user: AuthenticatedUser = {
   id: "10000000-0000-0000-0000-000000009901",
@@ -129,6 +134,44 @@ describe("AuthProvider", () => {
     expect(screen.getByText("Authenticated: no")).toBeInTheDocument();
     expect(screen.getByText("User: none")).toBeInTheDocument();
     expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+  });
+
+  it("updates provider state when API token refresh saves a new session", async () => {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(["CAMPAIGN_MANAGER"]));
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+
+    renderProvider();
+
+    expect(screen.getByText("Roles: CAMPAIGN_MANAGER")).toBeInTheDocument();
+
+    saveAuthSession({
+      user,
+      tokens: {
+        accessToken: createAccessToken(["ADMIN", "CAMPAIGN_MANAGER"]),
+        accessTokenExpiresAt: "2026-07-04T12:30:00Z",
+        refreshToken: "fresh-refresh-token",
+        refreshTokenExpiresAt: "2026-07-11T12:00:00Z",
+      },
+    });
+
+    expect(await screen.findByText("Roles: ADMIN,CAMPAIGN_MANAGER")).toBeInTheDocument();
+  });
+
+  it("clears provider state when API refresh failure clears the stored session", async () => {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+
+    renderProvider();
+
+    expect(screen.getByText("Authenticated: yes")).toBeInTheDocument();
+
+    clearAuthSession();
+    window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+
+    expect(await screen.findByText("Authenticated: no")).toBeInTheDocument();
+    expect(screen.getByText("Roles: none")).toBeInTheDocument();
   });
 });
 

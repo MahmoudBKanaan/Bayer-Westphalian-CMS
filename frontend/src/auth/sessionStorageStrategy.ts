@@ -18,6 +18,8 @@ export const AUTH_STORAGE_KEYS = {
   currentUser: "bwc.currentUser",
 } as const;
 
+export const AUTH_SESSION_CHANGED_EVENT = "bwc-auth-session-changed";
+
 export type StoredAuthSession = {
   accessToken: string;
   refreshToken: string;
@@ -29,6 +31,7 @@ export function saveAuthSession(session: AuthenticatedSession) {
   sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, session.tokens.accessToken);
   sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, session.tokens.refreshToken);
   sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(session.user));
+  notifyAuthSessionChanged();
 }
 
 export function loadAuthSession(): StoredAuthSession | null {
@@ -37,7 +40,7 @@ export function loadAuthSession(): StoredAuthSession | null {
   const user = parseStoredUser(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser));
 
   if (!accessToken || !refreshToken || user == null) {
-    clearAuthSession();
+    clearStoredAuthSession();
     return null;
   }
 
@@ -46,6 +49,10 @@ export function loadAuthSession(): StoredAuthSession | null {
 
 export function getStoredAccessToken(): string | null {
   return sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken);
+}
+
+export function getStoredRefreshToken(): string | null {
+  return sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken);
 }
 
 export function extractRolesFromAccessToken(accessToken: string): SystemRoleName[] {
@@ -58,9 +65,18 @@ export function extractRolesFromAccessToken(accessToken: string): SystemRoleName
 }
 
 export function clearAuthSession() {
+  clearStoredAuthSession();
+  notifyAuthSessionChanged();
+}
+
+function clearStoredAuthSession() {
   sessionStorage.removeItem(AUTH_STORAGE_KEYS.accessToken);
   sessionStorage.removeItem(AUTH_STORAGE_KEYS.refreshToken);
   sessionStorage.removeItem(AUTH_STORAGE_KEYS.currentUser);
+}
+
+export function notifyAuthSessionChanged() {
+  window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
 }
 
 function parseStoredUser(value: string | null): AuthenticatedUser | null {

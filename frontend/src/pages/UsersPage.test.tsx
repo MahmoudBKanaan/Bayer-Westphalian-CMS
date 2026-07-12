@@ -64,6 +64,15 @@ describe("UsersPage", () => {
     expect(await screen.findAllByText("Admin User")).not.toHaveLength(0);
     expect(screen.getAllByText("Campaign Manager")).not.toHaveLength(0);
     expect(screen.getByText("admin@bayer-westphalian.test")).toBeInTheDocument();
+    const employeeAccountsTable = screen.getByRole("table", { name: "Employee accounts" });
+    expect(
+      within(employeeAccountsTable).getByText(
+        "Employee accounts table with name, email, status, roles, and last login.",
+      ),
+    ).toHaveClass("sr-only");
+    expect(
+      within(employeeAccountsTable).getByRole("columnheader", { name: "Name" }),
+    ).toHaveAttribute("scope", "col");
   });
 
   it("creates a user through the admin endpoint", async () => {
@@ -113,6 +122,37 @@ describe("UsersPage", () => {
         method: "POST",
       });
     });
+    expect(await screen.findByRole("status")).toHaveTextContent("User created.");
+  });
+
+  it("shows create-user validation messages before posting", async () => {
+    const fetchMock = createFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+    await screen.findAllByText("Admin User");
+
+    const createPanel = screen.getByRole("heading", { name: "Create user" }).closest("section");
+    expect(createPanel).not.toBeNull();
+
+    await userEvent.click(
+      within(createPanel as HTMLElement).getByRole("button", {
+        name: "Create user",
+      }),
+    );
+
+    expect(screen.getByText("Full name is required.")).toBeInTheDocument();
+    expect(screen.getByText("Email is required.")).toBeInTheDocument();
+    expect(screen.getByText("Temporary password is required.")).toBeInTheDocument();
+    expect(within(createPanel as HTMLElement).getByLabelText("Full name")).toHaveAttribute(
+      "aria-invalid",
+      "true",
+    );
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, init]) => url === `${API_BASE_URL}/users` && init?.method === "POST",
+      ),
+    ).toBe(false);
   });
 
   it("edits the selected user's name and status", async () => {
@@ -171,6 +211,19 @@ describe("UsersPage", () => {
 
     await userEvent.selectOptions(roleSelect, "BI_ANALYST");
     await userEvent.click(screen.getByRole("button", { name: "Assign role" }));
+    const assignRoleDialog = await screen.findByRole("dialog", {
+      name: "Confirm role assignment",
+    });
+    expect(
+      within(assignRoleDialog).getByText(/changes the user's application access/i),
+    ).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, init]) =>
+          url === `${API_BASE_URL}/users/${campaignManager.id}/roles` && init?.method === "POST",
+      ),
+    ).toBe(false);
+    await userEvent.click(within(assignRoleDialog).getByRole("button", { name: "Assign role" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/users/${campaignManager.id}/roles`, {
@@ -187,11 +240,67 @@ describe("UsersPage", () => {
     });
 
     await userEvent.click(screen.getByRole("button", { name: "Disable user" }));
+    const disableDialog = await screen.findByRole("dialog", { name: "Confirm user disable" });
+    expect(
+      within(disableDialog).getByText(/prevents the user from accessing/i),
+    ).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, init]) => {
+          const isDisableEndpoint =
+            url === `${API_BASE_URL}/users/${campaignManager.id}/disable`;
+
+          return isDisableEndpoint && init?.method === "PATCH";
+        },
+      ),
+    ).toBe(false);
+    await userEvent.click(within(disableDialog).getByRole("button", { name: "Disable user" }));
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
         `${API_BASE_URL}/users/${campaignManager.id}/disable`,
         {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + createAccessToken(["ADMIN"]),
+          },
+          method: "PATCH",
+        },
+      );
+    });
+  });
+
+  it("requires confirmation before resetting a user password", async () => {
+    const fetchMock = createFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderUsersPage();
+    await screen.findAllByText("Campaign Manager");
+
+    await userEvent.selectOptions(screen.getByLabelText("User"), campaignManager.id);
+    await userEvent.type(screen.getByLabelText("New password"), "NewPass!2026");
+    await userEvent.click(screen.getByRole("button", { name: "Reset password" }));
+
+    const resetDialog = await screen.findByRole("dialog", { name: "Confirm password reset" });
+    expect(within(resetDialog).getByText(/approved secure channel/i)).toBeInTheDocument();
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, init]) => {
+          const isPasswordEndpoint =
+            url === `${API_BASE_URL}/users/${campaignManager.id}/password`;
+
+          return isPasswordEndpoint && init?.method === "PATCH";
+        },
+      ),
+    ).toBe(false);
+
+    await userEvent.click(within(resetDialog).getByRole("button", { name: "Reset password" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${API_BASE_URL}/users/${campaignManager.id}/password`,
+        {
+          body: JSON.stringify({ password: "NewPass!2026" }),
           headers: {
             "Content-Type": "application/json",
             Authorization: "Bearer " + createAccessToken(["ADMIN"]),
@@ -262,6 +371,10 @@ function createFetchMock() {
 
     if (url.endsWith("/disable")) {
       return jsonResponse({ ...campaignManager, status: "DISABLED" });
+    }
+
+    if (url.endsWith("/password")) {
+      return jsonResponse(campaignManager);
     }
 
     return jsonResponse([adminUser, campaignManager]);

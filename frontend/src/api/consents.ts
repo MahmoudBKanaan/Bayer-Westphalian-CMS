@@ -1,11 +1,7 @@
 import { apiRequest } from "@/api/client";
 
 export type ConsentType =
-  | "MARKETING_EMAIL"
-  | "MARKETING_PHONE"
-  | "MARKETING_SMS"
-  | "GUARDIAN"
-  | "DATA_PROCESSING";
+  "MARKETING_EMAIL" | "MARKETING_PHONE" | "MARKETING_SMS" | "GUARDIAN" | "DATA_PROCESSING";
 
 export type ConsentStatus = "GIVEN" | "WITHDRAWN" | "REQUIRED" | "EXPIRED" | "REJECTED";
 

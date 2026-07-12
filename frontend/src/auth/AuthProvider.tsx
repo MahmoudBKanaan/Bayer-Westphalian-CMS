@@ -1,6 +1,15 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
 import { login, type AuthenticatedUser } from "@/api/auth";
 import {
+  AUTH_SESSION_CHANGED_EVENT,
   clearAuthSession,
   loadAuthSession,
   saveAuthSession,
@@ -26,6 +35,17 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>(() => loadStoredAuthState());
+
+  useEffect(() => {
+    const handleAuthSessionChanged = () => {
+      setAuthState(loadStoredAuthState());
+    };
+
+    window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
+    };
+  }, []);
 
   const signIn = useCallback(async (email: string, password: string) => {
     const session = await login(email, password);

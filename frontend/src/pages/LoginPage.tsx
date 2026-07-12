@@ -1,37 +1,56 @@
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import { z } from "zod";
-import { isAuthorizationError } from "@/api/client";
 import { useAuth } from "@/auth/AuthProvider";
+import {
+  getLoginNotice,
+  getPostLoginPath,
+  LOGIN_EMPLOYEE_HINT,
+  LOGIN_PAGE_TITLE,
+  LOGIN_PANEL_HEADING,
+  loginErrorMessage,
+  loginFormValidationMessages,
+  loginSchema,
+  type LoginFormValues,
+  validateLoginForm,
+} from "@/features/auth/loginFlow";
+import {
+  LOGIN_EMAIL_LABEL,
+  LOGIN_FORM_ARIA_LABEL,
+  LOGIN_PASSWORD_LABEL,
+  LOGIN_SUBMIT_LABEL,
+} from "@/features/a11y/keyboardNavigationFlow";
 
-const loginSchema = z.object({
-  email: z.string().trim().email("Enter a valid internal email address."),
-  password: z.string().min(8, "Password must be at least 8 characters."),
-});
-
-type LoginForm = z.infer<typeof loginSchema>;
-
+/**
+ * Employee sign-in screen (KB FR-001 / item 598 — login flow works through UI).
+ *
+ * Validates credentials client-side, posts to AuthProvider.signIn, stores session,
+ * and navigates to the dashboard or the originally requested protected path.
+ */
 export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { signIn } = useAuth();
-  const { register, handleSubmit, formState, setError, clearErrors } = useForm<LoginForm>({
+  const { register, handleSubmit, formState, setError, clearErrors } = useForm<LoginFormValues>({
     defaultValues: {
       email: "",
       password: "",
     },
   });
 
-  async function onSubmit(values: LoginForm) {
+  async function onSubmit(values: LoginFormValues) {
     clearErrors("root");
-    const parsed = loginSchema.safeParse(values);
-    if (!parsed.success) {
-      for (const issue of parsed.error.issues) {
-        const fieldName = issue.path[0];
+    const fieldErrors = validateLoginForm(values);
+    if (Object.keys(fieldErrors).length > 0) {
+      for (const [fieldName, message] of Object.entries(fieldErrors)) {
         if (fieldName === "email" || fieldName === "password") {
-          setError(fieldName, { message: issue.message, type: "manual" });
+          setError(fieldName, { message, type: "manual" });
         }
       }
+      return;
+    }
+
+    const parsed = loginSchema.safeParse(values);
+    if (!parsed.success) {
       return;
     }
 
@@ -48,32 +67,39 @@ export function LoginPage() {
     void navigate(getPostLoginPath(location.state));
   }
 
+  const authRequiredNotice = getLoginNotice(location.state);
+
   return (
-    <main className="login-page">
+    <main className="login-page" aria-labelledby="login-title">
       <section className="login-hero" aria-labelledby="login-title">
         <span className="brand-mark">BW</span>
         <div>
           <span className="eyebrow">Internal employee access</span>
-          <h1 id="login-title">Bayer-Westphalian Campaign Management</h1>
+          <h1 id="login-title">{LOGIN_PAGE_TITLE}</h1>
         </div>
       </section>
-      <section className="login-panel">
+      <section className="login-panel" aria-labelledby="login-panel-heading">
         <div className="section-heading">
-          <h2>Sign in</h2>
-          <span>Use your employee account</span>
+          <h2 id="login-panel-heading">{LOGIN_PANEL_HEADING}</h2>
+          <span>{LOGIN_EMPLOYEE_HINT}</span>
         </div>
-        {getLoginNotice(location.state) ? (
-          <p className="form-error" role="alert">
-            {getLoginNotice(location.state)}
+        {authRequiredNotice ? (
+          <p className="form-error" role="alert" data-testid="login-auth-required-notice">
+            {authRequiredNotice}
           </p>
         ) : null}
-        <form onSubmit={handleSubmit(onSubmit)} className="form-grid" noValidate>
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="form-grid"
+          noValidate
+          aria-label={LOGIN_FORM_ARIA_LABEL}
+        >
           <label>
-            Email
+            {LOGIN_EMAIL_LABEL}
             <input
               autoComplete="email"
               type="email"
-              {...register("email", { required: "Email is required." })}
+              {...register("email", { required: loginFormValidationMessages.emailRequired })}
               aria-invalid={Boolean(formState.errors.email)}
             />
           </label>
@@ -81,11 +107,13 @@ export function LoginPage() {
             <p className="form-error">{formState.errors.email.message}</p>
           ) : null}
           <label>
-            Password
+            {LOGIN_PASSWORD_LABEL}
             <input
               autoComplete="current-password"
               type="password"
-              {...register("password", { required: "Password is required." })}
+              {...register("password", {
+                required: loginFormValidationMessages.passwordRequired,
+              })}
               aria-invalid={Boolean(formState.errors.password)}
             />
           </label>
@@ -93,10 +121,10 @@ export function LoginPage() {
             <p className="form-error">{formState.errors.password.message}</p>
           ) : null}
           <button type="submit" disabled={formState.isSubmitting}>
-            {formState.isSubmitting ? "Signing in..." : "Sign in"}
+            {formState.isSubmitting ? "Signing in..." : LOGIN_SUBMIT_LABEL}
           </button>
           {formState.errors.root?.message ? (
-            <p className="form-error" role="alert">
+            <p className="form-error" role="alert" data-testid="login-error">
               {formState.errors.root.message}
             </p>
           ) : null}
@@ -104,41 +132,4 @@ export function LoginPage() {
       </section>
     </main>
   );
-}
-
-function loginErrorMessage(error: unknown) {
-  if (isAuthorizationError(error)) {
-    return "Login failed. Check your credentials or account status.";
-  }
-
-  return "Login failed. Try again or contact an administrator.";
-}
-
-function getLoginNotice(state: unknown) {
-  if (
-    typeof state === "object" &&
-    state != null &&
-    "reason" in state &&
-    state.reason === "auth-required"
-  ) {
-    return "Sign in with an authorized employee account to continue.";
-  }
-
-  return "";
-}
-
-function getPostLoginPath(state: unknown) {
-  if (
-    typeof state === "object" &&
-    state != null &&
-    "from" in state &&
-    typeof state.from === "object" &&
-    state.from != null &&
-    "pathname" in state.from &&
-    typeof state.from.pathname === "string"
-  ) {
-    return state.from.pathname;
-  }
-
-  return "/dashboard";
 }

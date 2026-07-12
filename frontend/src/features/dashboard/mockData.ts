@@ -1,3 +1,7 @@
+/**
+ * Legacy demo fixtures (pre–item 440). The Dashboard screen loads live KPIs from
+ * {@code GET /api/analytics/dashboard}; these fixtures remain for local UI sketches only.
+ */
 import type { Campaign, Customer, Product } from "@/types/domain";
 
 export const customers: Customer[] = [

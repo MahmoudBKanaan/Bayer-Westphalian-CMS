@@ -15,6 +15,13 @@
  * Sprint 17 item **692**: CI badge on root README.
  * Sprint 17 item **693**: Verify pipeline fails when tests fail (fail-on-red).
  * Sprint 17 item **694**: Verify pipeline passes on clean main branch (pass-on-green).
+ * Sprint 17 item **698**: CI runs on pull request.
+ * Sprint 17 item **699**: CI runs on main branch.
+ * Sprint 17 item **700**: Backend build passes (`backend-build`).
+ * Sprint 17 item **701**: Backend tests pass (`backend-test`).
+ * Sprint 17 item **706**: Pipeline fails on intentionally broken test.
+ * Sprint 17 item **707**: Pipeline passes on clean main branch.
+ * Sprint 17 item **708**: CI/CD documentation.
  *
  * KB: CI/CD via GitHub Actions for build, test, and package checks. Catalog locks workflow path,
  * triggers, and job foundations (pipeline is not executed by these unit tests).
@@ -83,10 +90,40 @@ export const PIPELINE_FAILS_WHEN_TESTS_FAIL_ITEM = 693;
 export const PIPELINE_FAILS_WHEN_TESTS_FAIL_STATEMENT =
   "Verify pipeline fails when tests fail";
 
+export const PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_ITEM = 706;
+
+export const PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_STATEMENT =
+  "Pipeline fails on intentionally broken test";
+
+export const PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_ITEM = 707;
+
+export const PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_STATEMENT =
+  "Pipeline passes on clean main branch";
+
+export const CI_CD_DOCUMENTATION_ITEM = 708;
+
+export const CI_CD_DOCUMENTATION_STATEMENT = "CI/CD documentation";
+
 export const PIPELINE_PASSES_ON_CLEAN_MAIN_ITEM = 694;
 
 export const PIPELINE_PASSES_ON_CLEAN_MAIN_STATEMENT =
   "Verify pipeline passes on clean main branch";
+
+export const CI_RUNS_ON_PULL_REQUEST_ITEM = 698;
+
+export const CI_RUNS_ON_PULL_REQUEST_STATEMENT = "CI runs on pull request";
+
+export const CI_RUNS_ON_MAIN_BRANCH_ITEM = 699;
+
+export const CI_RUNS_ON_MAIN_BRANCH_STATEMENT = "CI runs on main branch";
+
+export const BACKEND_BUILD_PASSES_ITEM = 700;
+
+export const BACKEND_BUILD_PASSES_STATEMENT = "Backend build passes";
+
+export const BACKEND_TESTS_PASS_ITEM = 701;
+
+export const BACKEND_TESTS_PASS_STATEMENT = "Backend tests pass";
 
 export const GITHUB_ACTIONS_WORKFLOW_PATH = ".github/workflows/ci.yml";
 
@@ -141,8 +178,29 @@ export const CI_BADGE_DOCUMENTATION_TEST_CLASS =
 export const PIPELINE_FAILS_WHEN_TESTS_FAIL_DOCUMENTATION_TEST_CLASS =
   "com.bayerwestphalian.campaign.common.config.PipelineFailsWhenTestsFailDocumentationTests";
 
+export const PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.PipelineFailsOnIntentionallyBrokenTestDocumentationTests";
+
+export const PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.PipelinePassesOnCleanMainRuntimeDocumentationTests";
+
+export const CI_CD_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.CiCdDocumentationExpansionTests";
+
 export const PIPELINE_PASSES_ON_CLEAN_MAIN_DOCUMENTATION_TEST_CLASS =
   "com.bayerwestphalian.campaign.common.config.PipelinePassesOnCleanMainBranchDocumentationTests";
+
+export const CI_RUNS_ON_PULL_REQUEST_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.CiRunsOnPullRequestDocumentationTests";
+
+export const CI_RUNS_ON_MAIN_BRANCH_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.CiRunsOnMainBranchDocumentationTests";
+
+export const BACKEND_BUILD_PASSES_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.BackendBuildPassesDocumentationTests";
+
+export const BACKEND_TESTS_PASS_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.BackendTestsPassDocumentationTests";
 
 /** Branches that receive push and pull_request CI. */
 export const CI_TRIGGER_BRANCHES = ["main", "dev"] as const;
@@ -360,6 +418,108 @@ export const PIPELINE_FAILS_WHEN_TESTS_FAIL_REQUIRED_MARKERS = [
   "npm run lint",
 ] as const;
 
+export const PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_SCRIPT_PATH =
+  "scripts/verify-pipeline-fails-on-broken-test.ps1";
+
+/**
+ * Runtime evidence for item 706: create a temporary failing Vitest spec, prove npm test exits
+ * non-zero, and clean up the probe so no intentionally broken test is committed.
+ */
+export const PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST = {
+  item: PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_ITEM,
+  statement: PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_STATEMENT,
+  scriptPath: PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_SCRIPT_PATH,
+  temporaryTestPath: "frontend/src/__pipeline_broken__.test.ts",
+  command: "npm test -- --reporter=dot --silent=true src/__pipeline_broken__.test.ts",
+  expectedExitCode: "non-zero",
+  cleanupRequired: true,
+} as const;
+
+export const PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_REQUIRED_MARKERS = [
+  "706",
+  "Pipeline fails on intentionally broken test",
+  "verify-pipeline-fails-on-broken-test.ps1",
+  "__pipeline_broken__.test.ts",
+  "npm test",
+  "$LASTEXITCODE",
+  "Remove-Item",
+  "finally",
+] as const;
+
+export const PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_SCRIPT_PATH =
+  "scripts/verify-pipeline-passes-on-clean-main.ps1";
+
+/**
+ * Runtime evidence for item 707: run the local CI parity commands from a clean main worktree.
+ */
+export const PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME = {
+  item: PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_ITEM,
+  statement: PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_STATEMENT,
+  scriptPath: PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_SCRIPT_PATH,
+  requiredBranch: "main",
+  requiresCleanWorktree: true,
+  commands: [
+    "mvn -B -DskipTests package",
+    "mvn -B test",
+    "mvn -B test -Dtest=*IntegrationTests",
+    "npm ci",
+    "npm run lint",
+    "npm test",
+    "npm run build",
+    "docker build -t bwc-backend:ci -f backend/Dockerfile backend",
+    "docker build -t bwc-frontend:ci -f frontend/Dockerfile frontend",
+    "scripts/test-docker-compose-config.ps1",
+  ] as const,
+} as const;
+
+export const PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_REQUIRED_MARKERS = [
+  "707",
+  "Pipeline passes on clean main branch",
+  "verify-pipeline-passes-on-clean-main.ps1",
+  "git branch --show-current",
+  "git status --porcelain",
+  "mvn.cmd",
+  "-DskipTests",
+  "npm.cmd",
+  "npm test",
+  "npm run build",
+  "docker",
+  "test-docker-compose-config.ps1",
+] as const;
+
+export const CI_CD_DOCUMENTATION = {
+  item: CI_CD_DOCUMENTATION_ITEM,
+  statement: CI_CD_DOCUMENTATION_STATEMENT,
+  path: CI_CD_DOC_PATH,
+  evidenceTestClass: CI_CD_DOCUMENTATION_TEST_CLASS,
+  requiredSections: [
+    "Workflow file",
+    "Triggers",
+    "Jobs",
+    "Release artifact generation",
+    "Local parity",
+    "Runtime evidence",
+    "Security notes",
+    "Maintenance checklist",
+  ] as const,
+} as const;
+
+export const CI_CD_DOCUMENTATION_REQUIRED_MARKERS = [
+  "708",
+  "CI/CD documentation",
+  "Workflow file",
+  "Automated documentation evidence",
+  "Triggers",
+  "Jobs",
+  "Release artifact generation",
+  "Pipeline fails on intentionally broken test",
+  "Pipeline passes on clean main branch",
+  "Local parity",
+  "Security notes",
+  "Maintenance checklist",
+  "CiCdDocumentationExpansionTests",
+] as const;
+
 /**
  * Pass-on-green contract (item 694): clean main must be able to produce a green workflow when the
  * suite is green. Configuration is verified statically (does not claim a remote green run).
@@ -398,6 +558,102 @@ export const PIPELINE_PASSES_ON_CLEAN_MAIN_REQUIRED_MARKERS = [
   "frontend-test:",
   "frontend-build:",
   "production-config-validate:",
+] as const;
+
+/**
+ * CI on pull request acceptance (item 698): PRs targeting protected/integration branches run CI.
+ */
+export const CI_RUNS_ON_PULL_REQUEST = {
+  item: CI_RUNS_ON_PULL_REQUEST_ITEM,
+  statement: CI_RUNS_ON_PULL_REQUEST_STATEMENT,
+  event: "pull_request" as const,
+  targetBranches: CI_TRIGGER_BRANCHES,
+  requiresPathFilters: false,
+  runsFullJobMatrix: true,
+} as const;
+
+/** Required workflow markers for pull_request CI (item 698). */
+export const CI_RUNS_ON_PULL_REQUEST_REQUIRED_MARKERS = [
+  "698",
+  "pull_request:",
+  "branches:",
+  "- main",
+  "- dev",
+  "name: CI",
+  "backend-test:",
+  "frontend-test:",
+] as const;
+
+/**
+ * CI on main branch acceptance (item 699): push to releasable main runs CI.
+ */
+export const CI_RUNS_ON_MAIN_BRANCH = {
+  item: CI_RUNS_ON_MAIN_BRANCH_ITEM,
+  statement: CI_RUNS_ON_MAIN_BRANCH_STATEMENT,
+  event: "push" as const,
+  branch: "main" as const,
+  alsoRunsOnDev: true,
+  requiresPathFilters: false,
+  runsFullJobMatrix: true,
+  badgeTracksMain: true,
+} as const;
+
+/** Required workflow markers for push-to-main CI (item 699). */
+export const CI_RUNS_ON_MAIN_BRANCH_REQUIRED_MARKERS = [
+  "699",
+  "push:",
+  "- main",
+  "name: CI",
+  "backend-test:",
+  "frontend-test:",
+] as const;
+
+/**
+ * Backend build passes acceptance (item 700): Maven package + JAR assert without soft-fail.
+ */
+export const BACKEND_BUILD_PASSES = {
+  item: BACKEND_BUILD_PASSES_ITEM,
+  statement: BACKEND_BUILD_PASSES_STATEMENT,
+  jobId: "backend-build",
+  jobName: "Backend build",
+  packageCommand: "mvn -B -DskipTests package",
+  assertsJar: true,
+  softFailForbidden: true,
+  relatedJobItem: 678,
+} as const;
+
+/** Required markers for backend build pass acceptance (item 700). */
+export const BACKEND_BUILD_PASSES_REQUIRED_MARKERS = [
+  "700",
+  "backend-build:",
+  "name: Backend build",
+  "mvn -B -DskipTests package",
+  "id: backend-build",
+  "Assert backend JAR artifact was produced",
+] as const;
+
+/**
+ * Backend tests pass acceptance (item 701): full Maven Surefire without soft-fail or skipTests.
+ */
+export const BACKEND_TESTS_PASS = {
+  item: BACKEND_TESTS_PASS_ITEM,
+  statement: BACKEND_TESTS_PASS_STATEMENT,
+  jobId: "backend-test",
+  jobName: "Backend test",
+  testCommand: "mvn -B test",
+  softFailForbidden: true,
+  skipTestsForbidden: true,
+  relatedJobItem: 679,
+} as const;
+
+/** Required markers for backend tests pass acceptance (item 701). */
+export const BACKEND_TESTS_PASS_REQUIRED_MARKERS = [
+  "701",
+  "backend-test:",
+  "name: Backend test",
+  "mvn -B test",
+  "id: backend-test",
+  "Run backend tests (Maven test)",
 ] as const;
 
 /** Required YAML markers for the primary CI workflow (677–687, 690–691). */
@@ -1006,6 +1262,162 @@ export function workflowYamlDefinesPipelineFailsWhenTestsFail(yaml: string): boo
   );
 }
 
+export function scriptDefinesPipelineFailsOnIntentionallyBrokenTest(script: string): boolean {
+  if (script == null || script.trim() === "") {
+    return false;
+  }
+  return PIPELINE_FAILS_ON_INTENTIONALLY_BROKEN_TEST_REQUIRED_MARKERS.every((marker) =>
+    script.includes(marker),
+  );
+}
+
+export function scriptDefinesPipelinePassesOnCleanMainRuntime(script: string): boolean {
+  if (script == null || script.trim() === "") {
+    return false;
+  }
+  return PIPELINE_PASSES_ON_CLEAN_MAIN_RUNTIME_REQUIRED_MARKERS.every((marker) =>
+    script.includes(marker),
+  );
+}
+
+export function markdownDefinesCiCdDocumentation(markdown: string): boolean {
+  if (markdown == null || markdown.trim() === "") {
+    return false;
+  }
+  return CI_CD_DOCUMENTATION_REQUIRED_MARKERS.every((marker) => markdown.includes(marker));
+}
+
+/**
+ * True when the CI workflow runs on pull requests targeting main/dev (item 698).
+ */
+export function workflowYamlDefinesCiRunsOnPullRequest(yaml: string): boolean {
+  if (yaml == null || yaml.trim() === "") {
+    return false;
+  }
+  if (
+    !CI_RUNS_ON_PULL_REQUEST_REQUIRED_MARKERS.every((marker) => yaml.includes(marker))
+  ) {
+    return false;
+  }
+  const prIndex = yaml.indexOf("pull_request:");
+  if (prIndex < 0) {
+    return false;
+  }
+  const concurrencyIndex = yaml.indexOf("\nconcurrency:", prIndex);
+  const prBlock =
+    concurrencyIndex > prIndex ? yaml.slice(prIndex, concurrencyIndex) : yaml.slice(prIndex);
+  if (!prBlock.includes("- main") || !prBlock.includes("- dev")) {
+    return false;
+  }
+  if (prBlock.includes("paths:") || prBlock.includes("paths-ignore:")) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * True when backend-build is configured so a successful package means the job passes (item 700).
+ */
+export function workflowYamlDefinesBackendBuildPasses(yaml: string): boolean {
+  if (yaml == null || yaml.trim() === "") {
+    return false;
+  }
+  if (!BACKEND_BUILD_PASSES_REQUIRED_MARKERS.every((marker) => yaml.includes(marker))) {
+    return false;
+  }
+  const buildJobIndex = yaml.indexOf("backend-build:");
+  const nextJobIndex = yaml.indexOf("\n  backend-test:");
+  if (buildJobIndex < 0 || nextJobIndex <= buildJobIndex) {
+    return false;
+  }
+  const block = yaml.slice(buildJobIndex, nextJobIndex);
+  if (!block.includes("mvn -B -DskipTests package")) {
+    return false;
+  }
+  if (!block.includes("Assert backend JAR artifact was produced")) {
+    return false;
+  }
+  if (block.includes("continue-on-error: true") || block.includes("continue-on-error:true")) {
+    return false;
+  }
+  if (block.includes("mvn -B -DskipTests package || true")) {
+    return false;
+  }
+  // Package-only job — full suite is item 701 / 679.
+  if (block.includes("mvn -B test")) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * True when backend-test is configured so a successful Surefire suite means the job passes (item 701).
+ */
+export function workflowYamlDefinesBackendTestsPass(yaml: string): boolean {
+  if (yaml == null || yaml.trim() === "") {
+    return false;
+  }
+  if (!BACKEND_TESTS_PASS_REQUIRED_MARKERS.every((marker) => yaml.includes(marker))) {
+    return false;
+  }
+  const testJobIndex = yaml.indexOf("backend-test:");
+  const nextJobIndex = yaml.indexOf("\n  backend-integration-test:");
+  if (testJobIndex < 0 || nextJobIndex <= testJobIndex) {
+    return false;
+  }
+  const block = yaml.slice(testJobIndex, nextJobIndex);
+  if (!block.includes("mvn -B test")) {
+    return false;
+  }
+  if (block.includes("continue-on-error: true") || block.includes("continue-on-error:true")) {
+    return false;
+  }
+  if (block.includes("mvn -B test || true")) {
+    return false;
+  }
+  if (block.includes("-DskipTests") || block.includes("mvn -B -DskipTests package")) {
+    return false;
+  }
+  // Full suite is unfiltered; integration-only filter is item 680.
+  if (block.includes("*IntegrationTests")) {
+    return false;
+  }
+  return true;
+}
+
+/**
+ * True when the CI workflow runs on push to main (item 699).
+ */
+export function workflowYamlDefinesCiRunsOnMainBranch(yaml: string): boolean {
+  if (yaml == null || yaml.trim() === "") {
+    return false;
+  }
+  if (
+    !CI_RUNS_ON_MAIN_BRANCH_REQUIRED_MARKERS.every((marker) => yaml.includes(marker))
+  ) {
+    return false;
+  }
+  const pushIndex = yaml.indexOf("push:");
+  if (pushIndex < 0) {
+    return false;
+  }
+  let prIndex = yaml.indexOf("\npull_request:", pushIndex);
+  if (prIndex < 0) {
+    prIndex = yaml.indexOf("\n  pull_request:", pushIndex);
+  }
+  if (prIndex <= pushIndex) {
+    return false;
+  }
+  const pushBlock = yaml.slice(pushIndex, prIndex);
+  if (!pushBlock.includes("- main")) {
+    return false;
+  }
+  if (pushBlock.includes("paths:") || pushBlock.includes("paths-ignore:")) {
+    return false;
+  }
+  return true;
+}
+
 /**
  * True when CI is configured so a clean main branch can pass the full pipeline (item 694).
  */
@@ -1096,10 +1508,10 @@ export function isCiTriggerBranch(branch: string | null | undefined): boolean {
  */
 export function relatedBacklogBandForJob(jobId: CiJobId): string {
   if (jobId === "backend-build") {
-    return "678+691";
+    return "678+691+700";
   }
   if (jobId === "backend-test") {
-    return "679";
+    return "679+701";
   }
   if (jobId === "backend-integration-test") {
     return "680";

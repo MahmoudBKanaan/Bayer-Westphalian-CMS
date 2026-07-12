@@ -1,5 +1,6 @@
 /**
  * Sprint 17 item **688**: Add environment variable template.
+ * Sprint 17 item **709**: Environment variable documentation.
  *
  * KB: deployment configuration is driven by environment variables. Catalog locks template paths
  * and required keys (pipeline / runtime secrets are not loaded by these unit tests).
@@ -8,6 +9,11 @@
 export const ENVIRONMENT_VARIABLE_TEMPLATE_ITEM = 688;
 
 export const ENVIRONMENT_VARIABLE_TEMPLATE_STATEMENT = "Add environment variable template";
+
+export const ENVIRONMENT_VARIABLE_DOCUMENTATION_ITEM = 709;
+
+export const ENVIRONMENT_VARIABLE_DOCUMENTATION_STATEMENT =
+  "Environment variable documentation";
 
 export const ENVIRONMENT_VARIABLES_DOC_PATH = "docs/deployment/environment-variables.md";
 
@@ -19,6 +25,9 @@ export const FRONTEND_ENV_EXAMPLE_PATH = "frontend/.env.example";
 
 export const BACKEND_DOCUMENTATION_TEST_CLASS =
   "com.bayerwestphalian.campaign.common.config.EnvironmentVariableTemplateDocumentationTests";
+
+export const ENVIRONMENT_VARIABLE_DOCUMENTATION_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.EnvironmentVariableDocumentationTests";
 
 /** Keys that must appear in the root full-stack template. */
 export const ROOT_ENV_TEMPLATE_REQUIRED_KEYS = [
@@ -57,6 +66,20 @@ export const FRONTEND_ENV_TEMPLATE_REQUIRED_KEYS = [
   "VITE_APP_ENV",
 ] as const;
 
+export const ENVIRONMENT_VARIABLE_DOC_REQUIRED_MARKERS = [
+  "709",
+  "Environment variable documentation",
+  "Variable catalog",
+  "Classification",
+  "Required production variables",
+  "Secret variables",
+  "Validation and startup behavior",
+  "Change management",
+  "Rotation notes",
+  "Troubleshooting",
+  "EnvironmentVariableDocumentationTests",
+] as const;
+
 /**
  * True when env-example text defines `KEY=` for every required key.
  */
@@ -81,4 +104,13 @@ export function envTemplateLooksLikeSafeExample(content: string): boolean {
     return false;
   }
   return content.includes("688") || content.toLowerCase().includes("example");
+}
+
+export function environmentVariableDocDefinesRequiredMarkers(markdown: string): boolean {
+  if (markdown == null || markdown.trim() === "") {
+    return false;
+  }
+  return ENVIRONMENT_VARIABLE_DOC_REQUIRED_MARKERS.every((marker) =>
+    markdown.includes(marker),
+  );
 }

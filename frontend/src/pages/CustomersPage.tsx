@@ -1,9 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import { searchAiCustomers, type AiCustomerSearchView } from "@/api/ai";
 import { isAuthorizationError } from "@/api/client";
-import { useAuth } from "@/auth/AuthProvider";
-import type { SystemRoleName } from "@/auth/sessionStorageStrategy";
 import {
   createCustomer,
   deleteCustomer,
@@ -18,7 +17,23 @@ import {
   type CustomerType,
   type CustomerView,
 } from "@/api/customers";
+import { AiExplanationDisplay } from "@/components/AiExplanationDisplay";
+import { CustomerStatusBadge } from "@/components/CustomerStatusBadge";
 import { StatusBadge } from "@/components/StatusBadge";
+import { usePermissions } from "@/features/auth/usePermissions";
+import {
+  CUSTOMER_CREATE_FORM_ARIA_LABEL,
+  CUSTOMER_CREATE_PAGE_HEADING,
+  CUSTOMER_CREATE_SECTION_HEADING,
+  CUSTOMER_CREATE_SECTION_HINT,
+  CUSTOMER_CREATE_SUBMIT_LABEL,
+  CUSTOMER_CREATED_NOTICE,
+  CUSTOMER_LIST_TABLE_ARIA_LABEL,
+  customerViewToForm,
+  emptyCustomerForm,
+  validateCustomerForm,
+  type CustomerFormErrors,
+} from "@/features/customers/customerCreationFlow";
 
 const CUSTOMER_TYPES: CustomerType[] = ["CUSTOMER", "PROSPECT", "BENEFICIARY"];
 const AGE_GROUPS: Array<CustomerAgeGroup | ""> = [
@@ -39,30 +54,6 @@ const CUSTOMER_STATUSES: CustomerStatus[] = [
 const STATUS_FILTERS: Array<CustomerStatus | "ALL"> = ["ALL", ...CUSTOMER_STATUSES];
 const TYPE_FILTERS: Array<CustomerType | "ALL"> = ["ALL", ...CUSTOMER_TYPES];
 const CONTACTABLE_FILTERS: CustomerSearchFilters["contactable"][] = ["ALL", "true", "false"];
-const CUSTOMER_CREATE_ROLES: SystemRoleName[] = ["ADMIN", "CUSTOMER_SERVICE_AGENT"];
-const CUSTOMER_UPDATE_ROLES: SystemRoleName[] = [
-  "ADMIN",
-  "CUSTOMER_SERVICE_AGENT",
-  "COMPLIANCE_OFFICER",
-];
-const CUSTOMER_DELETE_ROLES: SystemRoleName[] = ["ADMIN"];
-const CUSTOMER_IMPORT_ROLES: SystemRoleName[] = ["ADMIN", "CUSTOMER_SERVICE_AGENT"];
-
-const emptyCustomerForm: CustomerFormPayload = {
-  customerType: "CUSTOMER",
-  firstName: "",
-  lastName: "",
-  email: "",
-  phone: "",
-  addressLine: "",
-  city: "",
-  country: "",
-  dateOfBirth: "",
-  ageGroup: "",
-  status: "ACTIVE",
-  doNotContact: false,
-  source: "",
-};
 
 const emptySearchFilters: CustomerSearchFilters = {
   term: "",
@@ -74,15 +65,17 @@ const emptySearchFilters: CustomerSearchFilters = {
 };
 
 export function CustomersPage() {
-  const { hasAnyRole } = useAuth();
+  const permissions = usePermissions();
   const queryClient = useQueryClient();
   const [selectedCustomerId, setSelectedCustomerId] = useState("");
-  const [createForm, setCreateForm] = useState<CustomerFormPayload>(emptyCustomerForm);
+  const [createForm, setCreateForm] = useState<CustomerFormPayload>(() => emptyCustomerForm());
   const [editForm, setEditForm] = useState<CustomerFormPayload | null>(null);
   const [draftFilters, setDraftFilters] = useState<CustomerSearchFilters>(emptySearchFilters);
   const [appliedFilters, setAppliedFilters] = useState<CustomerSearchFilters>(emptySearchFilters);
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importResult, setImportResult] = useState<CustomerImportResult | null>(null);
+  const [aiSearchQuery, setAiSearchQuery] = useState("");
+  const [aiSearchResult, setAiSearchResult] = useState<AiCustomerSearchView | null>(null);
   const [notice, setNotice] = useState("");
 
   const customersQuery = useQuery({
@@ -104,36 +97,36 @@ export function CustomersPage() {
     selectedCustomer == null
       ? null
       : editForm == null
-        ? customerToForm(selectedCustomer)
+        ? customerViewToForm(selectedCustomer)
         : editForm;
 
   const refreshCustomers = async () => {
     await queryClient.invalidateQueries({ queryKey: ["customers"] });
   };
-  const canCreateCustomers = hasAnyRole(CUSTOMER_CREATE_ROLES);
-  const canUpdateCustomers = hasAnyRole(CUSTOMER_UPDATE_ROLES);
-  const canDeleteCustomers = hasAnyRole(CUSTOMER_DELETE_ROLES);
-  const canImportCustomers = hasAnyRole(CUSTOMER_IMPORT_ROLES);
+  const canCreateCustomers = permissions.canCreateCustomers();
+  const canUpdateCustomers = permissions.canUpdateCustomers();
+  const canDeleteCustomers = permissions.canDeleteCustomers();
+  const canImportCustomers = permissions.canImportCustomers();
   const canManageCustomers =
     canCreateCustomers || canUpdateCustomers || canDeleteCustomers || canImportCustomers;
 
   const createMutation = useMutation({
     mutationFn: createCustomer,
     onSuccess: async (createdCustomer) => {
-      setCreateForm(emptyCustomerForm);
+      setCreateForm(emptyCustomerForm());
       setSelectedCustomerId(createdCustomer.id);
-      setEditForm(customerToForm(createdCustomer));
-      setNotice("Customer created.");
+      setEditForm(customerViewToForm(createdCustomer));
+      setNotice(CUSTOMER_CREATED_NOTICE);
       await refreshCustomers();
     },
   });
 
   const updateMutation = useMutation({
     mutationFn: () =>
-      updateCustomer(selectedCustomer?.id ?? "", selectedCustomerForm ?? emptyCustomerForm),
+      updateCustomer(selectedCustomer?.id ?? "", selectedCustomerForm ?? emptyCustomerForm()),
     onSuccess: async (updatedCustomer) => {
       setSelectedCustomerId(updatedCustomer.id);
-      setEditForm(customerToForm(updatedCustomer));
+      setEditForm(customerViewToForm(updatedCustomer));
       setNotice("Customer updated.");
       await refreshCustomers();
     },
@@ -164,6 +157,13 @@ export function CustomersPage() {
     },
   });
 
+  const aiSearchMutation = useMutation({
+    mutationFn: () => searchAiCustomers(aiSearchQuery, 5),
+    onSuccess: (result) => {
+      setAiSearchResult(result);
+    },
+  });
+
   const isBusy =
     createMutation.isPending ||
     updateMutation.isPending ||
@@ -178,16 +178,17 @@ export function CustomersPage() {
     ) ||
     generalErrorMessage(
       createMutation.error,
-      updateMutation.error,
-      deleteMutation.error,
-      importMutation.error,
-    );
+    updateMutation.error,
+    deleteMutation.error,
+    importMutation.error,
+    aiSearchMutation.error,
+  );
 
   return (
     <section className="page-stack">
       <div className="panel">
         <div className="section-heading">
-          <h2>Customers and prospects</h2>
+          <h2>{CUSTOMER_CREATE_PAGE_HEADING}</h2>
           <span>Profile, consent status, products, beneficiaries, and contact history</span>
         </div>
         <form
@@ -315,16 +316,57 @@ export function CustomersPage() {
         </form>
       </div>
 
+      {permissions.canUseAiCustomerSignals() ? (
+        <section className="panel" aria-labelledby="ai-customer-search-heading">
+          <div className="section-heading">
+            <h2 id="ai-customer-search-heading">AI customer search</h2>
+            <span>Fuzzy ranking with score explanation</span>
+          </div>
+          <form
+            className="toolbar-row"
+            aria-label="AI customer search"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (aiSearchQuery.trim() !== "") {
+                aiSearchMutation.mutate();
+              }
+            }}
+          >
+            <label>
+              Search
+              <input
+                aria-label="AI customer search query"
+                placeholder="Name, email, city, product, or notes"
+                value={aiSearchQuery}
+                onChange={(event) => setAiSearchQuery(event.target.value)}
+              />
+            </label>
+            <button
+              type="submit"
+              disabled={aiSearchMutation.isPending || aiSearchQuery.trim() === ""}
+            >
+              Search with AI
+            </button>
+          </form>
+          <AiCustomerSearchResults
+            error={aiSearchMutation.isError}
+            loading={aiSearchMutation.isPending}
+            result={aiSearchResult}
+          />
+        </section>
+      ) : null}
+
       {canManageCustomers ? (
         <div className="split-grid user-management-grid">
           {canCreateCustomers ? (
             <section className="panel" aria-labelledby="create-customer-heading">
               <div className="section-heading">
-                <h2 id="create-customer-heading">Create customer</h2>
-                <span>Customer, prospect, or beneficiary profile</span>
+                <h2 id="create-customer-heading">{CUSTOMER_CREATE_SECTION_HEADING}</h2>
+                <span>{CUSTOMER_CREATE_SECTION_HINT}</span>
               </div>
               <CustomerForm
-                submitLabel="Create customer"
+                formAriaLabel={CUSTOMER_CREATE_FORM_ARIA_LABEL}
+                submitLabel={CUSTOMER_CREATE_SUBMIT_LABEL}
                 value={createForm}
                 disabled={isBusy}
                 includeCustomerType
@@ -356,7 +398,7 @@ export function CustomersPage() {
                           (candidate) => candidate.id === event.target.value,
                         );
                         setSelectedCustomerId(event.target.value);
-                        setEditForm(nextCustomer == null ? null : customerToForm(nextCustomer));
+                        setEditForm(nextCustomer == null ? null : customerViewToForm(nextCustomer));
                       }}
                     >
                       {customers.map((customer) => (
@@ -438,12 +480,79 @@ export function CustomersPage() {
           canSelectForEditing={canUpdateCustomers || canDeleteCustomers}
           onSelect={(customer) => {
             setSelectedCustomerId(customer.id);
-            setEditForm(customerToForm(customer));
+            setEditForm(customerViewToForm(customer));
           }}
           onRetry={() => void customersQuery.refetch()}
         />
       </section>
     </section>
+  );
+}
+
+function AiCustomerSearchResults({
+  error,
+  loading,
+  result,
+}: {
+  error: boolean;
+  loading: boolean;
+  result: AiCustomerSearchView | null;
+}) {
+  if (loading) {
+    return (
+      <div className="state-panel" role="status" aria-live="polite">
+        <strong>Searching customer signals</strong>
+        <p>AI fuzzy customer search is ranking profile, product, and notes signals.</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="state-panel error-state" role="alert">
+        <strong>AI customer search could not be completed.</strong>
+        <p>Check the query and try again before using AI-assisted search results.</p>
+      </div>
+    );
+  }
+
+  if (result == null) {
+    return null;
+  }
+
+  if (result.results.length === 0) {
+    return (
+      <div className="state-panel">
+        <strong>No AI search matches.</strong>
+        <p>No relevant customers were found for {result.query}.</p>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="ai-recommendation-grid" aria-label="AI customer search results">
+      {result.results.map((hit) => (
+        <li className="ai-recommendation-card" key={hit.customerId}>
+          <div>
+            <strong>{hit.fullName}</strong>
+            <span>
+              Score {formatScore(hit.score)} - {formatNullable(hit.city)}
+              {hit.country ? `, ${hit.country}` : ""}
+            </span>
+          </div>
+          <AiExplanationDisplay
+            explanation={`Search explanation for ${hit.fullName}`}
+            factors={hit.explainScore.map((factor) => ({
+              fieldName: factor.factor,
+              weight: factor.weight,
+              contribution: factor.contribution,
+              reason: factor.detail ?? "Matched this customer search signal.",
+            }))}
+          />
+          <Link to={`/customers/${hit.customerId}`}>Details</Link>
+        </li>
+      ))}
+    </ul>
   );
 }
 
@@ -613,7 +722,7 @@ function CustomerListTable({
 
   return (
     <div className="table-scroll">
-      <table aria-label="Customer list table">
+      <table aria-label={CUSTOMER_LIST_TABLE_ARIA_LABEL}>
         <thead>
           <tr>
             <th scope="col">Name</th>
@@ -648,7 +757,7 @@ function CustomerListTable({
               <td>{formatLocation(customer)}</td>
               <td>{customer.ageGroup == null ? "Not set" : formatEnum(customer.ageGroup)}</td>
               <td>
-                <StatusBadge value={formatEnum(customer.status)} />
+                <CustomerStatusBadge status={customer.status} />
               </td>
               <td>
                 <StatusBadge value={customer.doNotContact ? "Do not contact" : "Allowed"} />
@@ -684,6 +793,7 @@ type CustomerFormProps = {
   submitLabel: string;
   disabled: boolean;
   includeCustomerType?: boolean;
+  formAriaLabel?: string;
   onChange: (value: CustomerFormPayload) => void;
   onSubmit: () => void;
 };
@@ -693,6 +803,7 @@ function CustomerForm({
   submitLabel,
   disabled,
   includeCustomerType = false,
+  formAriaLabel,
   onChange,
   onSubmit,
 }: CustomerFormProps) {
@@ -709,6 +820,7 @@ function CustomerForm({
     <form
       className="form-grid"
       noValidate
+      aria-label={formAriaLabel}
       onSubmit={(event) => {
         event.preventDefault();
         const nextErrors = validateCustomerForm(value, includeCustomerType);
@@ -872,87 +984,8 @@ function CustomerForm({
   );
 }
 
-type CustomerFormErrors = Partial<Record<keyof CustomerFormPayload, string>>;
-
 function FieldError({ message }: { message?: string }) {
   return message == null ? null : <span className="field-error">{message}</span>;
-}
-
-function validateCustomerForm(
-  value: CustomerFormPayload,
-  includeCustomerType: boolean,
-): CustomerFormErrors {
-  const errors: CustomerFormErrors = {};
-  if (includeCustomerType && value.customerType == null) {
-    errors.customerType = "Customer type is required.";
-  }
-  if (value.firstName.trim().length === 0) {
-    errors.firstName = "First name is required.";
-  }
-  if (value.lastName.trim().length === 0) {
-    errors.lastName = "Last name is required.";
-  }
-  if (value.email.trim().length > 0 && !isValidEmail(value.email)) {
-    errors.email = "Enter a valid email address.";
-  }
-  if (value.phone.trim().length > 0 && !isValidPhone(value.phone)) {
-    errors.phone = "Use 7 to 50 digits, spaces, parentheses, hyphens, and an optional +.";
-  }
-  if (value.dateOfBirth !== "" && new Date(value.dateOfBirth) > startOfToday()) {
-    errors.dateOfBirth = "Date of birth cannot be in the future.";
-  }
-  addMaxLengthError(errors, "firstName", value.firstName, 100);
-  addMaxLengthError(errors, "lastName", value.lastName, 100);
-  addMaxLengthError(errors, "email", value.email, 255);
-  addMaxLengthError(errors, "phone", value.phone, 50);
-  addMaxLengthError(errors, "addressLine", value.addressLine, 255);
-  addMaxLengthError(errors, "city", value.city, 100);
-  addMaxLengthError(errors, "country", value.country, 100);
-  addMaxLengthError(errors, "source", value.source, 100);
-  return errors;
-}
-
-function addMaxLengthError(
-  errors: CustomerFormErrors,
-  field: keyof CustomerFormPayload,
-  value: string,
-  maxLength: number,
-) {
-  if (value.length > maxLength) {
-    errors[field] = `Must be ${maxLength} characters or fewer.`;
-  }
-}
-
-function isValidEmail(value: string) {
-  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(value.trim());
-}
-
-function isValidPhone(value: string) {
-  return /^\+?[0-9 ()-]{7,50}$/.test(value.trim());
-}
-
-function startOfToday() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
-}
-
-function customerToForm(customer: CustomerView): CustomerFormPayload {
-  return {
-    customerType: customer.customerType,
-    firstName: customer.firstName,
-    lastName: customer.lastName,
-    email: customer.email ?? "",
-    phone: customer.phone ?? "",
-    addressLine: customer.addressLine ?? "",
-    city: customer.city ?? "",
-    country: customer.country ?? "",
-    dateOfBirth: customer.dateOfBirth ?? "",
-    ageGroup: customer.ageGroup ?? "",
-    status: customer.status,
-    doNotContact: customer.doNotContact,
-    source: customer.source ?? "",
-  };
 }
 
 function formatEnum(value: string) {
@@ -972,6 +1005,18 @@ function formatContactableFilter(value: CustomerSearchFilters["contactable"]) {
     return "All";
   }
   return value === "true" ? "Contactable" : "Do not contact";
+}
+
+function formatNullable(value: string | null | undefined) {
+  return value == null || value.trim() === "" ? "Not provided" : value;
+}
+
+function formatScore(value: number | string) {
+  const numeric = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(numeric)) {
+    return String(value);
+  }
+  return numeric.toFixed(0);
 }
 
 function formatLocation(customer: CustomerView) {

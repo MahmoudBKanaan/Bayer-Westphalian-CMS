@@ -6,6 +6,10 @@ import {
   BACKEND_DOCUMENTATION_TEST_CLASS,
   BACKEND_ENV_EXAMPLE_PATH,
   BACKEND_ENV_TEMPLATE_REQUIRED_KEYS,
+  ENVIRONMENT_VARIABLE_DOC_REQUIRED_MARKERS,
+  ENVIRONMENT_VARIABLE_DOCUMENTATION_ITEM,
+  ENVIRONMENT_VARIABLE_DOCUMENTATION_STATEMENT,
+  ENVIRONMENT_VARIABLE_DOCUMENTATION_TEST_CLASS,
   ENVIRONMENT_VARIABLES_DOC_PATH,
   ENVIRONMENT_VARIABLE_TEMPLATE_ITEM,
   ENVIRONMENT_VARIABLE_TEMPLATE_STATEMENT,
@@ -15,6 +19,7 @@ import {
   ROOT_ENV_TEMPLATE_REQUIRED_KEYS,
   envTemplateDefinesKeys,
   envTemplateLooksLikeSafeExample,
+  environmentVariableDocDefinesRequiredMarkers,
 } from "@/features/ops/environmentVariableTemplate";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
@@ -23,7 +28,7 @@ function readRepoFile(relativeFromRepo: string): string {
   return readFileSync(path.join(repoRoot, relativeFromRepo), "utf8");
 }
 
-describe("environmentVariableTemplate (item 688)", () => {
+describe("environmentVariableTemplate (items 688, 709)", () => {
   it("locks the environment variable template identity", () => {
     expect(ENVIRONMENT_VARIABLE_TEMPLATE_ITEM).toBe(688);
     expect(ENVIRONMENT_VARIABLE_TEMPLATE_STATEMENT).toBe("Add environment variable template");
@@ -33,6 +38,13 @@ describe("environmentVariableTemplate (item 688)", () => {
     expect(ENVIRONMENT_VARIABLES_DOC_PATH).toBe("docs/deployment/environment-variables.md");
     expect(BACKEND_DOCUMENTATION_TEST_CLASS).toContain(
       "EnvironmentVariableTemplateDocumentationTests",
+    );
+    expect(ENVIRONMENT_VARIABLE_DOCUMENTATION_ITEM).toBe(709);
+    expect(ENVIRONMENT_VARIABLE_DOCUMENTATION_STATEMENT).toBe(
+      "Environment variable documentation",
+    );
+    expect(ENVIRONMENT_VARIABLE_DOCUMENTATION_TEST_CLASS).toContain(
+      "EnvironmentVariableDocumentationTests",
     );
   });
 
@@ -57,10 +69,14 @@ describe("environmentVariableTemplate (item 688)", () => {
     expect(envTemplateLooksLikeSafeExample(backend)).toBe(true);
 
     expect(doc).toContain("688");
+    expect(doc).toContain("709");
     expect(doc).toContain("EnvironmentVariableTemplateDocumentationTests");
+    expect(doc).toContain("EnvironmentVariableDocumentationTests");
     expect(doc).toContain("JWT_SECRET");
     expect(doc).toContain("VITE_API_BASE_URL");
     expect(doc).toContain(".env.example");
+    expect(environmentVariableDocDefinesRequiredMarkers(doc)).toBe(true);
+    expect(ENVIRONMENT_VARIABLE_DOC_REQUIRED_MARKERS).toContain("Required production variables");
   });
 
   it("rejects empty or PEM-like content as unsafe templates", () => {

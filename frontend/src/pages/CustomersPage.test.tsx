@@ -1,11 +1,19 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { API_BASE_URL } from "@/api/client";
 import { AuthProvider } from "@/auth/AuthProvider";
 import { AUTH_STORAGE_KEYS, type SystemRoleName } from "@/auth/sessionStorageStrategy";
+import {
+  CUSTOMER_CREATE_FORM_ARIA_LABEL,
+  CUSTOMER_CREATE_PAGE_HEADING,
+  CUSTOMER_CREATE_SECTION_HEADING,
+  CUSTOMER_CREATE_SUBMIT_LABEL,
+  CUSTOMER_CREATED_NOTICE,
+  customerFormValidationMessages,
+} from "@/features/customers/customerCreationFlow";
 import { CustomersPage } from "@/pages/CustomersPage";
 
 const ADMIN_ACCESS_TOKEN = createAccessToken(["ADMIN"]);
@@ -101,9 +109,12 @@ describe("CustomersPage", () => {
     renderCustomersPage();
 
     expect(
-      await screen.findByRole("heading", { name: "Customers and prospects" }),
+      await screen.findByRole("heading", { name: CUSTOMER_CREATE_PAGE_HEADING }),
     ).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Create customer" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: CUSTOMER_CREATE_SECTION_HEADING }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("form", { name: CUSTOMER_CREATE_FORM_ARIA_LABEL })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Edit customer" })).toBeInTheDocument();
     expect(await screen.findAllByText("Ada Policyholder")).not.toHaveLength(0);
     expect(screen.getByText("ada@bayer-westphalian.test")).toBeInTheDocument();
@@ -115,7 +126,9 @@ describe("CustomersPage", () => {
     renderCustomersPage(["CAMPAIGN_MANAGER"]);
 
     const table = await screen.findByRole("table", { name: "Customer list table" });
-    expect(screen.queryByRole("heading", { name: "Create customer" })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: CUSTOMER_CREATE_SECTION_HEADING }),
+    ).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "Edit customer" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "CSV import" })).not.toBeInTheDocument();
     expect(
@@ -129,12 +142,34 @@ describe("CustomersPage", () => {
     expect(within(table).queryByRole("button", { name: "Select" })).not.toBeInTheDocument();
   });
 
+  it("hides customer management controls for product managers with read-only customer access", async () => {
+    vi.stubGlobal("fetch", createFetchMock());
+
+    renderCustomersPage(["PRODUCT_MANAGER"]);
+
+    const table = await screen.findByRole("table", { name: "Customer list table" });
+    expect(
+      screen.queryByRole("heading", { name: CUSTOMER_CREATE_SECTION_HEADING }),
+    ).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "Edit customer" })).not.toBeInTheDocument();
+    expect(
+      screen.getByText("Customer management actions are hidden for your role."),
+    ).toBeInTheDocument();
+    const customerRow = within(table).getByRole("row", { name: /Ada Policyholder/ });
+    expect(within(customerRow).getByRole("link", { name: "Details" })).toHaveAttribute(
+      "href",
+      `/customers/${customer.id}`,
+    );
+  });
+
   it("limits customer service users to create, update, and import actions", async () => {
     vi.stubGlobal("fetch", createFetchMock());
 
     renderCustomersPage(["CUSTOMER_SERVICE_AGENT"]);
 
-    expect(await screen.findByRole("heading", { name: "Create customer" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: CUSTOMER_CREATE_SECTION_HEADING }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Edit customer" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "CSV import" })).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Delete customer" })).not.toBeInTheDocument();
@@ -157,6 +192,12 @@ describe("CustomersPage", () => {
     expect(within(table).getByText("LIFE_INSURANCE_BENEFICIARY")).toBeInTheDocument();
     expect(within(table).getByText("Ben Prospect")).toBeInTheDocument();
     expect(within(table).getByText("Email not provided")).toBeInTheDocument();
+    expect(within(table).getByLabelText("Customer status: Active")).toHaveClass(
+      "customer-status-active",
+    );
+    expect(within(table).getByLabelText("Customer status: Interested")).toHaveClass(
+      "customer-status-interested",
+    );
     expect(within(table).getByText("Do not contact")).toBeInTheDocument();
     const customerRow = within(table).getByRole("row", { name: /Ada Policyholder/ });
     expect(within(customerRow).getByRole("link", { name: "Details" })).toHaveAttribute(
@@ -296,6 +337,38 @@ describe("CustomersPage", () => {
     });
   });
 
+  it("shows AI customer search explanations", async () => {
+    const fetchMock = createFetchMock();
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderCustomersPage(["CAMPAIGN_MANAGER"]);
+    await screen.findAllByText("Ada Policyholder");
+
+    await userEvent.type(screen.getByLabelText("AI customer search query"), "Ada policy");
+    await userEvent.click(screen.getByRole("button", { name: "Search with AI" }));
+
+    const aiResults = await screen.findByRole("list", { name: "AI customer search results" });
+    expect(within(aiResults).getByText("Score 73 - Berlin, Germany")).toBeInTheDocument();
+    expect(within(aiResults).getByLabelText("AI explanation")).toBeInTheDocument();
+    expect(
+      within(aiResults).getByText("Search explanation for Ada Policyholder"),
+    ).toBeInTheDocument();
+    expect(within(aiResults).getByLabelText("AI score factors")).toBeInTheDocument();
+    expect(within(aiResults).getByText("full name")).toBeInTheDocument();
+    expect(within(aiResults).getByText("40 / 45")).toBeInTheDocument();
+    expect(
+      within(aiResults).getByText("fuzzy match (full name: Ada Policyholder)"),
+    ).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        fetchMock.mock.calls.some(([url]) =>
+          String(url).includes("/ai/customer-search?q=Ada+policy&limit=5"),
+        ),
+      ).toBe(true);
+    });
+  });
+
   it("creates a customer through the backend endpoint", async () => {
     const fetchMock = createFetchMock();
     vi.stubGlobal("fetch", fetchMock);
@@ -303,30 +376,31 @@ describe("CustomersPage", () => {
     renderCustomersPage();
     await screen.findAllByText("Ada Policyholder");
 
-    const createPanel = screen.getByRole("heading", { name: "Create customer" }).closest("section");
-    expect(createPanel).not.toBeNull();
+    const createForm = screen.getByRole("form", { name: CUSTOMER_CREATE_FORM_ARIA_LABEL });
 
-    await userEvent.selectOptions(
-      within(createPanel as HTMLElement).getByLabelText("Customer type"),
-      "PROSPECT",
-    );
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("First name"), "Lena");
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("Last name"), "Mueller");
-    await userEvent.type(
-      within(createPanel as HTMLElement).getByLabelText("Email"),
-      "lena.mueller@bayer-westphalian.test",
-    );
-    await userEvent.type(
-      within(createPanel as HTMLElement).getByLabelText("Phone"),
-      "+49-555-0200",
-    );
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("City"), "Munich");
-    await userEvent.selectOptions(
-      within(createPanel as HTMLElement).getByLabelText("Status"),
-      "INTERESTED",
-    );
+    fireEvent.change(within(createForm).getByLabelText("Customer type"), {
+      target: { value: "PROSPECT" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("First name"), {
+      target: { value: "Lena" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Last name"), {
+      target: { value: "Mueller" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Email"), {
+      target: { value: "lena.mueller@bayer-westphalian.test" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Phone"), {
+      target: { value: "+49-555-0200" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("City"), {
+      target: { value: "Munich" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Status"), {
+      target: { value: "INTERESTED" },
+    });
     await userEvent.click(
-      within(createPanel as HTMLElement).getByRole("button", { name: "Create customer" }),
+      within(createForm).getByRole("button", { name: CUSTOMER_CREATE_SUBMIT_LABEL }),
     );
 
     await waitFor(() => {
@@ -352,6 +426,7 @@ describe("CustomersPage", () => {
         method: "POST",
       });
     });
+    expect(await screen.findByText(CUSTOMER_CREATED_NOTICE)).toBeInTheDocument();
   });
 
   it("allows an authorized customer service user to create a customer", async () => {
@@ -361,22 +436,23 @@ describe("CustomersPage", () => {
     renderCustomersPage(["CUSTOMER_SERVICE_AGENT"]);
     await screen.findAllByText("Ada Policyholder");
 
-    const createPanel = screen.getByRole("heading", { name: "Create customer" }).closest("section");
-    expect(createPanel).not.toBeNull();
+    const createForm = screen.getByRole("form", { name: CUSTOMER_CREATE_FORM_ARIA_LABEL });
     expect(screen.queryByRole("button", { name: "Delete customer" })).not.toBeInTheDocument();
 
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("First name"), "Clara");
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("Last name"), "Service");
-    await userEvent.type(
-      within(createPanel as HTMLElement).getByLabelText("Email"),
-      "clara.service@bayer-westphalian.test",
-    );
-    await userEvent.selectOptions(
-      within(createPanel as HTMLElement).getByLabelText("Status"),
-      "ACTIVE",
-    );
+    fireEvent.change(within(createForm).getByLabelText("First name"), {
+      target: { value: "Clara" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Last name"), {
+      target: { value: "Service" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Email"), {
+      target: { value: "clara.service@bayer-westphalian.test" },
+    });
+    fireEvent.change(within(createForm).getByLabelText("Status"), {
+      target: { value: "ACTIVE" },
+    });
     await userEvent.click(
-      within(createPanel as HTMLElement).getByRole("button", { name: "Create customer" }),
+      within(createForm).getByRole("button", { name: CUSTOMER_CREATE_SUBMIT_LABEL }),
     );
 
     await waitFor(() => {
@@ -409,21 +485,18 @@ describe("CustomersPage", () => {
     renderCustomersPage();
     await screen.findAllByText("Ada Policyholder");
 
-    const createPanel = screen.getByRole("heading", { name: "Create customer" }).closest("section");
-    expect(createPanel).not.toBeNull();
+    const createForm = screen.getByRole("form", { name: CUSTOMER_CREATE_FORM_ARIA_LABEL });
 
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("Email"), "bad-email");
-    await userEvent.type(within(createPanel as HTMLElement).getByLabelText("Phone"), "CALLME");
+    await userEvent.type(within(createForm).getByLabelText("Email"), "bad-email");
+    await userEvent.type(within(createForm).getByLabelText("Phone"), "CALLME");
     await userEvent.click(
-      within(createPanel as HTMLElement).getByRole("button", { name: "Create customer" }),
+      within(createForm).getByRole("button", { name: CUSTOMER_CREATE_SUBMIT_LABEL }),
     );
 
-    expect(screen.getByText("First name is required.")).toBeInTheDocument();
-    expect(screen.getByText("Last name is required.")).toBeInTheDocument();
-    expect(screen.getByText("Enter a valid email address.")).toBeInTheDocument();
-    expect(
-      screen.getByText("Use 7 to 50 digits, spaces, parentheses, hyphens, and an optional +."),
-    ).toBeInTheDocument();
+    expect(screen.getByText(customerFormValidationMessages.firstNameRequired)).toBeInTheDocument();
+    expect(screen.getByText(customerFormValidationMessages.lastNameRequired)).toBeInTheDocument();
+    expect(screen.getByText(customerFormValidationMessages.emailInvalid)).toBeInTheDocument();
+    expect(screen.getByText(customerFormValidationMessages.phoneInvalid)).toBeInTheDocument();
     expect(
       fetchMock.mock.calls.some(
         ([url, init]) => url === `${API_BASE_URL}/customers` && init?.method === "POST",
@@ -590,8 +663,10 @@ describe("CustomersPage", () => {
       within(editPanel as HTMLElement).getByRole("button", { name: "Save customer" }),
     );
 
-    expect(screen.getByText("Last name is required.")).toBeInTheDocument();
-    expect(screen.getByText("Date of birth cannot be in the future.")).toBeInTheDocument();
+    expect(screen.getByText(customerFormValidationMessages.lastNameRequired)).toBeInTheDocument();
+    expect(
+      screen.getByText(customerFormValidationMessages.dateOfBirthFuture),
+    ).toBeInTheDocument();
     expect(
       fetchMock.mock.calls.some(
         ([url, init]) =>
@@ -632,6 +707,36 @@ describe("CustomersPage", () => {
 
 function createFetchMock(customers = [customer, prospect]) {
   return vi.fn().mockImplementation((url: string, init?: RequestInit) => {
+    if (url.includes("/ai/customer-search")) {
+      return jsonResponse({
+        query: "Ada policy",
+        totalHits: 1,
+        results: [
+          {
+            customerId: customer.id,
+            firstName: customer.firstName,
+            lastName: customer.lastName,
+            fullName: customer.fullName,
+            email: customer.email,
+            city: customer.city,
+            country: customer.country,
+            customerType: customer.customerType,
+            status: customer.status,
+            doNotContact: customer.doNotContact,
+            score: 73,
+            explainScore: [
+              {
+                factor: "full name",
+                weight: 45,
+                contribution: 40,
+                detail: "fuzzy match (full name: Ada Policyholder)",
+              },
+            ],
+          },
+        ],
+      });
+    }
+
     if (url.endsWith("/customers/import") && init?.method === "POST") {
       return jsonResponse({
         importedCount: 1,

@@ -9,12 +9,19 @@ export const RELEASE_TAGGING_PROCESS_ITEM = 696;
 
 export const RELEASE_TAGGING_PROCESS_STATEMENT = "Add release tagging process";
 
+export const RELEASE_TAGGING_GUIDE_ITEM = 711;
+
+export const RELEASE_TAGGING_GUIDE_STATEMENT = "Release tagging guide";
+
 export const RELEASE_TAGGING_DOC_PATH = "docs/deployment/release-tagging.md";
 
 export const CI_CD_DOC_PATH = "docs/deployment/ci-cd.md";
 
 export const BACKEND_DOCUMENTATION_TEST_CLASS =
   "com.bayerwestphalian.campaign.common.config.ReleaseTaggingProcessDocumentationTests";
+
+export const RELEASE_TAGGING_GUIDE_TEST_CLASS =
+  "com.bayerwestphalian.campaign.common.config.ReleaseTaggingGuideDocumentationTests";
 
 /** Branch from which official release tags are created. */
 export const RELEASE_TAG_BRANCH = "main";
@@ -53,6 +60,21 @@ export const RELEASE_TAGGING_DOC_REQUIRED_MARKERS = [
   "714",
 ] as const;
 
+export const RELEASE_TAGGING_GUIDE_REQUIRED_MARKERS = [
+  "711",
+  "Release tagging guide",
+  "Release roles and ownership",
+  "Release operator",
+  "Reviewer / admin",
+  "System Auditor",
+  "Verification commands",
+  "Release notes template",
+  "Evidence capture",
+  "Troubleshooting",
+  "git ls-remote --tags origin",
+  "ReleaseTaggingGuideDocumentationTests",
+] as const;
+
 export const RELEASE_TAGGING_PROCESS = {
   item: RELEASE_TAGGING_PROCESS_ITEM,
   statement: RELEASE_TAGGING_PROCESS_STATEMENT,
@@ -82,6 +104,18 @@ export function releaseTaggingDocDefinesRequiredMarkers(markdown: string): boole
     }
     return markdown.includes(marker);
   });
+}
+
+/**
+ * True when release-tagging markdown includes the expanded guide markers for item 711.
+ */
+export function releaseTaggingDocDefinesGuideMarkers(markdown: string): boolean {
+  if (markdown == null || markdown.trim() === "") {
+    return false;
+  }
+  return RELEASE_TAGGING_GUIDE_REQUIRED_MARKERS.every((marker) =>
+    markdown.includes(marker),
+  );
 }
 
 /**

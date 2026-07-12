@@ -3,10 +3,17 @@ import { defineConfig, devices } from "@playwright/test";
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: true,
-  reporter: "html",
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 1 : 0,
+  reporter: [["list"], ["html", { open: "never" }]],
+  timeout: 120_000,
+  expect: {
+    timeout: 15_000,
+  },
   use: {
     baseURL: "http://127.0.0.1:5173",
     trace: "on-first-retry",
+    screenshot: "only-on-failure",
   },
   projects: [
     {
@@ -17,6 +24,7 @@ export default defineConfig({
   webServer: {
     command: "node scripts/start-vite-e2e.mjs",
     url: "http://127.0.0.1:5173",
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
 });

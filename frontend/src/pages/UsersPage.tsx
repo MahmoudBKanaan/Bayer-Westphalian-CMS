@@ -13,7 +13,10 @@ import {
 } from "@/api/users";
 import { useAuth } from "@/auth/AuthProvider";
 import type { SystemRoleName } from "@/auth/sessionStorageStrategy";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { FormValidationMessage } from "@/components/FormValidationMessage";
 import { StatusBadge } from "@/components/StatusBadge";
+import { SuccessNotification } from "@/components/SuccessNotification";
 
 const USER_STATUSES: Array<UserStatus | "ALL"> = ["ALL", "ACTIVE", "DISABLED", "LOCKED"];
 
@@ -36,6 +39,9 @@ const emptyCreateForm: CreateUserPayload = {
   fullName: "",
 };
 
+type CreateUserFormErrors = Partial<Record<keyof CreateUserPayload, string>>;
+type PendingSensitiveAction = "assign-role" | "disable-user" | "reset-password" | null;
+
 type UserEditDraft = {
   userId: string;
   fullName: string;
@@ -49,9 +55,12 @@ export function UsersPage() {
   const [statusFilter, setStatusFilter] = useState<UserStatus | "ALL">("ALL");
   const [selectedUserId, setSelectedUserId] = useState("");
   const [createForm, setCreateForm] = useState<CreateUserPayload>(emptyCreateForm);
+  const [createErrors, setCreateErrors] = useState<CreateUserFormErrors>({});
   const [editDraft, setEditDraft] = useState<UserEditDraft | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [notice, setNotice] = useState("");
+  const [pendingSensitiveAction, setPendingSensitiveAction] =
+    useState<PendingSensitiveAction>(null);
 
   const usersQuery = useQuery({
     queryKey: ["users", statusFilter],
@@ -87,6 +96,7 @@ export function UsersPage() {
     mutationFn: createUser,
     onSuccess: async (createdUser) => {
       setCreateForm(emptyCreateForm);
+      setCreateErrors({});
       setSelectedUserId(createdUser.id);
       setNotice("User created.");
       await refreshUsers();
@@ -111,8 +121,9 @@ export function UsersPage() {
         selectedUser?.id ?? "",
         selectedUserDraft?.roleName ?? "CAMPAIGN_MANAGER",
         currentUser?.id,
-      ),
+    ),
     onSuccess: async () => {
+      setPendingSensitiveAction(null);
       setNotice("Role assigned.");
       await refreshUsers();
     },
@@ -121,6 +132,7 @@ export function UsersPage() {
   const disableMutation = useMutation({
     mutationFn: () => disableUser(selectedUser?.id ?? ""),
     onSuccess: async () => {
+      setPendingSensitiveAction(null);
       setNotice("User disabled.");
       await refreshUsers();
     },
@@ -129,6 +141,7 @@ export function UsersPage() {
   const resetPasswordMutation = useMutation({
     mutationFn: () => resetPassword(selectedUser?.id ?? "", newPassword),
     onSuccess: async () => {
+      setPendingSensitiveAction(null);
       setNewPassword("");
       setNotice("Password reset.");
       await refreshUsers();
@@ -181,7 +194,7 @@ export function UsersPage() {
               ))}
             </select>
           </label>
-          {notice ? <p className="form-success">{notice}</p> : null}
+          {notice ? <SuccessNotification compact message={notice} /> : null}
           {errorMessage ? (
             <p className="form-error" role="alert">
               {errorMessage}
@@ -198,9 +211,18 @@ export function UsersPage() {
           </div>
           <form
             className="form-grid"
+            noValidate
             onSubmit={(event) => {
               event.preventDefault();
               setNotice("");
+              const nextErrors = validateCreateUserForm(createForm);
+
+              if (hasCreateUserFormErrors(nextErrors)) {
+                setCreateErrors(nextErrors);
+                return;
+              }
+
+              setCreateErrors({});
               createMutation.mutate(createForm);
             }}
           >
@@ -208,33 +230,53 @@ export function UsersPage() {
               Full name
               <input
                 required
+                aria-label="Full name"
+                aria-describedby={createErrors.fullName ? "create-user-full-name-error" : undefined}
+                aria-invalid={Boolean(createErrors.fullName)}
                 value={createForm.fullName}
                 onChange={(event) =>
                   setCreateForm((current) => ({ ...current, fullName: event.target.value }))
                 }
+              />
+              <FormValidationMessage
+                id="create-user-full-name-error"
+                message={createErrors.fullName}
               />
             </label>
             <label>
               Email
               <input
                 required
+                aria-label="Email"
+                aria-describedby={createErrors.email ? "create-user-email-error" : undefined}
+                aria-invalid={Boolean(createErrors.email)}
                 type="email"
                 value={createForm.email}
                 onChange={(event) =>
                   setCreateForm((current) => ({ ...current, email: event.target.value }))
                 }
               />
+              <FormValidationMessage id="create-user-email-error" message={createErrors.email} />
             </label>
             <label>
               Temporary password
               <input
                 required
                 minLength={8}
+                aria-label="Temporary password"
+                aria-describedby={
+                  createErrors.password ? "create-user-password-error" : undefined
+                }
+                aria-invalid={Boolean(createErrors.password)}
                 type="password"
                 value={createForm.password}
                 onChange={(event) =>
                   setCreateForm((current) => ({ ...current, password: event.target.value }))
                 }
+              />
+              <FormValidationMessage
+                id="create-user-password-error"
+                message={createErrors.password}
               />
             </label>
             <button type="submit" disabled={isBusy}>
@@ -327,7 +369,7 @@ export function UsersPage() {
                 <button
                   type="button"
                   disabled={isBusy || selectedUser.status === "DISABLED"}
-                  onClick={() => disableMutation.mutate()}
+                  onClick={() => setPendingSensitiveAction("disable-user")}
                 >
                   Disable user
                 </button>
@@ -377,7 +419,7 @@ export function UsersPage() {
                   selectedUserDraft == null ||
                   selectedUser.roles.includes(selectedUserDraft.roleName)
                 }
-                onClick={() => assignRoleMutation.mutate()}
+                onClick={() => setPendingSensitiveAction("assign-role")}
               >
                 Assign role
               </button>
@@ -393,10 +435,58 @@ export function UsersPage() {
               <button
                 type="button"
                 disabled={isBusy || newPassword.length < 8}
-                onClick={() => resetPasswordMutation.mutate()}
+                onClick={() => setPendingSensitiveAction("reset-password")}
               >
                 Reset password
               </button>
+              {pendingSensitiveAction === "assign-role" ? (
+                <ConfirmationDialog
+                  id="assign-role-confirmation"
+                  title="Confirm role assignment"
+                  description={
+                    <p>
+                      Assign {formatEnum(selectedUserDraft?.roleName ?? "CAMPAIGN_MANAGER")} to{" "}
+                      {selectedUser.fullName}? This changes the user&apos;s application access.
+                    </p>
+                  }
+                  confirmLabel="Assign role"
+                  busy={assignRoleMutation.isPending}
+                  onCancel={() => setPendingSensitiveAction(null)}
+                  onConfirm={() => assignRoleMutation.mutate()}
+                />
+              ) : null}
+              {pendingSensitiveAction === "disable-user" ? (
+                <ConfirmationDialog
+                  id="disable-user-confirmation"
+                  title="Confirm user disable"
+                  description={
+                    <p>
+                      Disable {selectedUser.fullName}? This prevents the user from accessing the
+                      platform until an admin restores access.
+                    </p>
+                  }
+                  confirmLabel="Disable user"
+                  busy={disableMutation.isPending}
+                  onCancel={() => setPendingSensitiveAction(null)}
+                  onConfirm={() => disableMutation.mutate()}
+                />
+              ) : null}
+              {pendingSensitiveAction === "reset-password" ? (
+                <ConfirmationDialog
+                  id="reset-password-confirmation"
+                  title="Confirm password reset"
+                  description={
+                    <p>
+                      Reset the password for {selectedUser.fullName}? Share the new temporary
+                      password only through an approved secure channel.
+                    </p>
+                  }
+                  confirmLabel="Reset password"
+                  busy={resetPasswordMutation.isPending}
+                  onCancel={() => setPendingSensitiveAction(null)}
+                  onConfirm={() => resetPasswordMutation.mutate()}
+                />
+              ) : null}
             </div>
           )}
         </section>
@@ -407,14 +497,17 @@ export function UsersPage() {
           <h2 id="users-table-heading">Employee accounts</h2>
           <span>{usersQuery.isLoading ? "Loading users" : `${users.length} records`}</span>
         </div>
-        <table>
+        <table aria-labelledby="users-table-heading">
+          <caption className="sr-only">
+            Employee accounts table with name, email, status, roles, and last login.
+          </caption>
           <thead>
             <tr>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Status</th>
-              <th>Roles</th>
-              <th>Last login</th>
+              <th scope="col">Name</th>
+              <th scope="col">Email</th>
+              <th scope="col">Status</th>
+              <th scope="col">Roles</th>
+              <th scope="col">Last login</th>
             </tr>
           </thead>
           <tbody>
@@ -460,6 +553,32 @@ function createUserEditDraft(
     status,
     roleName: firstAssignableRole(roles),
   };
+}
+
+function validateCreateUserForm(form: CreateUserPayload): CreateUserFormErrors {
+  const errors: CreateUserFormErrors = {};
+
+  if (form.fullName.trim().length === 0) {
+    errors.fullName = "Full name is required.";
+  }
+
+  if (form.email.trim().length === 0) {
+    errors.email = "Email is required.";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
+    errors.email = "Enter a valid email address.";
+  }
+
+  if (form.password.length === 0) {
+    errors.password = "Temporary password is required.";
+  } else if (form.password.length < 8) {
+    errors.password = "Temporary password must be at least 8 characters.";
+  }
+
+  return errors;
+}
+
+function hasCreateUserFormErrors(errors: CreateUserFormErrors) {
+  return Object.values(errors).some(Boolean);
 }
 
 function authorizationErrorMessage(...errors: unknown[]) {
