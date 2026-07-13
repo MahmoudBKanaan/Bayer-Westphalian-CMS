@@ -64,10 +64,7 @@ public final class EnvironmentVariableValidator {
                 "DB_URL",
                 List.of("DB_URL", "spring.datasource.url"),
                 value -> {
-                    if (!value.toLowerCase(Locale.ROOT).startsWith("jdbc:")) {
-                        return "DB_URL / spring.datasource.url must be a JDBC URL (jdbc:...)";
-                    }
-                    return null;
+                    return validateProductionDatabaseUrl(value);
                 });
 
         requireResolved(
@@ -93,8 +90,10 @@ public final class EnvironmentVariableValidator {
                     if (FORBIDDEN_JWT_SECRET_VALUES.contains(value.toLowerCase(Locale.ROOT))) {
                         return "JWT_SECRET / app.security.jwt.secret must not use a known development placeholder";
                     }
-                    if (value.length() < 16) {
-                        return "JWT_SECRET / app.security.jwt.secret must be at least 16 characters";
+                    if (value.length() < SecretPresenceValidator.MIN_JWT_SECRET_LENGTH) {
+                        return "JWT_SECRET / app.security.jwt.secret must be at least "
+                                + SecretPresenceValidator.MIN_JWT_SECRET_LENGTH
+                                + " characters";
                     }
                     return null;
                 });
@@ -105,22 +104,10 @@ public final class EnvironmentVariableValidator {
                 "CORS_ALLOWED_ORIGINS",
                 List.of("CORS_ALLOWED_ORIGINS", "app.cors.allowed-origins"),
                 value -> {
-                    if ("*".equals(value.trim()) || value.contains("*")) {
-                        return "CORS_ALLOWED_ORIGINS must not use wildcards";
-                    }
-                    String[] origins = value.split(",");
-                    boolean anyHttps = false;
-                    for (String origin : origins) {
-                        String trimmed = origin.trim();
-                        if (trimmed.isEmpty()) {
-                            continue;
-                        }
-                        if (trimmed.toLowerCase(Locale.ROOT).startsWith("https://")) {
-                            anyHttps = true;
-                        }
-                    }
-                    if (!anyHttps) {
-                        return "CORS_ALLOWED_ORIGINS must include at least one https:// origin";
+                    try {
+                        ProductionCorsOrigins.parseAndValidate(value);
+                    } catch (IllegalStateException exception) {
+                        return exception.getMessage();
                     }
                     return null;
                 });
@@ -241,6 +228,27 @@ public final class EnvironmentVariableValidator {
         }
         String trimmed = value.trim();
         return trimmed.startsWith("${") && trimmed.endsWith("}");
+    }
+
+    static String validateProductionDatabaseUrl(String value) {
+        if (value == null
+                || !value.toLowerCase(Locale.ROOT).startsWith("jdbc:postgresql://")) {
+            return "DB_URL / spring.datasource.url must be a PostgreSQL JDBC URL "
+                    + "(jdbc:postgresql://...)";
+        }
+        String lower = value.toLowerCase(Locale.ROOT);
+        String authorityAndPath = value.substring("jdbc:postgresql://".length());
+        int pathStart = authorityAndPath.indexOf('/');
+        String authority =
+                pathStart >= 0 ? authorityAndPath.substring(0, pathStart) : authorityAndPath;
+        if (authority.contains("@")
+                || lower.matches(".*[?&](user|username|password)=[^&]*.*")) {
+            return "DB_URL must not embed database credentials; use DB_USERNAME and DB_PASSWORD";
+        }
+        if (authority.isBlank() || pathStart < 0 || pathStart == authorityAndPath.length() - 1) {
+            return "DB_URL must include a database host and database name";
+        }
+        return null;
     }
 
     /** Required production environment variable names (documentation / ops checklist). */

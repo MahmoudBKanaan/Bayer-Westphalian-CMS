@@ -253,7 +253,7 @@ unresolved, or obviously invalid. Validation does **not** log secret values.
 | `DB_URL` | `spring.datasource.url` | Required; must start with `jdbc:` |
 | `DB_USERNAME` | `spring.datasource.username` | Required; non-blank |
 | `DB_PASSWORD` | `spring.datasource.password` | Required; non-blank |
-| `JWT_SECRET` | `app.security.jwt.secret` | Required; ≥16 chars; not a known dev placeholder |
+| `JWT_SECRET` | `app.security.jwt.secret` | Required; at least 32 chars; not a known dev placeholder |
 | `CORS_ALLOWED_ORIGINS` | `app.cors.allowed-origins` | Required; no `*`; at least one `https://` origin |
 
 When present, login lockout integers (`LOGIN_RATE_LIMIT_*`) must be positive.

@@ -2,221 +2,198 @@
 
 [![CI](https://github.com/MahmoudBKanaan/Bayer-Westphalian-CMS/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/MahmoudBKanaan/Bayer-Westphalian-CMS/actions/workflows/ci.yml)
 
-<!-- Sprint 17 item 692: CI badge reflects the GitHub Actions workflow named "CI"
-     (`.github/workflows/ci.yml`). Branch query `main` is the releasable line; `dev` also runs CI. -->
+<!-- Sprint 17 item 692: CI badge reflects .github/workflows/ci.yml on releasable main. -->
 
-Internal enterprise CRM, campaign management, and marketing automation system for Bayer-Westphalian Insurance.
-
-The platform is for authorized internal employees only. It supports customer and prospect management, beneficiaries, consent and opt-out handling, products, segmentation, campaigns, recipient preview, communication tracking, follow-ups, reminders, analytics, reports, audit logging, role-based access control, and AI-assisted recommendations.
+Internal enterprise CRM, campaign management, and marketing automation system for
+Bayer-Westphalian Insurance. It is for authorized employees, not public customer signup.
 
 ## Project Identity
 
 | Item | Value |
 | --- | --- |
 | Project name | Bayer-Westphalian Campaign Management Platform |
-| System type | Internal enterprise CRM, campaign management, and marketing automation system |
 | Business domain | Insurance marketing and business intelligence |
-| Primary users | Internal Bayer-Westphalian employees |
-| Main business case | Market insurance and investment products to grandchildren or beneficiaries of life-insurance payout customers while supporting automated campaigns |
-| Product status | Operation-ready business system; mock providers allowed only for development and testing |
+| Main business case | Manage customers, beneficiaries, consent, products, and compliant employee-operated campaigns |
+| Architecture | React and Spring Boot modular monolith with PostgreSQL |
+| Delivery model | Solo-adapted Scrum; no fictional multi-person project team |
+| Product status | v1.0 candidate; production release remains blocked pending the item 770 evidence gate |
+| Release status | `v1.0` is **DRAFT - NOT RELEASED** |
 
-## Stack
+## Current Status
+
+The application and production-oriented runbooks are implemented. That does not prove a production
+release. Exact-commit CI, a deployed HTTPS environment, critical role workflows, off-host backup and
+restore evidence, full smoke execution, and human approval must all be recorded.
+
+Production is allowed only after the fail-closed
+[item 770 release gate](docs/deployment/production-release-gate.md) passes. The
+[v1.0 release notes](docs/releases/v1.0-draft.md) record current blocked and pending gates.
+
+## Core Capabilities
+
+- Employee authentication, JWT access/refresh tokens, account controls, backend authorization,
+  protected frontend routes, and role-filtered navigation.
+- Customer/prospect, beneficiary, consent, opt-out, product, ownership, payment, segment, campaign,
+  communication, reminder, and follow-up management.
+- Central eligibility checks for consent, do-not-contact, uninterested, retry, and monthly contact
+  limits. AI and UI cannot bypass `EligibilityService`.
+- Recipient preview, exclusion explanations, human compliance approval, and controlled launch.
+- Dashboards, reports, fuzzy AI search, recommendation explanations, default-risk scoring,
+  duplicate-contact warnings, and human-approved campaign-copy suggestions.
+- Immutable audit logging for sensitive actions, with restricted read-only audit access.
+- Production Compose, Nginx HTTPS, health checks, bounded logs, scheduler observability, persistent
+  consent evidence, PostgreSQL backups, restore rehearsal, smoke, rollback, and incident runbooks.
+
+## System Roles
+
+| Role | Main responsibility |
+| --- | --- |
+| Admin | Employee accounts, roles, settings, and administration |
+| Campaign Manager | Segments, campaign drafts, preview, and approved launch |
+| Compliance Officer | Consent/compliance review and human campaign approval |
+| Customer Service Agent / Sales Agent | Customer service, contacts, and follow-up work |
+| Product Manager | Products, ownership, and product-change workflows |
+| BI Analyst / Marketing Analyst | Analytics, reports, and campaign insight |
+| Executive Viewer | Read-only executive dashboards and reports |
+| System Auditor | Read-only audit, consent, approval, and user-activity review |
+
+## Technology
 
 | Layer | Technology |
 | --- | --- |
-| Frontend | React, TypeScript, Vite |
-| Routing | React Router |
-| Data fetching | TanStack Query |
-| Forms | React Hook Form |
-| Frontend validation | Zod |
-| UI | Tailwind CSS or MUI |
-| Charts | Recharts |
-| Backend | Java 21, Spring Boot |
-| API | REST JSON |
-| Security | Spring Security |
-| Auth | JWT access token plus refresh token, or secure session |
-| Database | PostgreSQL |
-| ORM | Spring Data JPA / Hibernate |
-| Migrations | Flyway |
-| Mapping | MapStruct or manual mappers |
-| Backend tests | JUnit, Mockito, Spring Boot Test, Testcontainers |
-| Frontend tests | Vitest, React Testing Library, Playwright |
-| DevOps | Docker, Docker Compose, GitHub Actions |
-| Deployment | Docker containers with Nginx or Caddy |
+| Frontend | React, TypeScript, Vite, React Router, TanStack Query, React Hook Form, Zod, Recharts |
+| Backend | Java 21, Spring Boot, Spring Security, Spring Data JPA/Hibernate |
+| API and auth | REST JSON, Springdoc OpenAPI, JWT access and refresh tokens |
+| Database | PostgreSQL 16 with Flyway migrations |
+| Tests | JUnit, Mockito, Spring Boot Test, Testcontainers, Vitest, RTL, Playwright |
+| Delivery | GitHub Actions, Docker, Docker Compose, Nginx TLS reverse proxy |
 
 ## Repository Structure
 
 ```text
 .
-+-- frontend/
-|   +-- public/
-|   +-- src/
-|       +-- app/
-|       +-- api/
-|       +-- components/
-|       +-- features/
-|       +-- pages/
-|       +-- types/
-|       +-- utils/
-+-- backend/
-|   +-- src/
-|       +-- main/
-|       |   +-- java/com/bayerwestphalian/campaign/
-|       |   +-- resources/db/migration/
-|       +-- test/
-+-- docs/
-+-- docker/
-+-- scripts/
-+-- .github/
++-- backend/                 Spring Boot API, migrations, and tests
++-- frontend/                React application and tests
++-- config/                  Safe configuration/evidence examples
++-- docker/                  Proxy, PostgreSQL, backup, and TLS assets
++-- docs/                    Architecture, module, user, test, and operations guides
++-- scripts/                 Local CI and production verification helpers
++-- .github/workflows/       CI and deployment-placeholder workflows
++-- docker-compose.yml       Local PostgreSQL
++-- docker-compose.prod.yml  Production stack model
 ```
 
-## Setup Plan
+## Quick Start
 
-1. Create the repository folder structure.
-2. Generate the React + TypeScript + Vite frontend in `frontend/`.
-3. Generate the Spring Boot backend in `backend/` with Java 21.
-4. Add Docker Compose for PostgreSQL.
-5. Configure backend profiles: `dev`, `test`, and `prod`.
-6. Configure frontend environment files.
-7. Add OpenAPI/Swagger documentation.
-8. Add code formatting, linting, and test baselines.
-9. Add GitHub Actions for build, test, and package checks (item **677** — [`.github/workflows/ci.yml`](.github/workflows/ci.yml); [docs/deployment/ci-cd.md](docs/deployment/ci-cd.md)).
+Prerequisites: Node.js 22+, npm, Java 21, Maven 3.9+, Docker Engine/Desktop, and Docker Compose v2.
 
-## Planning Boards
+1. Start local PostgreSQL from the repository root:
 
-The KB defines Scrum delivery with a Jira project, sprint backlog issues, and planned sprints. Use these references for project tracking:
+   ```powershell
+   docker compose up -d postgres
+   docker compose ps
+   ```
 
-| Tool | Reference |
-| --- | --- |
-| GitHub repository | `bayer-westphalian-campaign-platform` |
-| GitHub project | `Bayer-Westphalian Campaign Platform Delivery` |
-| Jira project key | `BWC` |
-| Jira board | `BWC Scrum Board` |
-| Jira workflow | `Product Backlog -> Sprint Backlog -> In Progress -> Blocked -> Self Review -> Testing -> Done` |
-| Sprint plan | `Sprint 1` through `Sprint 19` |
+2. Start the backend in another terminal:
 
-Replace these placeholders with live GitHub Project and Jira board URLs once the hosted tools are created. Keep Jira issue IDs, sprint numbers, release versions, and pull request references aligned during delivery.
+   ```powershell
+   Set-Location backend
+   mvn spring-boot:run
+   ```
+
+3. Install and start the frontend in another terminal:
+
+   ```powershell
+   Set-Location frontend
+   npm install
+   npm run dev
+   ```
+
+4. Open the Vite URL printed by the frontend. Development Swagger UI is normally available at
+   `http://localhost:8080/swagger-ui.html` when enabled by the active profile.
+
+Environment templates contain placeholders only. Never commit real `.env` files or secrets. Follow
+the [Developer Setup Guide](docs/development/developer-setup.md),
+[Environment Variable Guide](docs/deployment/environment-variables.md), and
+[Secrets Guide](docs/deployment/secrets.md).
 
 ## Development Commands
 
-Run commands from the project root unless noted.
+Run from the indicated package directory:
 
-### Prerequisites
-
-- Node.js 22 or later
-- npm
-- Java 21
-- Maven 3.9 or later
-- Docker Desktop
-
-### Git
-
-```bash
-git status
-```
-
-### Frontend
-
-Install dependencies and run the frontend unit and integration tests:
-
-```bash
-cd frontend
+```powershell
+# Frontend
+Set-Location frontend
 npm install
-npm run test
-npm run build
-```
-
-Run the full frontend quality gate:
-
-```bash
-cd frontend
 npm run verify
-```
 
-Run the local Vite development server:
-
-```bash
-cd frontend
-npm run dev
-```
-
-### Backend
-
-Install Maven locally or add a Maven wrapper before replacing these commands with `./mvnw`.
-
-```bash
-cd backend
-mvn test
-mvn package
-```
-
-Run the full backend quality gate:
-
-```bash
-cd backend
+# Backend
+Set-Location ../backend
 mvn verify
 ```
 
-Run the local Spring Boot development server:
+Useful focused commands:
 
-```powershell
-cd backend
-mvn spring-boot:run
-```
+| Area | Command |
+| --- | --- |
+| Frontend lint | `cd frontend; npm run lint` |
+| Frontend tests | `cd frontend; npm run test` |
+| Frontend build | `cd frontend; npm run build` |
+| Backend tests | `cd backend; mvn test` |
+| Backend package/full gate | `cd backend; mvn verify` |
+| Local database | `docker compose up -d postgres` |
+| Compose verification | `.\scripts\test-docker-compose-config.ps1` |
 
-### Docker
+The local PostgreSQL defaults are database `bwc_campaign`, user `bwc_app`, and host port `5432`.
 
-```bash
-docker compose up -d
-docker compose ps
-docker compose logs -f
-docker compose down
-```
+## Quality Gates
 
-Run Docker verification scripts on Windows PowerShell:
+The repository contains backend unit, integration, security, persistence, and documentation tests;
+frontend unit, integration, accessibility, and Playwright coverage; lint/build checks; Docker checks;
+and production configuration contracts. A historical or local pass is not release evidence for a
+newer commit.
 
-```powershell
-.\scripts\test-docker-compose-config.ps1
-.\scripts\test-docker-compose-postgres.ps1
-```
-
-The local PostgreSQL service uses `docker-compose.yml` and defaults to:
-
-- database: `bwc_campaign`
-- user: `bwc_app`
-- port: `5432`
-
-## Test Coverage
-
-The foundation includes the initial unit and integration test baseline required by the KB.
-
-| Area | Command | Coverage |
-| --- | --- | --- |
-| Frontend unit tests | `cd frontend && npm run test` | Formatting helpers and API request behavior |
-| Frontend integration tests | `cd frontend && npm run test` | App routing, dashboard redirect, campaigns page, login shell |
-| Frontend full gate | `cd frontend && npm run verify` | ESLint, Prettier, Vitest, production build |
-| Backend unit tests | `cd backend && mvn test` | Spring context and OpenAPI metadata |
-| Backend integration tests | `cd backend && mvn test` | Actuator health and PostgreSQL connectivity |
-| Backend full gate | `cd backend && mvn verify` | Tests, package, Spotless, Checkstyle |
-| Docker config test | `.\scripts\test-docker-compose-config.ps1` | Compose service, network, volume, and healthcheck model |
-| Docker integration test | `.\scripts\test-docker-compose-postgres.ps1` | PostgreSQL startup, readiness, and SQL smoke query |
+GitHub Actions runs on pull requests and pushes to `main`/`dev`. Releasable `main` requires green CI
+for the exact commit. Production additionally requires item 770 evidence for smoke tests, backups,
+security and environment configuration, provider policy, rollback readiness, critical workflows,
+and human approval. See [CI/CD](docs/deployment/ci-cd.md).
 
 ## Environments
 
 | Environment | Purpose |
 | --- | --- |
-| dev | Local development with developer-friendly settings |
-| test | Automated tests and isolated verification |
-| prod | Production configuration with secure secrets, HTTPS, real providers, and hardened error handling |
+| `dev` | Local development with development-only conveniences |
+| `test` | Automated isolated verification |
+| `prod` | Fail-fast secure configuration, HTTPS, restricted CORS, safe errors, and provider policy |
 
 ## Production Rules
 
-- Core compliance, permission, consent, eligibility, campaign approval, audit, and customer data logic must be fully implemented.
-- Mocking is allowed only for development, testing, demonstration data, or replaceable external provider adapters before real integration.
-- Secrets must never be committed to Git.
-- Production must use HTTPS and restricted CORS.
-- Sensitive actions must be audited.
-- Database changes must be version-controlled through migrations.
+- Core authorization, consent, eligibility, approval, audit, and customer-data rules must be real.
+- Mocking is limited to development, tests, synthetic demos, or replaceable provider adapters.
+- Secrets and customer/consent data must never be committed to Git.
+- Production uses HTTPS, HSTS, explicit CORS origins, safe errors, and bounded secret-safe logging.
+- Sensitive actions are auditable; normal users cannot edit audit logs.
+- Database changes are version-controlled, forward-only Flyway migrations.
+- Real email/SMS sending must be approved and configured, or explicitly disabled.
+- A green CI run alone does not authorize production; every item 770 gate must pass.
+
+## Architecture And API
+
+React calls REST endpoints exposed by Spring Boot; Spring Security enforces authorization;
+PostgreSQL is the system of record; Flyway owns schema evolution; and Nginx is the production HTTPS
+edge. See [Architecture](docs/architecture/initial-architecture.md),
+[Role-Based Access](docs/architecture/role-based-access.md), and
+[OpenAPI/Swagger](docs/api/openapi.md).
+
+Production OpenAPI and Swagger are disabled by default. Do not expose them publicly without an
+approved access decision.
+
+## Project Process
+
+The KB is delivered with solo-adapted Scrum. The developer performs Product Owner, Scrum Master,
+development, and QA responsibilities transparently. Work moves through Product Backlog, Sprint
+Backlog, In Progress, Blocked, Self Review, Testing, and Done. Jira/GitHub board references remain
+project metadata until live hosted URLs are recorded.
 
 ## Release Strategy
 
@@ -232,3 +209,31 @@ The foundation includes the initial unit and integration test baseline required 
 | v0.8 | Audit and hardening |
 | v0.9 | Production candidate |
 | v1.0 | Production-ready MVP |
+
+## Documentation
+
+- [Complete documentation index](docs/README.md)
+- [Developer setup](docs/development/developer-setup.md)
+- [User guides](docs/README.md#user-guides) and [admin guides](docs/README.md#admin)
+- [API documentation](docs/api/openapi.md)
+- [Production deployment guide](docs/deployment/production-deployment-guide.md)
+- [Production operations manual](docs/operations/operations-guide.md)
+- [Backup guide](docs/deployment/backup-guide.md) and [restore guide](docs/deployment/restore-guide.md)
+- [Smoke checklist](docs/deployment/production-smoke-test-checklist.md),
+  [rollback plan](docs/deployment/rollback-plan.md), and
+  [incident notes](docs/deployment/incident-response-notes.md)
+- [v1.0 release notes](docs/releases/v1.0-draft.md) (**draft, not released**)
+- [Final demo dataset](docs/demo/final-demo-dataset.md) and
+  [20-minute demo script](docs/demo/final-demo-script.md)
+
+## Security And Data Handling
+
+Use synthetic data for development, tests, screenshots, and demonstrations. Never commit customer
+data, consent evidence, database dumps, passwords, JWTs, API keys, private keys, or production
+environment files. Report suspected exposure through the
+[incident-response process](docs/deployment/incident-response-notes.md).
+
+## License And Use
+
+No public open-source license is declared. Treat the project and its data as internal/university
+work unless the owner provides separate license and usage terms.

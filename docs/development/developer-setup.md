@@ -1,6 +1,8 @@
-# Developer Setup Guide
+# Local Setup Guide
 
-This guide prepares a local development environment for the Bayer-Westphalian Campaign Management Platform.
+**Item 774** prepares a local development environment for the Bayer-Westphalian Campaign Management
+Platform. It is for development and test use only; production uses the separate
+[production deployment guide](../deployment/production-deployment-guide.md).
 
 Frontend visual conventions (shell, colors, badges, forms, responsive layout) are documented in
 [UI Style Notes](ui-style-notes.md) (Sprint 15 item **610**). Accessibility baseline guidance
@@ -19,8 +21,22 @@ Install these tools before starting:
 | Java 21 | Backend runtime and compilation |
 | Maven 3.9 or later | Backend build, tests, formatting, and linting |
 | Docker Desktop | Local PostgreSQL database |
+| Docker Compose v2 | Local service orchestration (`docker compose`) |
 
-The backend currently supports a local Maven installation. A Maven wrapper can be added later for fully pinned build execution.
+Verify versions before setup:
+
+```powershell
+git --version
+node --version
+npm --version
+java -version
+mvn --version
+docker version
+docker compose version
+```
+
+Java and Maven must both report Java 21. The backend uses a local Maven installation; there is no
+Maven wrapper in this repository.
 
 Continuous integration runs the same major build/test steps via GitHub Actions (Sprint 17 items
 **677–687**, **690–701**: workflow, backend package/tests/integration, frontend
@@ -46,11 +62,15 @@ PR CI is item **698**
 
 ## Repository Setup
 
-From the project root:
+Clone or open the repository, then run from its root:
 
 ```powershell
+git branch --show-current
 git status
 ```
+
+Do not continue from a different similarly named folder. `docker-compose.yml`, `backend/pom.xml`,
+and `frontend/package.json` must all exist under the current directory.
 
 Expected project folders:
 
@@ -87,6 +107,11 @@ Backend:
 Copy-Item backend\.env.example backend\.env
 ```
 
+Vite automatically reads `frontend/.env`. Plain `mvn spring-boot:run` does **not** automatically
+load `backend/.env`; local backend defaults already match Compose. To override them, set variables
+in the current shell or use an approved environment loader. Do not assume that copying the file
+changed the backend process.
+
 Do not commit real `.env` files. The KB requires production secrets to be supplied by the deployment
 environment or a secret manager — see [Secrets Documentation](../deployment/secrets.md) (item
 **689**).
@@ -99,6 +124,9 @@ Start PostgreSQL from the project root:
 docker compose up -d postgres
 docker compose ps
 ```
+
+Wait until `postgres` reports `healthy` before starting the backend. Flyway applies the normal
+migrations and development demo migrations when the backend starts with the `dev` profile.
 
 Validate the Docker Compose configuration and PostgreSQL startup:
 
@@ -129,6 +157,8 @@ Remove the local database volume only when a full reset is intended:
 docker compose down -v
 ```
 
+This reset permanently removes local development data. It is never a production command.
+
 ## Frontend Setup
 
 From the frontend folder:
@@ -138,6 +168,9 @@ cd frontend
 npm install
 npm run dev
 ```
+
+Use `npm install` because the repository lock file defines the resolved dependency set. Do not
+update dependencies as part of setup unless dependency maintenance is the intended task.
 
 Default Vite URL:
 
@@ -167,13 +200,16 @@ From the backend folder:
 
 ```powershell
 cd backend
+$env:SPRING_PROFILES_ACTIVE = "dev"
 mvn spring-boot:run
 ```
 
-The backend dev profile is configured for local PostgreSQL. If needed, set:
+Optional shell overrides must be set before Maven starts, for example:
 
 ```powershell
-$env:SPRING_PROFILES_ACTIVE = "dev"
+$env:DB_URL = "jdbc:postgresql://localhost:5432/bwc_campaign"
+$env:DB_USERNAME = "bwc_app"
+$env:DB_PASSWORD = "bwc_app"
 ```
 
 Backend quality commands:
@@ -191,7 +227,27 @@ Use this command to apply backend formatting:
 mvn spotless:apply
 ```
 
-The PostgreSQL integration test connects to the local Docker Compose database on port `5432`. Start PostgreSQL before running the complete backend test suite when you want that integration check to execute.
+The backend is ready when startup completes without Flyway errors and the health endpoint responds.
+
+## Verify The Running Application
+
+With database, backend, and frontend running:
+
+```powershell
+Invoke-RestMethod http://localhost:8080/actuator/health
+Invoke-RestMethod http://localhost:8080/actuator/health/liveness
+Invoke-RestMethod http://localhost:8080/actuator/health/readiness
+```
+
+Expected status is `UP`. Open `http://localhost:5173`, confirm the login screen loads, and verify
+the browser network requests target `http://localhost:8080/api`. Swagger UI and OpenAPI JSON are
+development-only resources listed below.
+
+The dev profile may load synthetic `.test` users and demo records from `db/demo`. Treat them only as
+local demonstration data. Do not reuse demo credentials, identities, or records in production.
+
+If login credentials are needed, consult the current demo migration or approved local seed notes;
+do not add plaintext credentials to this guide or the repository.
 
 ## Unit and Integration Tests
 
@@ -208,12 +264,9 @@ Use this matrix during local development and before commits:
 | Docker config test | `.\scripts\test-docker-compose-config.ps1` | Compose service, network, volume, and health check model |
 | Docker integration test | `.\scripts\test-docker-compose-postgres.ps1` | PostgreSQL startup, readiness, and SQL smoke query |
 
-Current test files:
-
-| Area | Files |
-| --- | --- |
-| Frontend | `src/app/App.test.tsx`, `src/app/router.integration.test.tsx`, `src/api/client.test.ts`, `src/utils/format.test.ts` |
-| Backend | `CampaignApplicationTests.java`, `OpenApiConfigurationTests.java`, `HealthEndpointIntegrationTests.java`, `PostgreSqlConnectionIntegrationTests.java` |
+The suite now covers application modules, authorization, audit/security controls, role navigation,
+business workflows, persistence, accessibility, operations, and documentation. Use repository test
+discovery and the CI workflow as the current inventory rather than a hard-coded filename list.
 
 ## API Documentation
 
@@ -237,6 +290,17 @@ Use this sequence for normal local work:
 6. Run frontend and backend verification commands.
 7. Review `git status` before committing.
 
+## Stop And Restart
+
+Stop Vite and Spring Boot with `Ctrl+C` in their terminals, then stop PostgreSQL from the root:
+
+```powershell
+docker compose down
+```
+
+For the next session, start PostgreSQL, backend, then frontend in that order. Normal shutdown keeps
+the `bwc_postgres_data` volume. Use `docker compose down -v` only for an intentional local reset.
+
 ## Quality Baseline
 
 Frontend:
@@ -258,6 +322,23 @@ Backend:
 | Frontend cannot reach backend | Confirm `VITE_API_BASE_URL` in `frontend/.env` |
 | Backend cannot connect to database | Confirm Docker is running and `docker compose ps` shows `postgres` healthy |
 | Port `5432` is busy | Set `POSTGRES_PORT` before starting Docker Compose |
+| Backend ignores `backend/.env` | Set overrides in the shell; Maven/Spring does not automatically load that file |
+| Flyway validation fails after switching branches | Preserve diagnostics; for disposable local data only, stop services and intentionally reset the local volume |
+| Browser shows CORS failure | Confirm backend `CORS_ALLOWED_ORIGINS` includes the exact Vite origin and restart backend |
 | Port `5173` is busy | Start Vite with `npm run dev -- --port 5174` |
 | Maven command not found | Install Maven or add it to the system `PATH` |
 | Java version mismatch | Confirm `java -version` reports Java 21 |
+| Health is `DOWN` | Inspect bounded backend output and `docker compose logs --tail 100 postgres` |
+
+## Setup Completion Checklist
+
+- [ ] Tool versions satisfy prerequisites and Maven uses Java 21.
+- [ ] Repository root and branch are confirmed; no secrets were added.
+- [ ] PostgreSQL is healthy and Flyway startup completes.
+- [ ] Backend liveness/readiness report `UP`.
+- [ ] Frontend loads and calls the local `/api` base URL.
+- [ ] Swagger/OpenAPI is reachable only in the intended local profile.
+- [ ] Relevant quality gates run successfully before committing.
+- [ ] `git status` contains only intended changes.
+
+Automated documentation evidence: `LocalSetupGuideDocumentationTests`.

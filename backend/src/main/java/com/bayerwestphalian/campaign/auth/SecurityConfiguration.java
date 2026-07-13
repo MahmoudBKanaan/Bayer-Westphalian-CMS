@@ -1,6 +1,7 @@
 package com.bayerwestphalian.campaign.auth;
 
 import com.bayerwestphalian.campaign.common.api.SecureErrorResponses;
+import com.bayerwestphalian.campaign.common.config.ProductionCorsOrigins;
 import com.bayerwestphalian.campaign.user.SystemRoleName;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
@@ -525,32 +526,7 @@ public class SecurityConfiguration {
      * @throws IllegalStateException when origins are missing, wildcarded, or unsafe for production
      */
     static List<String> validateProductionOrigins(List<String> origins) {
-        if (origins == null || origins.isEmpty()) {
-            throw new IllegalStateException(
-                    "Production CORS requires app.cors.allowed-origins / CORS_ALLOWED_ORIGINS "
-                            + "with at least one explicit frontend origin");
-        }
-        for (String origin : origins) {
-            if (origin == null || origin.isBlank()) {
-                throw new IllegalStateException(
-                        "Production CORS origin entries must not be blank");
-            }
-            if ("*".equals(origin) || origin.contains("*")) {
-                throw new IllegalStateException(
-                        "Production CORS must not use wildcard origins (found: " + origin + ")");
-            }
-            String lower = origin.toLowerCase();
-            if (lower.contains("localhost") || lower.contains("127.0.0.1")) {
-                throw new IllegalStateException(
-                        "Production CORS must not allow localhost origins (found: " + origin + ")");
-            }
-            // Item 541: production frontends must use HTTPS origins (not plain http).
-            if (!lower.startsWith("https://")) {
-                throw new IllegalStateException(
-                        "Production CORS origins must use HTTPS (found: " + origin + ")");
-            }
-        }
-        return List.copyOf(origins);
+        return ProductionCorsOrigins.validate(origins);
     }
 
     static List<String> parseOrigins(String value) {

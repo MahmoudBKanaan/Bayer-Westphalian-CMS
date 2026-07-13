@@ -1,6 +1,9 @@
+import type { ReactNode } from "react";
 import { createBrowserRouter, Navigate, type RouteObject } from "react-router-dom";
 import { ProtectedRoute } from "@/auth/ProtectedRoute";
+import { RoleProtectedRoute } from "@/auth/RoleProtectedRoute";
 import { AppLayout } from "@/components/AppLayout";
+import { NAV_MENU_SECTIONS } from "@/features/auth/roleBasedMenu";
 import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import { AuditPage } from "@/pages/AuditPage";
 import { CampaignBuilderPage } from "@/pages/CampaignBuilderPage";
@@ -24,6 +27,21 @@ import { SegmentsPage } from "@/pages/SegmentsPage";
 import { SystemSettingsPage } from "@/pages/SystemSettingsPage";
 import { UsersPage } from "@/pages/UsersPage";
 
+function restricted(path: string, element: ReactNode, permissionPath = path) {
+  const item = NAV_MENU_SECTIONS.flatMap((section) => section.items).find(
+    (candidate) => candidate.to === `/${permissionPath}`,
+  );
+
+  if (item == null) {
+    throw new Error(`Missing role configuration for route: ${permissionPath}`);
+  }
+
+  return {
+    path,
+    element: <RoleProtectedRoute allowedRoles={item.roles}>{element}</RoleProtectedRoute>,
+  };
+}
+
 export const routes: RouteObject[] = [
   {
     path: "/login",
@@ -38,28 +56,28 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, element: <Navigate to="/dashboard" replace /> },
           { path: "dashboard", element: <DashboardPage /> },
-          { path: "customers", element: <CustomersPage /> },
-          { path: "customers/:customerId", element: <CustomerDetailsPage /> },
-          { path: "products", element: <ProductsPage /> },
-          { path: "products/:productId", element: <ProductDetailsPage /> },
-          { path: "product-change-requests", element: <ProductChangeRequestsPage /> },
-          { path: "segments", element: <SegmentsPage /> },
-          { path: "campaigns", element: <CampaignsPage /> },
+          restricted("customers", <CustomersPage />),
+          restricted("customers/:customerId", <CustomerDetailsPage />, "customers"),
+          restricted("products", <ProductsPage />),
+          restricted("products/:productId", <ProductDetailsPage />, "products"),
+          restricted("product-change-requests", <ProductChangeRequestsPage />),
+          restricted("segments", <SegmentsPage />),
+          restricted("campaigns", <CampaignsPage />),
           {
             path: "campaigns/:campaignId/recipients/preview",
-            element: <CampaignRecipientPreviewPage />,
+            element: restricted("campaigns", <CampaignRecipientPreviewPage />).element,
           },
-          { path: "campaign-builder", element: <CampaignBuilderPage /> },
-          { path: "compliance", element: <CompliancePage /> },
-          { path: "contact-history", element: <ContactHistoryPage /> },
-          { path: "follow-up-tasks", element: <FollowUpTasksPage /> },
-          { path: "reminders", element: <RemindersPage /> },
-          { path: "analytics", element: <AnalyticsPage /> },
-          { path: "executive", element: <ExecutiveDashboardPage /> },
-          { path: "reports", element: <ReportsPage /> },
-          { path: "users", element: <UsersPage /> },
-          { path: "settings", element: <SystemSettingsPage /> },
-          { path: "audit", element: <AuditPage /> },
+          restricted("campaign-builder", <CampaignBuilderPage />),
+          restricted("compliance", <CompliancePage />),
+          restricted("contact-history", <ContactHistoryPage />),
+          restricted("follow-up-tasks", <FollowUpTasksPage />),
+          restricted("reminders", <RemindersPage />),
+          restricted("analytics", <AnalyticsPage />),
+          restricted("executive", <ExecutiveDashboardPage />),
+          restricted("reports", <ReportsPage />),
+          restricted("users", <UsersPage />),
+          restricted("settings", <SystemSettingsPage />),
+          restricted("audit", <AuditPage />),
         ],
       },
     ],

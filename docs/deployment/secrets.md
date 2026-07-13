@@ -78,10 +78,16 @@ temporary access after the incident.
 2. Use **local placeholders** from the templates (e.g. Compose default `bwc_app` password).
 3. Do **not** put production `JWT_SECRET` or production DB passwords on developer laptops unless
    your org policy requires a separate break-glass process.
-4. Prefer `EMAIL_PROVIDER_MODE=mock` / `SMS_PROVIDER_MODE=mock` and
-   `PROVIDER_REAL_SENDING_ENABLED=false` so provider secrets are unused.
+4. Production uses `EMAIL_PROVIDER_MODE=disabled`, `SMS_PROVIDER_MODE=disabled`, and
+   `PROVIDER_REAL_SENDING_ENABLED=false`; mock providers are dev/test only.
 
 ## Production deployment checklist (secrets)
+
+JWT-specific generation, deployment, and rotation guidance:
+[Production JWT Secret](jwt-secret.md) (item **724**).
+
+Database credential provisioning and coordinated rotation:
+[Production Database Credentials](database-credentials.md) (item **725**).
 
 Before enabling the `prod` profile against real customer data:
 

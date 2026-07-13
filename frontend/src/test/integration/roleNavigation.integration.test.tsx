@@ -113,4 +113,26 @@ describe("role-based navigation integration (item 596)", () => {
       await screen.findByRole("heading", { name: "Executive dashboard" }),
     ).toBeInTheDocument();
   });
+
+  it.each(["/users", "/settings", "/audit"])(
+    "prevents an unauthorized user from opening %s directly",
+    async (path) => {
+      stubDashboardAndEmptyLists();
+      renderApp({ path, roles: ["EXECUTIVE_VIEWER"] });
+
+      expect(
+        await screen.findByRole("heading", { name: /campaign performance/i }),
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByRole("heading", { name: /users|system settings|audit log/i }),
+      ).not.toBeInTheDocument();
+    },
+  );
+
+  it("allows an authorized system auditor to open the audit page directly", async () => {
+    stubDashboardAndEmptyLists();
+    renderApp({ path: "/audit", roles: ["SYSTEM_AUDITOR"] });
+
+    expect(await screen.findByRole("heading", { name: /audit/i })).toBeInTheDocument();
+  });
 });

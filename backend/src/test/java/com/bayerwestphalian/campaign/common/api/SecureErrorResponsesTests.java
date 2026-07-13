@@ -64,4 +64,13 @@ class SecureErrorResponsesTests {
         assertThat(SecureErrorResponses.isSensitiveField("temporaryPassword")).isTrue();
         assertThat(SecureErrorResponses.isSensitiveField("fullName")).isFalse();
     }
+
+    @Test
+    void usesSanitizedCorrelationAttributeBeforeRawRequestHeader() {
+        MockHttpServletRequest request = new MockHttpServletRequest();
+        request.addHeader("X-Request-Id", "unsafe raw value");
+        request.setAttribute(RequestCorrelationFilter.REQUEST_ID_ATTRIBUTE, "safe-request-729");
+
+        assertThat(SecureErrorResponses.requestId(request)).isEqualTo("safe-request-729");
+    }
 }

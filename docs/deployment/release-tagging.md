@@ -54,6 +54,8 @@ evidence capture, verification commands, GitHub Release notes, and troubleshooti
 5. Release artifacts from CI (**691**: `bwc-backend-jar`, `bwc-frontend-dist`) are available for the
    run when packaging evidence is required.
 6. Secrets remain outside Git — [secrets.md](secrets.md).
+7. For a production release, the item **770** [production release gate](production-release-gate.md)
+   passes for the exact commit/tag/environment after human approval. Green CI alone is insufficient.
 
 ### Mandatory main CI release gate (item 714)
 
@@ -66,6 +68,21 @@ The deployment placeholder enforces this rule with `scripts/assert-main-ci-succe
 records release intent. The gate queries the `ci.yml` push runs using read-only `actions: read`
 permission and fails closed when matching evidence is absent. Branch protection remains the merge
 gate; this check is the release-time gate.
+
+### Mandatory production evidence gate (item 770)
+
+Immediately before creating a production tag, validate the approved evidence manifest:
+
+```powershell
+.\scripts\assert-production-release-gate.ps1 `
+  -EvidenceFile <approved-evidence-manifest.json> `
+  -ExpectedCommit <40-character-final-main-sha> `
+  -ExpectedTag v1.0
+```
+
+Do not run this gate with the blocked example manifest. Any missing or non-PASS smoke, backup,
+security configuration, environment configuration, provider policy, rollback, or critical-workflow
+evidence blocks production tagging and release publication.
 
 ## Release roles and ownership
 
@@ -178,6 +195,10 @@ After pushing the tag:
 Keep release notes concise and evidence-focused. Link to existing documentation instead of copying
 configuration values, secret names with values, or large test logs into the release description.
 
+The prepared v1.0 publication draft is [v1.0 Release Notes Draft](../releases/v1.0-draft.md)
+(Sprint 18 item **742**). Its draft banner and blocked/pending gates must remain until evidence for
+the exact final `main` commit is complete.
+
 ## Evidence capture
 
 Record this evidence for each release tag:
@@ -210,7 +231,8 @@ Tags mark history; they do not deploy by themselves. To stop using a bad release
 
 1. Do **not** delete a published course milestone tag unless the tag was created in error and never
    shared; prefer a **new** fix tag (e.g. `v0.9.1`) on a corrected `main` commit.
-2. Operational rollback of a deployment is a Sprint 18 concern (rollback plan / prod Compose).
+2. Follow the human-approved [Production Rollback Plan](rollback-plan.md) (Sprint 18 item **739**);
+   never move a release tag or improvise a schema downgrade as a deployment rollback.
 
 ## Checklist (operator)
 
@@ -220,4 +242,20 @@ Tags mark history; they do not deploy by themselves. To stop using a bad release
 4. Push tag to `origin`.
 5. Optionally publish a GitHub Release with notes.
 6. Record tag name + SHA + CI run URL for Sprint 17 evidence.
-7. Proceed to deploy only when 
+7. Proceed to deploy only when ops readiness allows (Sprint 18 / item **716+**).
+
+## Related items
+
+| Item | Topic |
+| --- | --- |
+| **691** | Release artifact generation (JAR + dist) |
+| **692** | CI badge on README |
+| **693–694** | Fail-on-red / pass-on-green |
+| **695** | Branch protection recommendation |
+| **696** | This release tagging process |
+| **697** | [Deployment workflow placeholder](ci-cd.md#deployment-workflow-placeholder-item-697) |
+| **711** | This release tagging guide expansion |
+| **714** | Main not releasable unless CI passes |
+
+Automated documentation evidence: `ReleaseTaggingProcessDocumentationTests` and
+`ReleaseTaggingGuideDocumentationTests` (backend), `releaseTaggingProcess.ts` (frontend catalog).

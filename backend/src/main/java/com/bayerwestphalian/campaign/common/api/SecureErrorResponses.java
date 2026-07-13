@@ -74,6 +74,10 @@ public class SecureErrorResponses {
         if (request == null) {
             return null;
         }
+        Object correlated = request.getAttribute(RequestCorrelationFilter.REQUEST_ID_ATTRIBUTE);
+        if (correlated instanceof String value && !value.isBlank()) {
+            return value;
+        }
         String requestId = request.getHeader("X-Request-Id");
         return requestId == null || requestId.isBlank() ? null : requestId.trim();
     }

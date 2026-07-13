@@ -97,6 +97,25 @@ class ProductionCorsConfigurationTests {
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessageContaining("HTTPS");
         }
+
+        @Test
+        void rejectsOriginsWithPathsQueriesFragmentsOrUserInfo() {
+            assertThatThrownBy(
+                            () ->
+                                    SecurityConfiguration.validateProductionOrigins(
+                                            List.of("https://campaign.example.com/api")))
+                    .hasMessageContaining("origins only");
+            assertThatThrownBy(
+                            () ->
+                                    SecurityConfiguration.validateProductionOrigins(
+                                            List.of("https://campaign.example.com?tenant=one")))
+                    .hasMessageContaining("origins only");
+            assertThatThrownBy(
+                            () ->
+                                    SecurityConfiguration.validateProductionOrigins(
+                                            List.of("https://user@campaign.example.com")))
+                    .hasMessageContaining("user info");
+        }
     }
 
     @Nested

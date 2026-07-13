@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "releaseTag": "v1.0",
+  "commitSha": "REPLACE_WITH_FULL_40_CHARACTER_COMMIT_SHA",
+  "environment": "REPLACE_WITH_APPROVED_PRODUCTION_ENVIRONMENT",
+  "evaluatedAtUtc": "REPLACE_WITH_UTC_TIMESTAMP",
+  "operator": "REPLACE_WITH_OPERATOR_IDENTITY",
+  "approvedBy": "REPLACE_WITH_HUMAN_APPROVER_IDENTITY",
+  "decision": "BLOCKED",
+  "gates": {
+    "smokeTests": {
+      "status": "BLOCKED",
+      "evidence": "Production smoke checklist execution reference"
+    },
+    "backups": {
+      "status": "BLOCKED",
+      "evidence": "Backup integrity, off-host copy, and restore rehearsal references"
+    },
+    "securityConfiguration": {
+      "status": "BLOCKED",
+      "evidence": "Approved production security checklist reference"
+    },
+    "environmentConfiguration": {
+      "status": "BLOCKED",
+      "evidence": "Validated production environment/configuration reference"
+    },
+    "providerConfigurationPolicy": {
+      "status": "BLOCKED",
+      "evidence": "Approved real-provider configuration or explicit disabled-policy reference"
+    },
+    "rollbackPlan": {
+      "status": "BLOCKED",
+      "evidence": "Rollback readiness review reference"
+    },
+    "criticalWorkflows": {
+      "status": "BLOCKED",
+      "evidence": "Critical workflow acceptance execution reference"
+    }
+  }
+}

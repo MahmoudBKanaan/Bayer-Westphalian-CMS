@@ -19,6 +19,7 @@ import {
   LOGIN_PASSWORD_LABEL,
   LOGIN_SUBMIT_LABEL,
 } from "@/features/a11y/keyboardNavigationFlow";
+import { BrandLogo } from "@/components/BrandLogo";
 
 /**
  * Employee sign-in screen (KB FR-001 / item 598 — login flow works through UI).
@@ -72,7 +73,7 @@ export function LoginPage() {
   return (
     <main className="login-page" aria-labelledby="login-title">
       <section className="login-hero" aria-labelledby="login-title">
-        <span className="brand-mark">BW</span>
+        <BrandLogo variant="full" size="lg" className="login-hero-logo" />
         <div>
           <span className="eyebrow">Internal employee access</span>
           <h1 id="login-title">{LOGIN_PAGE_TITLE}</h1>
@@ -99,6 +100,7 @@ export function LoginPage() {
             <input
               autoComplete="email"
               type="email"
+              placeholder="admin@bayer-westphalian.test"
               {...register("email", { required: loginFormValidationMessages.emailRequired })}
               aria-invalid={Boolean(formState.errors.email)}
             />
@@ -111,6 +113,7 @@ export function LoginPage() {
             <input
               autoComplete="current-password"
               type="password"
+              placeholder="Neoarel@7368"
               {...register("password", {
                 required: loginFormValidationMessages.passwordRequired,
               })}

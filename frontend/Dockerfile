@@ -10,6 +10,12 @@ WORKDIR /app
 # Keep Vite cache inside the image layer (vite.config defaults to a parent cache dir).
 ENV VITE_CACHE_DIR=/app/.vite-cache
 
+# Item 719: Vite values are compile-time configuration, never runtime secrets.
+ARG VITE_API_BASE_URL=/api
+ARG VITE_APP_ENV=prod
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+ENV VITE_APP_ENV=${VITE_APP_ENV}
+
 COPY package.json package-lock.json ./
 RUN npm ci
 

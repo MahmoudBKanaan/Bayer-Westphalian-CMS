@@ -46,6 +46,32 @@ class EnvironmentVariableValidatorTests {
         }
 
         @Test
+        void failsWhenDatabaseUrlEmbedsCredentials() {
+            MockEnvironment environment = validProductionEnvironment();
+            environment.setProperty(
+                    "DB_URL", "jdbc:postgresql://bwc_app:secret@db:5432/bwc_campaign");
+
+            assertThat(EnvironmentVariableValidator.collectProductionErrors(environment))
+                    .anyMatch(
+                            error ->
+                                    error.contains("must not embed database credentials")
+                                            && error.contains("DB_USERNAME")
+                                            && error.contains("DB_PASSWORD"));
+        }
+
+        @Test
+        void failsWhenDatabaseUrlIsNotPostgresqlOrHasNoDatabaseName() {
+            MockEnvironment environment = validProductionEnvironment();
+            environment.setProperty("DB_URL", "jdbc:mysql://db:3306/bwc_campaign");
+            assertThat(EnvironmentVariableValidator.collectProductionErrors(environment))
+                    .anyMatch(error -> error.contains("PostgreSQL JDBC URL"));
+
+            environment.setProperty("DB_URL", "jdbc:postgresql://db:5432/");
+            assertThat(EnvironmentVariableValidator.collectProductionErrors(environment))
+                    .anyMatch(error -> error.contains("database host and database name"));
+        }
+
+        @Test
         void failsWhenJwtSecretIsDevPlaceholder() {
             MockEnvironment environment = validProductionEnvironment();
             environment.setProperty("JWT_SECRET", "dev-only-change-me");
@@ -62,7 +88,7 @@ class EnvironmentVariableValidatorTests {
             environment.setProperty("app.security.jwt.secret", "short");
 
             assertThat(EnvironmentVariableValidator.collectProductionErrors(environment))
-                    .anyMatch(error -> error.contains("at least 16"));
+                    .anyMatch(error -> error.contains("at least 32"));
         }
 
         @Test
@@ -83,6 +109,20 @@ class EnvironmentVariableValidatorTests {
 
             assertThat(EnvironmentVariableValidator.collectProductionErrors(environment))
                     .anyMatch(error -> error.contains("wildcard"));
+        }
+
+        @Test
+        void failsWhenCorsListMixesSecureAndInsecureOrigins() {
+            MockEnvironment environment = validProductionEnvironment();
+            environment.setProperty(
+                    "CORS_ALLOWED_ORIGINS",
+                    "https://campaign.example.com,http://legacy.example.com");
+            environment.setProperty(
+                    "app.cors.allowed-origins",
+                    "https://campaign.example.com,http://legacy.example.com");
+
+            assertThat(EnvironmentVariableValidator.collectProductionErrors(environment))
+                    .anyMatch(error -> error.contains("HTTPS"));
         }
 
         @Test

@@ -1,3 +1,7 @@
+-- Final controlled demo dataset (item 781).
+-- Synthetic dev/test data only. application-prod.yml must never load classpath:db/demo.
+-- Deterministic UUIDs and upserts make repeated Flyway execution safe for demonstrations.
+
 insert into customers (
     id,
     customer_type,
@@ -1079,6 +1083,9 @@ set
     exclusion_reason = excluded.exclusion_reason,
     eligibility_explanation = excluded.eligibility_explanation;
 
+-- Lena Keller (customer 20000000-...-0102) email engagement timeline for campaign demo.
+-- Required fields: customer_id, channel, event_type, occurred_at; campaign_id links metrics;
+-- notes carry provider/tracking context the communication service records for OPENED/REPLIED.
 insert into contact_events (
     id,
     customer_id,
@@ -1090,19 +1097,45 @@ insert into contact_events (
     occurred_at,
     created_by
 )
-values (
-    '52000000-0000-0000-0000-000000000101',
-    '20000000-0000-0000-0000-000000000102',
-    '50000000-0000-0000-0000-000000000101',
-    'EMAIL',
-    'SENT',
-    'NO_RESPONSE',
-    'Controlled demo contact event',
-    now() - interval '2 hours',
-    '10000000-0000-0000-0000-000000000006'
-)
+values
+    (
+        '52000000-0000-0000-0000-000000000101',
+        '20000000-0000-0000-0000-000000000102',
+        '50000000-0000-0000-0000-000000000101',
+        'EMAIL',
+        'SENT',
+        'NO_RESPONSE',
+        'providerMessageId=demo-email-lena-keller-001; Controlled demo contact event',
+        now() - interval '2 hours',
+        '10000000-0000-0000-0000-000000000006'
+    ),
+    (
+        '52000000-0000-0000-0000-000000000102',
+        '20000000-0000-0000-0000-000000000102',
+        '50000000-0000-0000-0000-000000000101',
+        'EMAIL',
+        'OPENED',
+        null,
+        'providerMessageId=demo-email-lena-keller-001; trackingReference=demo-open-lena-keller-001',
+        now() - interval '90 minutes',
+        '10000000-0000-0000-0000-000000000006'
+    ),
+    (
+        '52000000-0000-0000-0000-000000000103',
+        '20000000-0000-0000-0000-000000000102',
+        '50000000-0000-0000-0000-000000000101',
+        'EMAIL',
+        'REPLIED',
+        'INTERESTED',
+        'providerMessageId=demo-email-lena-keller-001; inboundMessageId=demo-reply-lena-keller-001; replyText=Thanks for the product information. I would like to schedule a call.',
+        now() - interval '45 minutes',
+        '10000000-0000-0000-0000-000000000006'
+    )
 on conflict (id) do update
 set
+    customer_id = excluded.customer_id,
+    campaign_id = excluded.campaign_id,
+    channel = excluded.channel,
     event_type = excluded.event_type,
     outcome = excluded.outcome,
     notes = excluded.notes,
@@ -1239,9 +1272,9 @@ values (
     9,
     11,
     1,
+    1,
     0,
-    0,
-    0,
+    1,
     0,
     12.50,
     0.00,

@@ -5,6 +5,11 @@ Management Platform. Complete this checklist before a production candidate is ex
 users or real customer data. Acceptance item **566** is satisfied only when sensitive actions are
 auditable and production does not expose secrets, stack traces, or unsafe configuration.
 
+Record deployment-level verification with the
+[Production Smoke Test Checklist](production-smoke-test-checklist.md) (item **737**).
+Handle suspected production security, privacy, consent, or availability events using
+[Production Incident Response Notes](incident-response-notes.md) (item **740**).
+
 ## Required Production Profile
 
 - Set `SPRING_PROFILES_ACTIVE=prod`.
@@ -25,6 +30,11 @@ Production startup must fail fast unless all required values are present and saf
 | `CORS_ALLOWED_ORIGINS` | Required; explicit `https://` frontend origins only |
 | `SMTP_PASSWORD` | Required when `PROVIDER_REAL_SENDING_ENABLED=true` and `EMAIL_PROVIDER_MODE=smtp` |
 | `SMS_API_KEY` | Required when `PROVIDER_REAL_SENDING_ENABLED=true` and `SMS_PROVIDER_MODE=provider` |
+
+Email delivery state and activation gate: [Production Email Provider](email-provider.md) (item
+**726**).
+
+SMS delivery state and activation gate: [Production SMS Provider](sms-provider.md) (item **727**).
 
 Environment variable **templates** (placeholders only) live under `.env.example`,
 `backend/.env.example`, and `frontend/.env.example` (item **688** —
@@ -49,6 +59,8 @@ values. Validators must not print configured secret values.
 
 ## HTTPS And Transport Security
 
+Deployment configuration and certificate operations: [Production HTTPS](https.md) (item **722**).
+
 - Set `HTTPS_REQUIRED=true` for production unless an emergency break-glass deployment is formally
   documented.
 - Terminate TLS at the reverse proxy and forward `X-Forwarded-Proto: https`.
@@ -66,6 +78,8 @@ Primary components:
 
 ## Production CORS
 
+Deployment configuration and verification: [Production CORS](production-cors.md) (item **723**).
+
 - `CORS_ALLOWED_ORIGINS` must be explicit.
 - Wildcards such as `*` or `https://*.example.com` are forbidden.
 - `localhost` and `127.0.0.1` are forbidden in production.
@@ -74,6 +88,9 @@ Primary components:
 - Preflight `maxAge` remains 3600 seconds.
 
 ## Secure Errors And Stack Traces
+
+Production log format, rotation, and redaction guidance:
+[Production Logging](production-logging.md) (item **729**).
 
 - `server.error.include-stacktrace: never`
 - `server.error.include-message: never`
@@ -92,6 +109,8 @@ Primary components:
 - `ProductionErrorSafetyConfiguration`
 
 ## Authentication And Rate Limiting
+
+JWT/session signing configuration: [Production JWT Secret](jwt-secret.md) (item **724**).
 
 - Passwords are stored with BCrypt.
 - JWT signing uses the production `JWT_SECRET`.

@@ -23,6 +23,7 @@ import {
   MAIN_CONTENT_ID,
   SKIP_TO_CONTENT_LABEL,
 } from "@/features/a11y/keyboardNavigationFlow";
+import { BrandLogo } from "@/components/BrandLogo";
 
 type PageHeading = {
   title: string;
@@ -123,7 +124,7 @@ export function AppLayout() {
       </a>
       <aside className="sidebar">
         <div className="brand-block">
-          <span className="brand-mark">BW</span>
+          <BrandLogo variant="mark" size="md" className="brand-mark-logo" />
           <div>
             <strong>Bayer-Westphalian</strong>
             <span>Campaign Management</span>

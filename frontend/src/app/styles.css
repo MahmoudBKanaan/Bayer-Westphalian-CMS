@@ -187,6 +187,45 @@ th[scope="row"] {
   width: 42px;
 }
 
+/* Web logo (Files/Logo.png → public/brand/) */
+.brand-logo {
+  display: block;
+  flex-shrink: 0;
+  height: auto;
+  object-fit: contain;
+}
+
+.brand-logo--mark.brand-logo--sm {
+  height: 36px;
+  width: 36px;
+}
+
+.brand-logo--mark.brand-logo--md {
+  height: 42px;
+  width: 42px;
+}
+
+.brand-logo--mark.brand-logo--lg {
+  height: 54px;
+  width: 54px;
+}
+
+.brand-logo--full {
+  height: auto;
+  max-width: min(280px, 100%);
+  width: 100%;
+}
+
+.brand-logo--full.brand-logo--lg {
+  max-width: min(320px, 100%);
+}
+
+.brand-mark-logo {
+  border-radius: 8px;
+  background: transparent;
+}
+
+
 .sidebar-nav,
 .nav-section,
 .nav-list {
@@ -1819,6 +1858,10 @@ th[scope="row"] {
 .login-hero .brand-mark {
   height: 54px;
   width: 54px;
+}
+
+.login-hero-logo {
+  margin-bottom: 0.25rem;
 }
 
 .login-hero h1 {

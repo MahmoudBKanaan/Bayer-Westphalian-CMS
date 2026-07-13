@@ -45,6 +45,7 @@ production SQL outside migrations.
 | Asset | Location / notes |
 | --- | --- |
 | **Database data** | PostgreSQL database (default local: `bwc_campaign`) |
+| **Consent evidence files** | Production volume `bwc_consent_evidence`; back up with the matching database recovery point |
 | **Docker volume** (local) | Named volume `bwc_postgres_data` (Compose) |
 | **Migration scripts** | `backend/src/main/resources/db/migration` (in Git — not a DB dump) |
 | **Environment / secrets** | Ops secret store only (`JWT_SECRET`, `DB_PASSWORD`, …) — **never** in Git ([secrets.md](secrets.md), item **689**) |
@@ -124,6 +125,11 @@ docker compose exec -T postgres pg_restore -U bwc_app -d bwc_campaign --clean --
 
 ## Production-Candidate Strategy
 
+The production Compose stack uses the stable volume name `bwc_postgres_prod_data`; see
+[PostgreSQL Production Volume](postgres-production-volume.md) (item **720**). Production commands
+must include `--env-file .env.production -f docker-compose.prod.yml`. Never use
+`docker compose down -v` on the production stack.
+
 For a production or release-candidate deployment:
 
 1. **Schedule** regular logical backups (e.g. nightly `pg_dump -Fc`) to secure storage.
@@ -137,9 +143,203 @@ For a production or release-candidate deployment:
 Automated cloud-native PITR is **optional** and out of MVP scope; logical dumps remain the
 required baseline (KB: scheduled PostgreSQL backups).
 
+## Automated Production Backup (Item 733)
+
+`docker-compose.prod.yml` runs the isolated `database-backup` service after PostgreSQL becomes
+healthy. The service executes `docker/postgres/backup.sh` immediately and then every
+`BACKUP_INTERVAL_SECONDS` (24 hours by default). Each recovery point is:
+
+1. Written to a `.partial` file using `pg_dump --format=custom`.
+2. Validated with `pg_restore --list` before publication.
+3. Atomically renamed to `<database>-<UTC timestamp>.dump`.
+4. Accompanied by a SHA-256 manifest.
+5. Retained for `BACKUP_RETENTION_DAYS` (7 days by default).
+
+Backups live in the `bwc_postgres_backups` volume, separate from the live database volume. The
+health check requires a recent `.last-success` marker. Container health and local retention do not
+replace monitoring or an encrypted off-host copy; the volume is labeled
+`com.bayer-westphalian.off-host-copy-required=true` to make that responsibility explicit.
+
+```bash
+docker compose --env-file .env.production -f docker-compose.prod.yml logs database-backup
+docker run --rm -v bwc_postgres_backups:/backups alpine ls -lh /backups
+```
+
+Do not expose the backup service on a host port. `PGPASSWORD` is injected from `DB_PASSWORD`, is
+not written into dump files, and must come from the deployment secret manager.
+
+### Backup creation verification (Item 735)
+
+Run the non-destructive verification from the repository root against a production-like environment:
+
+```powershell
+.\scripts\test-production-backup.ps1 -EnvFile .env.production
+```
+
+The script records the existing dump names, starts PostgreSQL, restarts `database-backup` to trigger
+an immediate backup, and waits up to 180 seconds for a new uniquely named `.dump`. It then verifies
+that the artifact and manifest are non-empty, checks SHA-256 integrity, and confirms the custom
+archive is readable with `pg_restore --list`. It prints only the filename, byte size, and validation
+status; it does not read rows or expose credentials. The successful dump remains in
+`bwc_postgres_backups` as test evidence and is removed later by configured retention.
+
+Failure is explicit when no new archive appears, the dump is empty, its manifest is missing or
+invalid, or PostgreSQL cannot parse the archive. Capture the sanitized output and backup-worker logs
+in the release evidence. Do not attach the dump itself because it contains production data.
+
+### Backup existence verification (Item 757)
+
+The release gate must prove a recent recovery artifact exists, not merely that backup configuration
+is present:
+
+```powershell
+.\scripts\test-production-backup-exists.ps1 `
+  -BackupVolume bwc_postgres_backups `
+  -MaximumAgeHours 26
+```
+
+The verifier is read-only, has networking disabled, ignores `.partial` files, selects the newest
+completed `.dump`, and requires non-zero size, a matching non-empty `.sha256` manifest, successful
+checksum verification, `pg_restore --list` readability, and age within the configured threshold. It
+prints only filename, size, freshness window, and validation status.
+
+Execution at `2026-07-13T00:27:39+03:00` is **BLOCKED**: Docker contains no backup-named volume,
+including no `bwc_postgres_backups`, so no completed dump/checksum can be verified. Existing database
+data volumes are not backup evidence. Run item 735 after the production stack is configured, copy the
+artifact off-host, then rerun item 757 and retain sanitized output.
+
+### Non-production restore rehearsal (Item 736)
+
+After item 735 has produced a verified backup, test restoration in an ephemeral environment:
+
+```powershell
+.\scripts\test-production-restore.ps1 -BackupVolume bwc_postgres_backups
+# To select a specific recovery point:
+.\scripts\test-production-restore.ps1 -BackupVolume bwc_postgres_backups `
+  -DumpName bwc_campaign-YYYYMMDDTHHMMSSZ.dump
+```
+
+The verifier never connects to or mutates the production PostgreSQL service. It validates the dump
+and SHA-256 manifest, starts a PostgreSQL 16 rehearsal container with networking disabled, stores
+its disposable data directory in `tmpfs`, and mounts the backup volume read-only. It restores with
+`--exit-on-error --no-owner --no-privileges`, confirms successful Flyway history and the `users`,
+`customers`, `campaigns`, and `audit_logs` tables, and removes the container in a `finally` block.
+
+Run this rehearsal before release and after material PostgreSQL or migration changes. Record the
+sanitized artifact name, successful Flyway-entry count, core-schema result, execution time, operator,
+and release/change identifier. A failed checksum, failed restore, absent migration history, or missing
+core table blocks release until investigated. Never attach the source dump or temporary database.
+
+## Production Database Restore (Item 734)
+
+This procedure is destructive and must be performed by an authorized operator during an approved
+maintenance window. Restore into a non-production rehearsal database first whenever possible.
+Record the incident/change identifier, selected UTC recovery point, operator, start time, and
+expected RPO before continuing.
+
+### Preconditions and recovery-point verification
+
+1. Confirm the target environment and database name. Never rely on an implicit Compose project.
+2. Confirm a matching consent-evidence recovery point is available when restoring records that
+   reference files in `bwc_consent_evidence`.
+3. Select one completed `.dump` file; never restore a `.partial` file.
+4. Verify its checksum and archive table of contents without printing database rows:
+
+```bash
+export COMPOSE_FILE=docker-compose.prod.yml
+export ENV_FILE=.env.production
+export RESTORE_DUMP=/backups/bwc_campaign-YYYYMMDDTHHMMSSZ.dump
+
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" run --rm --no-deps \
+  --entrypoint sh database-backup -c \
+  'sha256sum -c "$1.sha256" && pg_restore --list "$1" >/dev/null' -- "$RESTORE_DUMP"
+```
+
+Stop immediately if checksum or archive validation fails. Preserve the current database and select
+another verified recovery point; do not attempt to repair a dump in place.
+
+### Controlled production restore
+
+1. Put the service in maintenance mode at the load balancer or reverse proxy.
+2. Stop writers and the backup scheduler. Keep PostgreSQL running:
+
+```bash
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" \
+  stop reverse-proxy frontend backend database-backup
+```
+
+3. Take a final pre-restore backup when the incident permits it. Copy it off-host and do not allow
+   retention cleanup to remove it until the restore is accepted.
+4. Recreate the target database using the database name and owner already injected into the
+   PostgreSQL service. The `--force` option terminates remaining sessions:
+
+```bash
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T postgres sh -eu -c '
+  dropdb --force --if-exists -U "$POSTGRES_USER" "$POSTGRES_DB"
+  createdb -U "$POSTGRES_USER" -O "$POSTGRES_USER" "$POSTGRES_DB"
+'
+```
+
+5. Restore the verified custom-format archive. `--exit-on-error` prevents a partially failed
+   restore from being mistaken for success:
+
+```bash
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" run --rm --no-deps \
+  --entrypoint sh database-backup -eu -c \
+  'pg_restore --exit-on-error --no-owner --no-privileges --dbname="$PGDATABASE" "$1"' \
+  -- "$RESTORE_DUMP"
+```
+
+Do not start the application if `pg_restore` exits non-zero. Preserve logs, recreate the empty
+database, and retry only with a known-good archive or invoke the rollback/incident plan.
+
+### Validation and return to service
+
+1. Start the backend first. Its Flyway startup validation must succeed before other services start:
+
+```bash
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d backend
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" logs --since=10m backend
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T backend \
+  wget -qO- http://localhost:8080/actuator/health/readiness
+```
+
+2. Confirm `flyway_schema_history` has no failed migration and record its current version:
+
+```bash
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" exec -T postgres sh -eu -c '
+  psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -c \
+  "SELECT version, description, success FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5;"
+'
+```
+
+3. Restore the matching consent-evidence snapshot when applicable, before reopening customer or
+   consent workflows.
+4. Start `frontend` and `reverse-proxy`, then run smoke checks for login, customer lookup, consent
+   evidence access, campaign listing, audit history, and HTTPS health.
+5. Start `database-backup` only after the restored database is accepted. Confirm it creates a new
+   post-restore recovery point without overwriting the archive used for recovery.
+
+```bash
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d frontend reverse-proxy
+# Run and record the approved smoke checklist before restarting scheduled backups.
+docker compose --env-file "$ENV_FILE" -f "$COMPOSE_FILE" up -d database-backup
+```
+
+6. End maintenance mode and record command exit codes, checksum result, Flyway version, health
+   output, smoke-test result, restored timestamp, actual RPO, and approver in the incident/change
+   record. Do not place dump contents, passwords, tokens, or connection strings in evidence.
+
+### Abort criteria
+
+Keep the system in maintenance mode and escalate when the archive checksum fails, `pg_restore`
+fails, Flyway reports schema incompatibility, consent evidence does not match the recovery point,
+health remains down, or a critical smoke test fails. A technically completed restore is not an
+approved return to service until all validation and business checks pass.
+
 ## Testability (How This Process Is Proven Without Running Live Dumps in CI)
 
-Item **666** requires the process to be **documented and testable**. Evidence layers:
+Items **666**, **733**, and **734** require the process to be documented and testable. Evidence layers:
 
 | Evidence | What it proves |
 | --- | --- |

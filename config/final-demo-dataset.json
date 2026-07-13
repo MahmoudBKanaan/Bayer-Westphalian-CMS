@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "dataset": "Bayer-Westphalian final controlled demo",
+  "backlogItem": 781,
+  "scope": "dev-test-only",
+  "source": "backend/src/main/resources/db/demo/R__controlled_demo_data.sql",
+  "syntheticEmailDomain": "example.test",
+  "providerSendingRequired": false,
+  "anchorEntities": {
+    "adminUserId": "10000000-0000-0000-0000-000000000001",
+    "campaignManagerUserId": "10000000-0000-0000-0000-000000000002",
+    "biAnalystUserId": "10000000-0000-0000-0000-000000000003",
+    "productManagerUserId": "10000000-0000-0000-0000-000000000004",
+    "complianceOfficerUserId": "10000000-0000-0000-0000-000000000005",
+    "customerServiceUserId": "10000000-0000-0000-0000-000000000006",
+    "policyholderCustomerId": "20000000-0000-0000-0000-000000000101",
+    "eligibleBeneficiaryCustomerId": "20000000-0000-0000-0000-000000000102",
+    "doNotContactCustomerId": "20000000-0000-0000-0000-000000000103",
+    "productId": "30000000-0000-0000-0000-000000000101",
+    "segmentId": "40000000-0000-0000-0000-000000000101",
+    "campaignId": "50000000-0000-0000-0000-000000000101",
+    "paymentRecordId": "32000000-0000-0000-0000-000000000101",
+    "contactEventId": "52000000-0000-0000-0000-000000000101",
+    "followUpTaskId": "53000000-0000-0000-0000-000000000101",
+    "reminderId": "54000000-0000-0000-0000-000000000101",
+    "aiRecommendationId": "57000000-0000-0000-0000-000000000101",
+    "auditLogId": "58000000-0000-0000-0000-000000000101"
+  },
+  "scenarios": [
+    "role-based-login-and-navigation",
+    "customer-beneficiary-and-consent",
+    "product-ownership-and-payment-history",
+    "segment-preview-with-eligibility-exclusions",
+    "campaign-review-and-recipient-preview",
+    "contact-history-follow-up-and-reminder",
+    "analytics-report-and-ai-explanation",
+    "immutable-audit-review"
+  ]
+}

@@ -3,6 +3,20 @@
 Project documentation for Agile planning, architecture, APIs, database design, testing,
 deployment, and university report evidence.
 
+## API
+
+- [REST API and OpenAPI Guide](api/openapi.md) (item **779**)
+- [Exported OpenAPI JSON](api/openapi.json) (item **780**)
+
+## Releases
+
+- [v1.0 Release Notes](releases/v1.0-draft.md) (item **742**; not released; finalized content item **767**)
+
+## Demo
+
+- [Final Demo Dataset](demo/final-demo-dataset.md) (item **781**, synthetic dev/test only)
+- [Final Demo Script](demo/final-demo-script.md) (item **782**, 20-minute role walkthrough)
+
 ## Agile
 
 - [Sprint 1 Review Notes](agile/sprint-1-review-notes.md)
@@ -10,11 +24,13 @@ deployment, and university report evidence.
 
 ## Admin
 
+- [Administrator Manual](admin/admin-manual.md) (item **777**)
 - [User-Management Guide](admin/user-management-guide.md)
 - [Customer CSV Import Guide](admin/customer-csv-import-guide.md)
 
 ## User Guides
 
+- [Employee User Manual](user-guides/user-manual.md) (item **776**)
 - [Customer Service Agent User Guide](user-guides/customer-service-agent-guide.md)
 - [Campaign Manager User Guide](user-guides/campaign-manager-guide.md)
 - [Compliance Officer User Guide](user-guides/compliance-officer-guide.md)
@@ -67,7 +83,7 @@ deployment, and university report evidence.
 
 ## Development
 
-- [Developer Setup Guide](development/developer-setup.md)
+- [Local Setup Guide](development/developer-setup.md) (item **774**)
 - [UI Style Notes](development/ui-style-notes.md) (item **610**)
 - [Accessibility Notes](development/accessibility-notes.md) (item **611**)
 
@@ -101,8 +117,48 @@ deployment, and university report evidence.
 
 ## Deployment
 
+- [Production Operations Manual](operations/operations-guide.md) (items **765** / **778**, NFR-004/013/014)
+- [Production Release Gate](deployment/production-release-gate.md) (item **770**)
+- [Production Deployment Guide](deployment/production-deployment-guide.md) (items **760** / **775**)
+- [Production Backup Guide](deployment/backup-guide.md) (item **761** / NFR-013)
+- [Production Restore Guide](deployment/restore-guide.md) (item **762** / NFR-013)
+- [Production Docker Compose](deployment/production-compose.md) (item **717**)
+- [Production Backend Environment](deployment/production-backend-environment.md) (item **718**)
+- [Production Frontend Environment](deployment/production-frontend-environment.md) (item **719**)
+- [PostgreSQL Production Volume](deployment/postgres-production-volume.md) (item **720**)
+- [Production Reverse Proxy](deployment/reverse-proxy.md) (item **721**)
+- [Production HTTPS](deployment/https.md) (item **722**)
+- [Production CORS](deployment/production-cors.md) (item **723**)
+- [Production JWT Secret](deployment/jwt-secret.md) (item **724**)
+- [Production Database Credentials](deployment/database-credentials.md) (item **725**)
+- [Production Email Provider](deployment/email-provider.md) (item **726**)
+- [Production SMS Provider](deployment/sms-provider.md) (item **727**)
+- [Consent Evidence File Storage](deployment/consent-evidence-storage.md) (item **728**)
+- [Production Logging](deployment/production-logging.md) (item **729**)
+- [Production Log Accessibility Verification](deployment/production-logging.md#production-log-accessibility-verification-item-758) (item **758**, blocked until deployment)
+- [Production Scheduler Logging](deployment/scheduler-logging.md) (item **730**)
+- [Production Health Endpoints](deployment/health-endpoints.md) (item **731**)
+- [Production Smoke Test Checklist](deployment/production-smoke-test-checklist.md) (items **737** / **763**)
+- [Smoke Test Execution 2026-07-12](deployment/smoke-test-executions/2026-07-12-item-738.md) (item **738**, blocked preflight)
+- [Production Rollback Plan](deployment/rollback-plan.md) (items **739** / **764**)
+- [Production Incident Response Notes](deployment/incident-response-notes.md) (items **740** / **766**)
+- [Production Operational Monitoring Notes](deployment/operational-monitoring-notes.md) (item **741**, NFR-004/NFR-014)
+- [Production Deployment Screenshot Evidence](deployment/deployment-screenshot-evidence.md) (item **743**, blocked until deployment)
+- [Production Admin Login Verification](deployment/admin-login-verification.md) (item **745**, blocked until deployment)
+- [Production Admin Create-User Verification](deployment/admin-create-user-verification.md) (item **746**, blocked until deployment)
+- [Production Agent Create-Customer Verification](deployment/agent-create-customer-verification.md) (item **747**, blocked until deployment)
+- [Production Consent Recording Verification](deployment/consent-recording-verification.md) (item **748**, blocked until deployment)
+- [Production Product Manager Create-Product Verification](deployment/product-manager-create-product-verification.md) (item **749**, blocked until deployment)
+- [Production Campaign Manager Create-Segment Verification](deployment/campaign-manager-create-segment-verification.md) (item **750**, blocked until deployment)
+- [Production Campaign Manager Create-Campaign Verification](deployment/campaign-manager-create-campaign-verification.md) (item **751**, blocked until deployment)
+- [Production Compliance Approve-Campaign Verification](deployment/compliance-approve-campaign-verification.md) (item **752**, blocked until deployment)
+- [Production Campaign Manager Launch Verification](deployment/campaign-manager-launch-approved-verification.md) (item **753**, blocked until deployment)
+- [Production Contact-Event Recording Verification](deployment/contact-event-recording-verification.md) (item **754**, blocked until deployment)
+- [Production Analytics Dashboard Update Verification](deployment/analytics-dashboard-update-verification.md) (item **755**, blocked until deployment)
+- [Production Sensitive-Action Audit Verification](deployment/sensitive-action-audit-verification.md) (item **756**, blocked until deployment)
 - [Production Security Checklist](deployment/production-security-checklist.md)
-- [Backup and Restore Process](deployment/backup-and-restore.md) (item **666** / NFR-013)
+- [Backup and Restore Process](deployment/backup-and-restore.md) (items **666**, **733**, **734** / NFR-013)
+- [Backup Existence Verification](deployment/backup-and-restore.md#backup-existence-verification-item-757) (item **757**, blocked until artifact exists)
 - [CI/CD — GitHub Actions](deployment/ci-cd.md) (items **677** / **708**)
 - [Environment Variable Template](deployment/environment-variables.md) (items **688** / **709**)
 - [Secrets Documentation](deployment/secrets.md) (items **689** / **710**)

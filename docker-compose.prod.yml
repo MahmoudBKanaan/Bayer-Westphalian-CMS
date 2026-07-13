@@ -1,0 +1,237 @@
+# Production Compose model - Sprint 18 item 717.
+# Supply required values through an uncommitted env file or secret-management system.
+name: bwc-production
+
+x-production-logging: &production-logging
+  driver: local
+  options:
+    max-size: ${LOG_MAX_SIZE:-10m}
+    max-file: "${LOG_MAX_FILES:-5}"
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-bwc_campaign}
+      POSTGRES_USER: ${DB_USERNAME:?DB_USERNAME is required}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS:---data-checksums --encoding=UTF8}
+    volumes:
+      - bwc_postgres_prod_data:/var/lib/postgresql/data
+    shm_size: ${POSTGRES_SHM_SIZE:-256m}
+    stop_grace_period: ${POSTGRES_STOP_GRACE_PERIOD:-60s}
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+    logging: *production-logging
+
+  database-backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: ${POSTGRES_DB:-bwc_campaign}
+      PGUSER: ${DB_USERNAME:?DB_USERNAME is required}
+      PGPASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      BACKUP_DIR: /backups
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-86400}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-7}
+      BACKUP_HEALTH_MAX_AGE_MINUTES: ${BACKUP_HEALTH_MAX_AGE_MINUTES:-1560}
+    entrypoint: ["/bin/sh", "/opt/bwc/backup.sh"]
+    volumes:
+      - ./docker/postgres/backup.sh:/opt/bwc/backup.sh:ro
+      - bwc_postgres_backups:/backups
+    networks:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /backups/.last-success && test $$(find /backups/.last-success -mmin -$${BACKUP_HEALTH_MAX_AGE_MINUTES:-1560} | wc -l) -eq 1"]
+      interval: 5m
+      timeout: 10s
+      retries: 3
+      start_period: 5m
+    security_opt:
+      - no-new-privileges:true
+    logging: *production-logging
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    image: ${BACKEND_IMAGE:-bwc-backend:prod}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8080
+      DB_URL: ${DB_URL:?DB_URL is required}
+      DB_USERNAME: ${DB_USERNAME:?DB_USERNAME is required}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is required}
+      DB_POOL_MAX_SIZE: ${DB_POOL_MAX_SIZE:-20}
+      DB_POOL_MIN_IDLE: ${DB_POOL_MIN_IDLE:-2}
+      DB_CONNECTION_TIMEOUT_MS: ${DB_CONNECTION_TIMEOUT_MS:-30000}
+      DB_VALIDATION_TIMEOUT_MS: ${DB_VALIDATION_TIMEOUT_MS:-5000}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      ADMIN_BOOTSTRAP_ENABLED: ${ADMIN_BOOTSTRAP_ENABLED:-false}
+      ADMIN_BOOTSTRAP_EMAIL: ${ADMIN_BOOTSTRAP_EMAIL:-}
+      ADMIN_BOOTSTRAP_PASSWORD: ${ADMIN_BOOTSTRAP_PASSWORD:-}
+      ADMIN_BOOTSTRAP_FULL_NAME: ${ADMIN_BOOTSTRAP_FULL_NAME:-Production Administrator}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:?CORS_ALLOWED_ORIGINS is required}
+      HTTPS_REQUIRED: ${HTTPS_REQUIRED:-true}
+      HTTPS_HSTS_ENABLED: ${HTTPS_HSTS_ENABLED:-true}
+      HTTPS_HSTS_MAX_AGE_SECONDS: ${HTTPS_HSTS_MAX_AGE_SECONDS:-31536000}
+      OPENAPI_ENABLED: ${OPENAPI_ENABLED:-false}
+      SWAGGER_UI_ENABLED: ${SWAGGER_UI_ENABLED:-false}
+      SHUTDOWN_TIMEOUT: ${SHUTDOWN_TIMEOUT:-30s}
+      LOGIN_RATE_LIMIT_MAX_FAILURES: ${LOGIN_RATE_LIMIT_MAX_FAILURES:-5}
+      LOGIN_RATE_LIMIT_FAILURE_WINDOW_MINUTES: ${LOGIN_RATE_LIMIT_FAILURE_WINDOW_MINUTES:-15}
+      LOGIN_RATE_LIMIT_LOCKOUT_MINUTES: ${LOGIN_RATE_LIMIT_LOCKOUT_MINUTES:-15}
+      CONTACT_MONTHLY_LIMIT: ${CONTACT_MONTHLY_LIMIT:-3}
+      CONTACT_RETRY_LIMIT: ${CONTACT_RETRY_LIMIT:-3}
+      UNINTERESTED_EXCLUSION_DAYS: ${UNINTERESTED_EXCLUSION_DAYS:-90}
+      REMINDER_PROCESSING_CRON: ${REMINDER_PROCESSING_CRON:-0 */15 * * * *}
+      REMINDER_PROCESSING_ZONE: ${REMINDER_PROCESSING_ZONE:-UTC}
+      LOG_LEVEL_SCHEDULER: ${LOG_LEVEL_SCHEDULER:-INFO}
+      PROVIDER_REAL_SENDING_ENABLED: ${PROVIDER_REAL_SENDING_ENABLED:-false}
+      EMAIL_PROVIDER_MODE: ${EMAIL_PROVIDER_MODE:-disabled}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMS_PROVIDER_MODE: ${SMS_PROVIDER_MODE:-disabled}
+      SMS_API_KEY: ${SMS_API_KEY:-}
+      FILE_STORAGE_MODE: ${FILE_STORAGE_MODE:-filesystem}
+      FILE_STORAGE_LOCAL_PATH: /app/data/consent-evidence
+      FILE_STORAGE_MAX_BYTES: ${FILE_STORAGE_MAX_BYTES:-10485760}
+    expose:
+      - "8080"
+    volumes:
+      - bwc_consent_evidence:/app/data/consent-evidence
+    networks:
+      - application
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/actuator/health/readiness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 45s
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    security_opt:
+      - no-new-privileges:true
+    logging: *production-logging
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api}
+        VITE_APP_ENV: prod
+    image: ${FRONTEND_IMAGE:-bwc-frontend:prod}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    expose:
+      - "80"
+    networks:
+      - application
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost/healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m
+      - /var/run:size=8m
+      - /tmp:size=16m
+    security_opt:
+      - no-new-privileges:true
+    logging: *production-logging
+
+  reverse-proxy:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    ports:
+      - "${HTTP_PORT:-80}:8080"
+      - "${HTTPS_PORT:-443}:8443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - type: bind
+        source: ${TLS_CERTIFICATE_PATH:?TLS_CERTIFICATE_PATH is required}
+        target: /etc/nginx/tls/fullchain.pem
+        read_only: true
+      - type: bind
+        source: ${TLS_PRIVATE_KEY_PATH:?TLS_PRIVATE_KEY_PATH is required}
+        target: /etc/nginx/tls/privkey.pem
+        read_only: true
+    networks:
+      - application
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:8080/proxy-healthz || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m
+      - /var/run:size=8m
+      - /tmp:size=16m
+    security_opt:
+      - no-new-privileges:true
+    logging: *production-logging
+
+volumes:
+  bwc_postgres_prod_data:
+    name: ${POSTGRES_VOLUME_NAME:-bwc_postgres_prod_data}
+    driver: local
+    labels:
+      com.bayer-westphalian.component: postgres
+      com.bayer-westphalian.environment: production
+      com.bayer-westphalian.backup-required: "true"
+  bwc_consent_evidence:
+    name: ${CONSENT_EVIDENCE_VOLUME_NAME:-bwc_consent_evidence}
+    driver: local
+    labels:
+      com.bayer-westphalian.component: consent-evidence
+      com.bayer-westphalian.environment: production
+      com.bayer-westphalian.backup-required: "true"
+  bwc_postgres_backups:
+    name: ${POSTGRES_BACKUP_VOLUME_NAME:-bwc_postgres_backups}
+    driver: local
+    labels:
+      com.bayer-westphalian.component: postgres-backups
+      com.bayer-westphalian.environment: production
+      com.bayer-westphalian.off-host-copy-required: "true"
+
+networks:
+  application:
+    driver: bridge
+  database:
+    driver: bridge
+    internal: true

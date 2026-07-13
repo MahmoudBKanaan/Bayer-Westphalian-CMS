@@ -65,9 +65,15 @@ docker compose -f docker-compose.yml config
 Integration start/smoke of Postgres remains `.\scripts\test-docker-compose-postgres.ps1` (not the
 CI validate job).
 
-## Reverse Proxy Placeholders
+## Production Reverse Proxy
 
-Placeholder configs are available for future deployment hardening:
+As of item **721**, `nginx/nginx.conf` is no longer a placeholder: `docker-compose.prod.yml` runs it
+as the production `reverse-proxy` service for frontend, `/api/*`, and health routing. It is the only
+service publishing an application port. The Caddy file remains an unused alternative example.
+See [`docs/deployment/reverse-proxy.md`](../docs/deployment/reverse-proxy.md) and the configured
+[production HTTPS guide](../docs/deployment/https.md) (item **722**).
+
+Proxy configuration files:
 
 - `nginx/nginx.conf`
 - `caddy/Caddyfile`

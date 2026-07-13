@@ -22,6 +22,22 @@ class SecretPresenceValidatorTests {
     class ProductionSecrets {
 
         @Test
+        void rejectsJwtSecretReusedAsDatabasePassword() {
+            MockEnvironment environment = validSecretsEnvironment();
+            String reusedSecret = "one-secret-must-not-protect-two-systems-12345";
+            environment.setProperty("JWT_SECRET", reusedSecret);
+            environment.setProperty("app.security.jwt.secret", reusedSecret);
+            environment.setProperty("DB_PASSWORD", reusedSecret);
+            environment.setProperty("spring.datasource.password", reusedSecret);
+
+            assertThat(SecretPresenceValidator.collectProductionSecretErrors(environment))
+                    .anyMatch(
+                            error ->
+                                    error.contains("JWT_SECRET")
+                                            && error.contains("must not reuse DB_PASSWORD"));
+        }
+
+        @Test
         void passesWhenJwtAndDatabaseSecretsAreStrong() {
             MockEnvironment environment = validSecretsEnvironment();
 
@@ -65,7 +81,7 @@ class SecretPresenceValidatorTests {
         @Test
         void failsWhenJwtSecretShorterThan32Characters() {
             MockEnvironment environment = validSecretsEnvironment();
-            // 16 chars — passes env var min length in item 542 but not secret presence min (32).
+            // 16 chars - rejected consistently by both production validators (minimum 32).
             environment.setProperty("JWT_SECRET", "sixteen-char-sec!");
             environment.setProperty("app.security.jwt.secret", "sixteen-char-sec!");
 
@@ -118,6 +134,34 @@ class SecretPresenceValidatorTests {
         }
 
         @Test
+        void blocksRealSmtpWhileOnlyPlaceholderAdapterExists() {
+            MockEnvironment environment = validSecretsEnvironment();
+            environment.setProperty("PROVIDER_REAL_SENDING_ENABLED", "true");
+            environment.setProperty("EMAIL_PROVIDER_MODE", "smtp");
+            environment.setProperty("SMTP_HOST", "smtp.example.com");
+            environment.setProperty("SMTP_PORT", "587");
+            environment.setProperty("SMTP_USERNAME", "mailer");
+            environment.setProperty("SMTP_PASSWORD", "provider-secret");
+
+            assertThat(SecretPresenceValidator.collectProductionSecretErrors(environment))
+                    .anyMatch(
+                            error ->
+                                    error.contains("EMAIL_PROVIDER_MODE=smtp")
+                                            && error.contains("placeholder"));
+        }
+
+        @Test
+        void acceptsDisabledEmailWithoutSmtpCredentials() {
+            MockEnvironment environment = validSecretsEnvironment();
+            environment.setProperty("PROVIDER_REAL_SENDING_ENABLED", "false");
+            environment.setProperty("EMAIL_PROVIDER_MODE", "disabled");
+            environment.setProperty("SMTP_PASSWORD", "");
+
+            assertThat(SecretPresenceValidator.collectProductionSecretErrors(environment))
+                    .noneMatch(error -> error.contains("SMTP_"));
+        }
+
+        @Test
         void requiresSmsApiKeyWhenRealSmsProviderEnabled() {
             MockEnvironment environment = validSecretsEnvironment();
             environment.setProperty("PROVIDER_REAL_SENDING_ENABLED", "true");
@@ -127,6 +171,32 @@ class SecretPresenceValidatorTests {
 
             assertThat(SecretPresenceValidator.collectProductionSecretErrors(environment))
                     .anyMatch(error -> error.contains("SMS_API_KEY"));
+        }
+
+        @Test
+        void blocksRealSmsWhileOnlyPlaceholderAdapterExists() {
+            MockEnvironment environment = validSecretsEnvironment();
+            environment.setProperty("PROVIDER_REAL_SENDING_ENABLED", "true");
+            environment.setProperty("EMAIL_PROVIDER_MODE", "disabled");
+            environment.setProperty("SMS_PROVIDER_MODE", "provider");
+            environment.setProperty("SMS_API_KEY", "provider-api-key");
+
+            assertThat(SecretPresenceValidator.collectProductionSecretErrors(environment))
+                    .anyMatch(
+                            error ->
+                                    error.contains("SMS_PROVIDER_MODE=provider")
+                                            && error.contains("placeholder"));
+        }
+
+        @Test
+        void acceptsDisabledSmsWithoutApiKey() {
+            MockEnvironment environment = validSecretsEnvironment();
+            environment.setProperty("PROVIDER_REAL_SENDING_ENABLED", "false");
+            environment.setProperty("SMS_PROVIDER_MODE", "disabled");
+            environment.setProperty("SMS_API_KEY", "");
+
+            assertThat(SecretPresenceValidator.collectProductionSecretErrors(environment))
+                    .noneMatch(error -> error.contains("SMS_"));
         }
 
         @Test

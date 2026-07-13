@@ -109,12 +109,16 @@ secret manager, not in Git, Docker images, CI YAML, screenshots, or exported rep
 | `CONTACT_RETRY_LIMIT` | Backend | `3` |
 | `UNINTERESTED_EXCLUSION_DAYS` | Backend | `90` |
 | `REMINDER_PROCESSING_CRON` | Backend | every 15 minutes |
+| `REMINDER_PROCESSING_ZONE` | Backend | `UTC` in production |
+| `LOG_LEVEL_SCHEDULER` | Backend | `INFO` |
 | `PROVIDER_REAL_SENDING_ENABLED` | Backend | `false` locally |
 | `EMAIL_PROVIDER_MODE` | Backend | `mock` locally |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USERNAME` / `SMTP_PASSWORD` | Backend | empty/mock until real email configured |
-| `SMS_PROVIDER_MODE` / `SMS_API_KEY` | Backend | mock / empty until real SMS configured |
-| `FILE_STORAGE_MODE` | Backend | `local` |
-| `FILE_STORAGE_LOCAL_PATH` | Backend | `./data/files` |
+| `SMS_PROVIDER_MODE` / `SMS_API_KEY` | Backend | `mock` in dev/test; `disabled` / empty in production until a real provider is implemented |
+| `FILE_STORAGE_MODE` | Backend | `local` in dev; `filesystem` in production |
+| `FILE_STORAGE_LOCAL_PATH` | Backend | `./data/files` in dev; `/app/data/consent-evidence` in production |
+| `FILE_STORAGE_MAX_BYTES` | Backend | `10485760` (10 MiB production default) |
+| `CONSENT_EVIDENCE_VOLUME_NAME` | Docker Compose | `bwc_consent_evidence` |
 
 ### Frontend (Vite)
 

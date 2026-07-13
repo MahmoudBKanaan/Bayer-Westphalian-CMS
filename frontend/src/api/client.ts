@@ -5,7 +5,31 @@ import {
   saveAuthSession,
 } from "@/auth/sessionStorageStrategy";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api";
+function resolveApiBaseUrl(
+  configuredUrl: string | undefined,
+  appEnvironment: string | undefined,
+  productionBuild: boolean,
+): string {
+  const value = configuredUrl?.trim() || "http://localhost:8080/api";
+  const isProduction = productionBuild || appEnvironment?.toLowerCase() === "prod";
+
+  if (
+    isProduction &&
+    (value.includes("localhost") || value.includes("127.0.0.1") || value.startsWith("http://"))
+  ) {
+    throw new Error(
+      "Production frontend API URL must be same-origin or use an explicit HTTPS origin.",
+    );
+  }
+
+  return value.length > 1 ? value.replace(/\/$/, "") : value;
+}
+
+const API_BASE_URL = resolveApiBaseUrl(
+  import.meta.env.VITE_API_BASE_URL,
+  import.meta.env.VITE_APP_ENV,
+  import.meta.env.PROD,
+);
 
 type ApiRequestInit = RequestInit & {
   authenticated?: boolean;
@@ -236,4 +260,4 @@ function headersToRecord(headers: HeadersInit | undefined): Record<string, strin
   return headers;
 }
 
-export { API_BASE_URL };
+export { API_BASE_URL, resolveApiBaseUrl };

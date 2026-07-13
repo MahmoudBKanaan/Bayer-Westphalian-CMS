@@ -87,12 +87,29 @@ public final class SecretPresenceValidator {
                 MIN_DB_PASSWORD_LENGTH,
                 true);
 
+        rejectReusedJwtAndDatabaseSecret(environment, errors);
+
         // Provider secrets only when real sending is enabled in production.
         if (isRealSendingEnabled(environment)) {
             String emailMode =
                     firstNonBlank(
                             environment, List.of("EMAIL_PROVIDER_MODE", "app.providers.email.mode"));
             if (emailMode != null && "smtp".equalsIgnoreCase(emailMode)) {
+                requireProviderValue(
+                        environment,
+                        errors,
+                        "SMTP_HOST",
+                        List.of("SMTP_HOST", "app.providers.email.smtp-host"));
+                requirePositivePort(
+                        environment,
+                        errors,
+                        "SMTP_PORT",
+                        List.of("SMTP_PORT", "app.providers.email.smtp-port"));
+                requireProviderValue(
+                        environment,
+                        errors,
+                        "SMTP_USERNAME",
+                        List.of("SMTP_USERNAME", "app.providers.email.smtp-username"));
                 validateSecret(
                         environment,
                         errors,
@@ -100,6 +117,13 @@ public final class SecretPresenceValidator {
                         List.of("SMTP_PASSWORD", "app.providers.email.smtp-password"),
                         1,
                         false);
+                errors.add(
+                        "EMAIL_PROVIDER_MODE=smtp cannot enable real sending until the SMTP "
+                                + "placeholder is replaced by a delivery implementation");
+            } else if (emailMode != null && !"disabled".equalsIgnoreCase(emailMode)) {
+                errors.add(
+                        "Production real email sending requires EMAIL_PROVIDER_MODE=disabled "
+                                + "until a real provider is implemented");
             }
             String smsMode =
                     firstNonBlank(
@@ -112,6 +136,13 @@ public final class SecretPresenceValidator {
                         List.of("SMS_API_KEY", "app.providers.sms.api-key"),
                         8,
                         true);
+                errors.add(
+                        "SMS_PROVIDER_MODE=provider cannot enable real sending until the SMS "
+                                + "placeholder is replaced by a delivery implementation");
+            } else if (smsMode != null && !"disabled".equalsIgnoreCase(smsMode)) {
+                errors.add(
+                        "Production real SMS sending requires SMS_PROVIDER_MODE=disabled until "
+                                + "a real provider is implemented");
             }
         }
 
@@ -145,6 +176,21 @@ public final class SecretPresenceValidator {
         return EnvironmentVariableValidator.looksLikeUnresolvedPlaceholder(value);
     }
 
+    private static void rejectReusedJwtAndDatabaseSecret(
+            Environment environment, List<String> errors) {
+        String jwtSecret =
+                firstNonBlank(environment, List.of("JWT_SECRET", "app.security.jwt.secret"));
+        String databasePassword =
+                firstNonBlank(
+                        environment, List.of("DB_PASSWORD", "spring.datasource.password"));
+        if (jwtSecret != null
+                && databasePassword != null
+                && !looksLikeUnresolvedPlaceholder(jwtSecret)
+                && jwtSecret.equals(databasePassword)) {
+            errors.add("JWT_SECRET must be unique and must not reuse DB_PASSWORD");
+        }
+    }
+
     private static void validateSecret(
             Environment environment,
             List<String> errors,
@@ -176,6 +222,36 @@ public final class SecretPresenceValidator {
         }
         if (value.length() < minLength) {
             errors.add(displayName + " must be at least " + minLength + " characters");
+        }
+    }
+
+    private static void requireProviderValue(
+            Environment environment,
+            List<String> errors,
+            String displayName,
+            List<String> propertyKeys) {
+        if (firstNonBlank(environment, propertyKeys) == null) {
+            errors.add(displayName + " is required when real email sending is enabled");
+        }
+    }
+
+    private static void requirePositivePort(
+            Environment environment,
+            List<String> errors,
+            String displayName,
+            List<String> propertyKeys) {
+        String value = firstNonBlank(environment, propertyKeys);
+        if (value == null) {
+            errors.add(displayName + " is required when real email sending is enabled");
+            return;
+        }
+        try {
+            int port = Integer.parseInt(value);
+            if (port < 1 || port > 65535) {
+                errors.add(displayName + " must be between 1 and 65535");
+            }
+        } catch (NumberFormatException exception) {
+            errors.add(displayName + " must be between 1 and 65535");
         }
     }
 
