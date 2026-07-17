@@ -67,14 +67,15 @@ function renderProvider() {
 
 describe("AuthProvider", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
 
-  it("hydrates authenticated user state from session storage", () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+  it("hydrates authenticated user state from local storage", () => {
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
 
     renderProvider();
 
@@ -85,16 +86,16 @@ describe("AuthProvider", () => {
   });
 
   it("clears incomplete or invalid stored auth state", () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, "not-json");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, "not-json");
 
     renderProvider();
 
     expect(screen.getByText("Authenticated: no")).toBeInTheDocument();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("signs in through the backend and stores auth state", async () => {
@@ -120,26 +121,26 @@ describe("AuthProvider", () => {
       method: "POST",
     });
     expect(screen.getByText("Roles: ADMIN,CAMPAIGN_MANAGER")).toBeInTheDocument();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe(accessToken);
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe(accessToken);
   });
 
   it("signs out and removes stored auth state", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
 
     renderProvider();
     await userEvent.click(screen.getByRole("button", { name: "Sign out probe" }));
 
     expect(screen.getByText("Authenticated: no")).toBeInTheDocument();
     expect(screen.getByText("User: none")).toBeInTheDocument();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
   });
 
   it("updates provider state when API token refresh saves a new session", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(["CAMPAIGN_MANAGER"]));
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(["CAMPAIGN_MANAGER"]));
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
 
     renderProvider();
 
@@ -159,9 +160,9 @@ describe("AuthProvider", () => {
   });
 
   it("clears provider state when API refresh failure clears the stored session", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
 
     renderProvider();
 

@@ -302,13 +302,22 @@ describe("CampaignBuilderPage (item 592)", () => {
     await completeBasics(user);
     await completeAudience(user);
 
-    expect(await screen.findByRole("button", { name: "Generate AI copy" })).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: "Generate AI copy" }));
+    expect(
+      await screen.findByRole("button", { name: "Generate AI campaign copy suggestion" }),
+    ).toBeInTheDocument();
+    const subjectBefore = (screen.getByLabelText("Message subject") as HTMLInputElement).value;
+    await user.click(
+      screen.getByRole("button", { name: "Generate AI campaign copy suggestion" }),
+    );
 
     expect(await screen.findByText("Protect your next chapter")).toBeInTheDocument();
     expect(screen.getByText(copySuggestion.explanation)).toBeInTheDocument();
     expect(screen.getByText("Awaiting human approval")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Apply approved copy" })).toBeDisabled();
+    expect(screen.getByTestId("ai-copy-pending-banner")).toHaveTextContent(
+      "human review required",
+    );
+    // Suggestion must not auto-write into campaign form fields before approval.
+    expect(screen.getByLabelText("Message subject")).toHaveValue(subjectBefore);
 
     await waitFor(() => {
       const generateCall = fetchMock.mock.calls.find(
@@ -326,27 +335,47 @@ describe("CampaignBuilderPage (item 592)", () => {
     });
 
     await user.type(screen.getByLabelText("AI copy review notes"), "Reviewed by manager");
-    await user.click(screen.getByRole("button", { name: "Approve AI copy" }));
+    await user.click(screen.getByRole("button", { name: "Approve and Apply AI copy" }));
+
+    const dialog = await screen.findByRole("dialog", { name: "Approve AI Copy Suggestion?" });
+    expect(within(dialog).getByText(/does not approve the campaign for launch/i)).toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    expect(screen.getByLabelText("Message subject")).toHaveValue(subjectBefore);
+
+    await user.click(screen.getByRole("button", { name: "Approve and Apply AI copy" }));
+    await user.click(
+      within(await screen.findByRole("dialog", { name: "Approve AI Copy Suggestion?" })).getByRole(
+        "button",
+        { name: "Approve and Apply" },
+      ),
+    );
 
     await waitFor(() => {
       const approvalCall = fetchMock.mock.calls.find(([url]) =>
         String(url).endsWith(`/ai/campaign-copy/${copySuggestion.storedRecommendationId}/approve`),
       );
       expect(approvalCall).toBeDefined();
-      expect(JSON.parse((approvalCall?.[1] as RequestInit).body as string)).toEqual({
+      expect(JSON.parse((approvalCall?.[1] as RequestInit).body as string)).toMatchObject({
         reviewNotes: "Reviewed by manager",
+        editedSubject: copySuggestion.subject,
+        editedMessageBody: copySuggestion.body,
       });
     });
 
     expect(await screen.findByText("Human approved")).toBeInTheDocument();
-    expect(screen.getAllByText("Reviewed by manager").length).toBeGreaterThanOrEqual(1);
-    await user.click(screen.getByRole("button", { name: "Apply approved copy" }));
-
+    expect(screen.getByText(/APPROVED BY USER/i)).toBeInTheDocument();
+    expect(screen.getByText(/Compliance approval/i)).toBeInTheDocument();
+    expect(screen.getByText(/Still required before launch/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Message subject")).toHaveValue(copySuggestion.subject);
-    expect(screen.getByLabelText("Campaign message body")).toHaveValue(copySuggestion.body);
+    expect(screen.getByLabelText("Campaign message body")).toHaveValue(
+      `${copySuggestion.body}\n\n${copySuggestion.callToAction}`,
+    );
     expect(
-      await screen.findByText("Approved AI copy applied to the campaign message."),
+      await screen.findByText(/Campaign remains DRAFT/i),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: "Approve and Apply AI copy" }),
+    ).toBeDisabled();
     },
     20_000,
   );

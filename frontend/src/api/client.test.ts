@@ -11,6 +11,7 @@ import { AUTH_STORAGE_KEYS } from "@/auth/sessionStorageStrategy";
 
 describe("apiRequest", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
@@ -75,7 +76,7 @@ describe("apiRequest", () => {
   });
 
   it("adds the stored access token to API requests", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stored-access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stored-access-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true }),
@@ -96,8 +97,8 @@ describe("apiRequest", () => {
   });
 
   it("refreshes an expired access token and retries the original request", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "expired-access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "stored-refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "expired-access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "stored-refresh-token");
     sessionStorage.setItem(
       AUTH_STORAGE_KEYS.currentUser,
       JSON.stringify({
@@ -169,13 +170,13 @@ describe("apiRequest", () => {
         Authorization: "Bearer fresh-access-token",
       },
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe("fresh-access-token");
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("fresh-refresh-token");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe("fresh-access-token");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("fresh-refresh-token");
   });
 
   it("clears the stored session when refresh token recovery fails", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "expired-access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "expired-refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "expired-access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "expired-refresh-token");
     sessionStorage.setItem(
       AUTH_STORAGE_KEYS.currentUser,
       JSON.stringify({
@@ -205,13 +206,13 @@ describe("apiRequest", () => {
       status: 401,
       message: "Access token expired",
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("can skip stored access token attachment for public auth requests", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stale-access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stale-access-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true }),
@@ -235,7 +236,7 @@ describe("apiRequest", () => {
   });
 
   it("does not force a JSON content type for multipart form uploads", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stored-access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stored-access-token");
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({ success: true }),
@@ -262,7 +263,7 @@ describe("apiRequest", () => {
   });
 
   it("downloads binary attachments with content-disposition filenames", async () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stored-access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "stored-access-token");
     const blob = new Blob(["a,b\n1,2\n"], { type: "text/csv" });
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

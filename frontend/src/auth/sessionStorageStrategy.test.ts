@@ -26,13 +26,13 @@ const session: AuthenticatedSession = {
   },
 };
 
-describe("sessionStorage auth strategy", () => {
+describe("auth storage strategy (localStorage, shared across tabs)", () => {
   afterEach(() => {
     localStorage.clear();
     sessionStorage.clear();
   });
 
-  it("stores and loads the authenticated session from session storage", () => {
+  it("stores and loads the authenticated session from local storage", () => {
     saveAuthSession(session);
 
     expect(loadAuthSession()).toEqual({
@@ -41,17 +41,36 @@ describe("sessionStorage auth strategy", () => {
       roles: ["ADMIN", "CAMPAIGN_MANAGER"],
       user: session.user,
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBe(
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBe(
       JSON.stringify(session.user),
     );
   });
 
-  it("does not persist auth tokens in local storage", () => {
+  it("persists auth tokens in local storage so new tabs share the session", () => {
     saveAuthSession(session);
 
-    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe(accessToken);
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("refresh-token");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBe(
+      JSON.stringify(session.user),
+    );
+    // Must not leave a tab-only copy that would desync other tabs.
+    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+  });
+
+  it("migrates a legacy sessionStorage session into localStorage", () => {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, accessToken);
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(session.user));
+
+    expect(loadAuthSession()).toEqual({
+      accessToken,
+      refreshToken: "refresh-token",
+      roles: ["ADMIN", "CAMPAIGN_MANAGER"],
+      user: session.user,
+    });
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe(accessToken);
+    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
   });
 
   it("extracts known role names from the stored access token", () => {
@@ -70,40 +89,40 @@ describe("sessionStorage auth strategy", () => {
     clearAuthSession();
 
     expect(loadAuthSession()).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("clears incomplete stored sessions", () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(session.user));
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(session.user));
 
     expect(loadAuthSession()).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("clears invalid stored user payloads", () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, "not-json");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, "not-json");
 
     expect(loadAuthSession()).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("clears non-object stored user payloads", () => {
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-    sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, "null");
+    localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+    localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, "null");
 
     expect(loadAuthSession()).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 });
 

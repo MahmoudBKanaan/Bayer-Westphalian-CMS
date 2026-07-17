@@ -1,39 +1,64 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { isAuthorizationError } from "@/api/client";
 import {
   assignFollowUpTask,
+  completeFollowUpTask,
   createFollowUpTask,
   type AssignFollowUpTaskInput,
   type CreateFollowUpTaskInput,
   emptyFollowUpTaskFilters,
+  type FollowUpAssigneeOption,
   followUpTaskPriorities,
   followUpTaskStatuses,
   formatFollowUpEnum,
+  listFollowUpAssigneeOptions,
   listFollowUpTasks,
   type FollowUpTaskFilters,
   type FollowUpTaskView,
 } from "@/api/followUpTasks";
+import { useAuth } from "@/auth/AuthProvider";
 import { StatusBadge } from "@/components/StatusBadge";
 import { usePermissions } from "@/features/auth/usePermissions";
 
 export function FollowUpTasksPage() {
   const permissions = usePermissions();
+  const { user } = useAuth();
   const canReadFollowUps = permissions.canReadFollowUpTasks();
   const canCreateFollowUps = permissions.canCreateFollowUpTasks();
+  /** Only Admin / Campaign Manager may assign tasks to Customer Service Agents. */
   const canAssignFollowUps = permissions.canAssignFollowUpTasks();
+  const canCompleteFollowUps = permissions.canCompleteFollowUpTasks();
+  const isManagerWorklist = canAssignFollowUps;
   const queryClient = useQueryClient();
   const [draftFilters, setDraftFilters] = useState<FollowUpTaskFilters>(emptyFollowUpTaskFilters);
   const [appliedFilters, setAppliedFilters] =
     useState<FollowUpTaskFilters>(emptyFollowUpTaskFilters);
   const [createDraft, setCreateDraft] = useState<CreateFollowUpTaskInput>(emptyCreateTaskInput);
   const [assignDrafts, setAssignDrafts] = useState<Record<string, string>>({});
+  /** Filters and create form start minimized; expand via the card header button. */
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [createExpanded, setCreateExpanded] = useState(false);
+
+  // Agents only see their Assigned Worklist (server also enforces assigned_to = current user).
+  const effectiveFilters: FollowUpTaskFilters = isManagerWorklist
+    ? appliedFilters
+    : {
+        ...appliedFilters,
+        assignedTo: user?.id ?? appliedFilters.assignedTo,
+      };
 
   const tasksQuery = useQuery({
-    queryKey: ["follow-up-tasks", appliedFilters],
-    queryFn: () => listFollowUpTasks(appliedFilters),
-    enabled: canReadFollowUps,
+    queryKey: ["follow-up-tasks", effectiveFilters, isManagerWorklist ? "manager" : "assigned"],
+    queryFn: () => listFollowUpTasks(effectiveFilters),
+    enabled: canReadFollowUps && (isManagerWorklist || Boolean(user?.id)),
   });
+  const assigneeOptionsQuery = useQuery({
+    queryKey: ["follow-up-assignee-options"],
+    queryFn: listFollowUpAssigneeOptions,
+    enabled: canAssignFollowUps,
+  });
+  const assigneeOptions = assigneeOptionsQuery.data ?? [];
   const tasks = tasksQuery.data ?? [];
   const errorMessage = tasksQuery.isError
     ? isAuthorizationError(tasksQuery.error)
@@ -44,11 +69,23 @@ export function FollowUpTasksPage() {
     mutationFn: createFollowUpTask,
     onSuccess: () => {
       setCreateDraft(emptyCreateTaskInput);
+      setCreateExpanded(false);
       void queryClient.invalidateQueries({ queryKey: ["follow-up-tasks"] });
     },
   });
   const assignTaskMutation = useMutation({
     mutationFn: assignFollowUpTask,
+    onSuccess: (_data, variables) => {
+      setAssignDrafts((current) => {
+        const next = { ...current };
+        delete next[variables.taskId];
+        return next;
+      });
+      void queryClient.invalidateQueries({ queryKey: ["follow-up-tasks"] });
+    },
+  });
+  const completeTaskMutation = useMutation({
+    mutationFn: completeFollowUpTask,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["follow-up-tasks"] });
     },
@@ -68,50 +105,87 @@ export function FollowUpTasksPage() {
     );
   }
 
+  const worklistTitle = isManagerWorklist ? "Task worklist" : "Assigned worklist";
+  const worklistHint = isManagerWorklist
+    ? "All follow-ups — managers assign tasks to Customer Service Agents"
+    : "Only tasks assigned to you";
+
   return (
     <section className="page-stack">
-      <div className="panel">
-        <div className="section-heading">
-          <h2>Follow-up tasks</h2>
-          <span>
-            {tasksQuery.isLoading
-              ? "Loading follow-up tasks"
-              : formatCount(tasks.length, "follow-up task")}
-          </span>
-        </div>
+      <CollapsiblePanel
+        title="Filters"
+        summary={
+          filtersExpanded
+            ? isManagerWorklist
+              ? "Filter by assignee, priority, status, and due date"
+              : "Filter your assigned tasks by priority, status, and due date"
+            : filterSummary(effectiveFilters, isManagerWorklist)
+        }
+        expanded={filtersExpanded}
+        onToggle={() => setFiltersExpanded((open) => !open)}
+        expandLabel="Expand filters"
+        collapseLabel="Minimize filters"
+      >
         <FollowUpFiltersPanel
           draftFilters={draftFilters}
+          showAssigneeFilter={isManagerWorklist}
           onDraftChange={setDraftFilters}
-          onApply={() => setAppliedFilters(normalizeFilters(draftFilters))}
+          onApply={() => {
+            setAppliedFilters(normalizeFilters(draftFilters));
+            setFiltersExpanded(false);
+          }}
           onReset={() => {
             setDraftFilters(emptyFollowUpTaskFilters);
             setAppliedFilters(emptyFollowUpTaskFilters);
           }}
         />
-      </div>
+      </CollapsiblePanel>
 
       {canCreateFollowUps ? (
-        <div className="panel">
-          <div className="section-heading">
-            <h2>Create follow-up task</h2>
-            <span>Customer, assignee, priority, due date, and campaign context</span>
-          </div>
+        <CollapsiblePanel
+          title="Create follow-up task"
+          summary={
+            createExpanded
+              ? isManagerWorklist
+                ? "Customer, Customer Service Agent, priority, due date, and campaign context"
+                : "Task is automatically assigned to you"
+              : "Collapsed — expand to create a new task"
+          }
+          expanded={createExpanded}
+          onToggle={() => setCreateExpanded((open) => !open)}
+          expandLabel="Expand create task"
+          collapseLabel="Minimize create task"
+        >
           <CreateFollowUpTaskPanel
             draft={createDraft}
+            canChooseAssignee={isManagerWorklist}
+            assigneeOptions={assigneeOptions}
+            assigneesLoading={assigneeOptionsQuery.isLoading}
+            currentUserName={user?.fullName ?? "you"}
             saving={createTaskMutation.isPending}
             errorMessage={
               createTaskMutation.isError ? "Follow-up task could not be created." : ""
             }
             onDraftChange={setCreateDraft}
-            onSubmit={() => createTaskMutation.mutate(createDraft)}
+            onSubmit={() =>
+              createTaskMutation.mutate(
+                isManagerWorklist
+                  ? createDraft
+                  : { ...createDraft, assignedTo: user?.id ?? "" },
+              )
+            }
           />
-        </div>
+        </CollapsiblePanel>
       ) : null}
 
       <div className="panel">
         <div className="section-heading">
-          <h2>Task worklist</h2>
-          <span>Assignee, priority, status, due date, customer, and campaign context</span>
+          <h2>{worklistTitle}</h2>
+          <span>
+            {tasksQuery.isLoading
+              ? "Loading follow-up tasks"
+              : `${formatCount(tasks.length, "follow-up task")} · ${worklistHint}`}
+          </span>
         </div>
         {tasksQuery.isLoading ? (
           <p className="table-state">Loading follow-up task records.</p>
@@ -142,13 +216,39 @@ export function FollowUpTasksPage() {
                 <FollowUpTaskRow
                   key={task.id}
                   task={task}
+                  currentUserId={user?.id}
                   canAssign={canAssignFollowUps}
-                  assignDraft={assignDrafts[task.id] ?? task.assignedToUserId ?? ""}
+                  canCompleteRole={canCompleteFollowUps}
+                  isManager={isManagerWorklist}
+                  assigneeOptions={assigneeOptions}
+                  assigneesLoading={assigneeOptionsQuery.isLoading}
+                  assignDraft={assignDrafts[task.id] ?? ""}
                   assigning={assignTaskMutation.isPending}
+                  completing={
+                    completeTaskMutation.isPending &&
+                    completeTaskMutation.variables === task.id
+                  }
+                  assignError={
+                    assignTaskMutation.isError &&
+                    assignTaskMutation.variables?.taskId === task.id
+                      ? isAuthorizationError(assignTaskMutation.error)
+                        ? "You are not authorized to assign this task."
+                        : "Follow-up task could not be assigned."
+                      : ""
+                  }
+                  completeError={
+                    completeTaskMutation.isError &&
+                    completeTaskMutation.variables === task.id
+                      ? isAuthorizationError(completeTaskMutation.error)
+                        ? "You are not authorized to complete this task."
+                        : "Follow-up task could not be completed."
+                      : ""
+                  }
                   onAssignDraftChange={(assignedTo) =>
                     setAssignDrafts((current) => ({ ...current, [task.id]: assignedTo }))
                   }
                   onAssign={(input) => assignTaskMutation.mutate(input)}
+                  onComplete={(taskId) => completeTaskMutation.mutate(taskId)}
                 />
               ))}
             </tbody>
@@ -171,12 +271,20 @@ const emptyCreateTaskInput: CreateFollowUpTaskInput = {
 
 function CreateFollowUpTaskPanel({
   draft,
+  canChooseAssignee,
+  assigneeOptions,
+  assigneesLoading,
+  currentUserName,
   saving,
   errorMessage,
   onDraftChange,
   onSubmit,
 }: {
   draft: CreateFollowUpTaskInput;
+  canChooseAssignee: boolean;
+  assigneeOptions: FollowUpAssigneeOption[];
+  assigneesLoading: boolean;
+  currentUserName: string;
   saving: boolean;
   errorMessage: string;
   onDraftChange: (draft: CreateFollowUpTaskInput) => void;
@@ -215,15 +323,25 @@ function CreateFollowUpTaskPanel({
           placeholder="Call customer back"
         />
       </label>
-      <label>
-        Assigned user ID
-        <input
-          aria-label="Follow-up assigned user ID"
-          value={draft.assignedTo}
-          onChange={(event) => onDraftChange({ ...draft, assignedTo: event.target.value })}
-          placeholder="Optional user UUID"
-        />
-      </label>
+      {canChooseAssignee ? (
+        <label>
+          Assign to Customer Service Agent
+          <CustomerServiceAgentSelect
+            ariaLabel="Follow-up assigned Customer Service Agent"
+            value={draft.assignedTo}
+            options={assigneeOptions}
+            loading={assigneesLoading}
+            allowEmpty
+            emptyLabel="Unassigned (optional)"
+            onChange={(assignedTo) => onDraftChange({ ...draft, assignedTo })}
+          />
+        </label>
+      ) : (
+        <p className="table-secondary-text" data-testid="follow-up-auto-assign-notice">
+          This task will be automatically assigned to you ({currentUserName}). Only managers can
+          assign follow-ups to Customer Service Agents.
+        </p>
+      )}
       <label>
         Campaign ID
         <input
@@ -286,26 +404,32 @@ function CreateFollowUpTaskPanel({
 
 function FollowUpFiltersPanel({
   draftFilters,
+  showAssigneeFilter,
   onDraftChange,
   onApply,
   onReset,
 }: {
   draftFilters: FollowUpTaskFilters;
+  showAssigneeFilter: boolean;
   onDraftChange: (filters: FollowUpTaskFilters) => void;
   onApply: () => void;
   onReset: () => void;
 }) {
   return (
     <div className="form-grid">
-      <label>
-        Assignee ID
-        <input
-          aria-label="Follow-up assignee ID"
-          value={draftFilters.assignedTo}
-          onChange={(event) => onDraftChange({ ...draftFilters, assignedTo: event.target.value })}
-          placeholder="Filter by user UUID"
-        />
-      </label>
+      {showAssigneeFilter ? (
+        <label>
+          Assignee ID
+          <input
+            aria-label="Follow-up assignee ID"
+            value={draftFilters.assignedTo}
+            onChange={(event) =>
+              onDraftChange({ ...draftFilters, assignedTo: event.target.value })
+            }
+            placeholder="Filter by user UUID"
+          />
+        </label>
+      ) : null}
       <label>
         Priority
         <select
@@ -378,21 +502,56 @@ function FollowUpFiltersPanel({
 
 function FollowUpTaskRow({
   task,
+  currentUserId,
   canAssign,
+  canCompleteRole,
+  isManager,
+  assigneeOptions,
+  assigneesLoading,
   assignDraft,
   assigning,
+  completing,
+  assignError,
+  completeError,
   onAssignDraftChange,
   onAssign,
+  onComplete,
 }: {
   task: FollowUpTaskView;
+  currentUserId: string | undefined;
   canAssign: boolean;
+  canCompleteRole: boolean;
+  isManager: boolean;
+  assigneeOptions: FollowUpAssigneeOption[];
+  assigneesLoading: boolean;
   assignDraft: string;
   assigning: boolean;
+  completing: boolean;
+  assignError: string;
+  completeError: string;
   onAssignDraftChange: (assignedTo: string) => void;
   onAssign: (input: AssignFollowUpTaskInput) => void;
+  onComplete: (taskId: string) => void;
 }) {
   const normalizedAssignee = assignDraft.trim();
-  const canSubmitAssignment = normalizedAssignee.length > 0 && !assigning;
+  // Enable whenever a real agent is chosen (including re-assign to the same CSA).
+  // Previously we disabled when draft === current assignee, which blocked Assign for
+  // almost every demo row (pre-filled to the only Customer Service Agent).
+  const selectedAgentIsValid = assigneeOptions.some((agent) => agent.id === normalizedAssignee);
+  const canSubmitAssignment =
+    selectedAgentIsValid && !assigning && !assigneesLoading && assigneeOptions.length > 0;
+  const isReassign =
+    task.assignedToUserId != null &&
+    task.assignedToUserId.length > 0 &&
+    normalizedAssignee === task.assignedToUserId;
+  const isAssignee =
+    currentUserId != null &&
+    task.assignedToUserId != null &&
+    task.assignedToUserId === currentUserId;
+  const isOpenWork =
+    task.status !== "COMPLETED" && task.status !== "CANCELLED" && task.completedAt == null;
+  /** Assignee or manager may tag the task complete. */
+  const canCompleteThisTask = canCompleteRole && isOpenWork && (isManager || isAssignee);
 
   return (
     <tr>
@@ -427,17 +586,25 @@ function FollowUpTaskRow({
             }}
           >
             <label>
-              Assign to user ID
-              <input
-                aria-label={`Assign follow-up ${task.title}`}
+              Assign to Customer Service Agent
+              <CustomerServiceAgentSelect
+                ariaLabel={`Assign follow-up ${task.title}`}
                 value={assignDraft}
-                onChange={(event) => onAssignDraftChange(event.target.value)}
-                placeholder="User UUID"
+                options={assigneeOptions}
+                loading={assigneesLoading}
+                allowEmpty
+                emptyLabel="Select a Customer Service Agent"
+                onChange={onAssignDraftChange}
               />
             </label>
             <button type="submit" disabled={!canSubmitAssignment}>
-              Assign
+              {assigning ? "Assigning..." : isReassign ? "Reassign" : "Assign"}
             </button>
+            {assignError ? (
+              <p className="form-error" role="alert">
+                {assignError}
+              </p>
+            ) : null}
           </form>
         ) : null}
       </td>
@@ -449,9 +616,138 @@ function FollowUpTaskRow({
         {task.completedAt == null ? null : (
           <span className="table-secondary-text">{formatDateTime(task.completedAt)}</span>
         )}
+        {canCompleteThisTask ? (
+          <div className="inline-form">
+            <button
+              type="button"
+              className="secondary-button"
+              aria-label={`Mark follow-up ${task.title} complete`}
+              disabled={completing}
+              onClick={() => onComplete(task.id)}
+            >
+              {completing ? "Completing..." : "Mark complete"}
+            </button>
+            {completeError ? (
+              <p className="form-error" role="alert">
+                {completeError}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
       </td>
       <td>{formatDate(task.dueDate)}</td>
     </tr>
+  );
+}
+
+function CollapsiblePanel({
+  title,
+  summary,
+  expanded,
+  onToggle,
+  expandLabel,
+  collapseLabel,
+  children,
+}: {
+  title: string;
+  summary: string;
+  expanded: boolean;
+  onToggle: () => void;
+  expandLabel: string;
+  collapseLabel: string;
+  children: ReactNode;
+}) {
+  const contentId = `collapsible-${title.toLowerCase().replace(/\s+/g, "-")}`;
+
+  return (
+    <div className={`panel collapsible-panel${expanded ? " is-expanded" : " is-collapsed"}`}>
+      <div className="section-heading collapsible-panel-header">
+        <div className="collapsible-panel-titles">
+          <h2 id={`${contentId}-title`}>{title}</h2>
+          <span>{summary}</span>
+        </div>
+        <button
+          type="button"
+          className="secondary-button collapsible-panel-toggle"
+          aria-expanded={expanded}
+          aria-controls={contentId}
+          onClick={onToggle}
+        >
+          {expanded ? collapseLabel : expandLabel}
+        </button>
+      </div>
+      {expanded ? (
+        <div
+          id={contentId}
+          className="collapsible-panel-body"
+          role="region"
+          aria-labelledby={`${contentId}-title`}
+        >
+          {children}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function filterSummary(filters: FollowUpTaskFilters, isManagerWorklist: boolean) {
+  const parts: string[] = [];
+  if (isManagerWorklist && filters.assignedTo.trim().length > 0) {
+    parts.push("assignee set");
+  }
+  if (!isManagerWorklist) {
+    parts.push("my assigned tasks");
+  }
+  if (filters.priority !== "ALL") {
+    parts.push(formatFollowUpEnum(filters.priority));
+  }
+  if (filters.status !== "ALL") {
+    parts.push(formatFollowUpEnum(filters.status));
+  }
+  if (filters.dueDateFrom.trim().length > 0 || filters.dueDateTo.trim().length > 0) {
+    parts.push("due date range");
+  }
+  if (parts.length === 0 || (parts.length === 1 && parts[0] === "my assigned tasks")) {
+    return isManagerWorklist
+      ? "Collapsed — expand to filter the worklist"
+      : "Collapsed — expand to filter your assigned worklist";
+  }
+  return `Active: ${parts.join(" · ")}`;
+}
+
+function CustomerServiceAgentSelect({
+  ariaLabel,
+  value,
+  options,
+  loading,
+  allowEmpty,
+  emptyLabel,
+  onChange,
+}: {
+  ariaLabel: string;
+  value: string;
+  options: FollowUpAssigneeOption[];
+  loading: boolean;
+  allowEmpty: boolean;
+  emptyLabel: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <select
+      aria-label={ariaLabel}
+      value={value}
+      disabled={loading || options.length === 0}
+      onChange={(event) => onChange(event.target.value)}
+    >
+      {allowEmpty || value.length === 0 ? (
+        <option value="">{loading ? "Loading agents..." : emptyLabel}</option>
+      ) : null}
+      {options.map((agent) => (
+        <option key={agent.id} value={agent.id}>
+          {agent.fullName} ({agent.email})
+        </option>
+      ))}
+    </select>
   );
 }
 

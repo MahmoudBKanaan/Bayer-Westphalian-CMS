@@ -68,6 +68,7 @@ function successfulLoginHandlers() {
 
 describe("login flow UI integration (item 598)", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
@@ -104,9 +105,9 @@ describe("login flow UI integration (item 598)", () => {
 
     expect(await screen.findByRole("heading", { name: "Dashboard", level: 1 })).toBeInTheDocument();
     expect(screen.getByLabelText("Main navigation")).toBeInTheDocument();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toContain(".");
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("refresh-token");
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toContain(loginUser.email);
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toContain(".");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("refresh-token");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toContain(loginUser.email);
 
     const loginCall = fetchMock.mock.calls.find(([url, init]) => {
       return String(url).endsWith("/auth/login") && (init as RequestInit | undefined)?.method === "POST";
@@ -173,7 +174,7 @@ describe("login flow UI integration (item 598)", () => {
         LOGIN_INVALID_CREDENTIALS_MESSAGE,
       );
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
     expect(screen.queryByLabelText("Main navigation")).not.toBeInTheDocument();
   });
 
@@ -197,6 +198,6 @@ describe("login flow UI integration (item 598)", () => {
     await waitFor(() => {
       expect(screen.getByTestId("login-error")).toHaveTextContent(LOGIN_RATE_LIMITED_MESSAGE);
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
   });
 });

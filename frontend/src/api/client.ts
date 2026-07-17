@@ -25,10 +25,13 @@ function resolveApiBaseUrl(
   return value.length > 1 ? value.replace(/\/$/, "") : value;
 }
 
+// Playwright imports shared frontend helpers in Node during test discovery, where Vite does not
+// populate import.meta.env. The browser build still receives Vite's normal environment object.
+const viteEnvironment = import.meta.env as ImportMetaEnv | undefined;
 const API_BASE_URL = resolveApiBaseUrl(
-  import.meta.env.VITE_API_BASE_URL,
-  import.meta.env.VITE_APP_ENV,
-  import.meta.env.PROD,
+  viteEnvironment?.VITE_API_BASE_URL,
+  viteEnvironment?.VITE_APP_ENV,
+  viteEnvironment?.PROD ?? false,
 );
 
 type ApiRequestInit = RequestInit & {

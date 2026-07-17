@@ -168,6 +168,7 @@ const launchSummary = {
 
 describe("CampaignRecipientPreviewPage (item 594)", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
@@ -421,12 +422,108 @@ describe("CampaignRecipientPreviewPage (item 594)", () => {
       await screen.findByText("You are not authorized to view campaign recipient previews."),
     ).toBeInTheDocument();
   });
+
+  it("recipientPreview_displaysDuplicateContactRiskWithoutOfferingOverride", async () => {
+    const ahmedExcluded = {
+      id: "62000000-0000-0000-0000-000000000290",
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      customerId: "20000000-0000-0000-0000-000000000130",
+      customerFullName: "Ahmed Saleh",
+      eligibilityStatus: "EXCLUDED",
+      exclusionReason: "MONTHLY_CONTACT_LIMIT",
+      eligibilityExplanation: "Customer has reached the monthly marketing contact limit",
+      sentAt: null,
+      openedAt: null,
+      clickedAt: null,
+      convertedAt: null,
+      createdAt: "2026-07-09T10:50:30Z",
+    };
+    const riskPayload = {
+      customerId: ahmedExcluded.customerId,
+      campaignId: campaign.id,
+      riskDetected: true,
+      warning: "Duplicate-contact risk detected: BR-010 same campaign and BR-011 monthly limit",
+      explanation:
+        "The customer has already received this campaign and has reached the configured marketing-contact limit.",
+      contactsInCurrentMonth: 3,
+      monthlyContactLimit: 3,
+      sameCampaignAlreadyContacted: true,
+      storedRecommendationId: "70000000-0000-0000-0000-000000000290",
+    };
+
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/ai/duplicate-contact-warning") && init?.method === "POST") {
+        return jsonResponse(riskPayload);
+      }
+      if (url.endsWith("/recipients/excluded")) {
+        return jsonResponse([...excludedRecipients, ahmedExcluded]);
+      }
+      if (url.endsWith("/recipients/preview")) {
+        return jsonResponse(preview);
+      }
+      if (url.endsWith("/recipients/eligible")) {
+        return jsonResponse(eligibleRecipients);
+      }
+      if (url.endsWith("/recipients/summary")) {
+        return jsonResponse(launchSummary);
+      }
+      return jsonResponse(campaign);
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderPreviewPage(campaignManagerUser);
+
+    await screen.findByRole("heading", { name: RECIPIENT_PREVIEW_PAGE_TITLE });
+    await userEvent.click(screen.getByRole("tab", { name: /Excluded recipients/i }));
+    await userEvent.click(screen.getByRole("button", { name: "View details for Ahmed Saleh" }));
+
+    expect(await screen.findByTestId("selected-recipient-details")).toHaveTextContent(
+      "Ahmed Saleh",
+    );
+    expect(screen.getByTestId("duplicate-contact-warning-panel")).toBeInTheDocument();
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Check Duplicate-Contact Risk" }),
+    );
+
+    const result = await screen.findByTestId("duplicate-contact-result");
+    expect(result).toHaveTextContent("Duplicate-contact risk detected");
+    expect(result).toHaveTextContent("Ahmed Saleh");
+    expect(result).toHaveTextContent("3");
+    expect(screen.getByTestId("eligibility-service-notice")).toHaveTextContent(
+      "EligibilityService remains authoritative",
+    );
+    expect(screen.queryByRole("button", { name: /override/i })).not.toBeInTheDocument();
+    expect(screen.getByTestId("selected-recipient-details")).toHaveTextContent("Excluded");
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/ai/duplicate-contact-warning`,
+      expect.objectContaining({ method: "POST" }),
+    );
+    const body = JSON.parse(
+      fetchMock.mock.calls.find((call) =>
+        String(call[0]).endsWith("/ai/duplicate-contact-warning"),
+      )?.[1]?.body as string,
+    );
+    expect(body).toEqual({
+      customerId: ahmedExcluded.customerId,
+      campaignId: campaign.id,
+    });
+    expect(
+      fetchMock.mock.calls.some((call) => {
+        const url = String(call[0]);
+        return url.includes("/eligibility") || url.includes("/recipients/") && (call[1] as RequestInit | undefined)?.method === "PUT";
+      }),
+    ).toBe(false);
+  });
 });
 
 function renderPreviewPage(user: typeof campaignManagerUser, roles: string[] = user.roles) {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
+  localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+  localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },

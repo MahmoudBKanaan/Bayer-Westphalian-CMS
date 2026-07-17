@@ -39,9 +39,10 @@ export function seedAuthenticatedSession(
   roles: SystemRoleName[] = ["CAMPAIGN_MANAGER"],
   user: IntegrationUser = defaultIntegrationUser,
 ): void {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify({ ...user, roles }));
+  // Shared across tabs: localStorage (see sessionStorageStrategy).
+  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
+  localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+  localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify({ ...user, roles }));
 }
 
 export function jsonOk<T>(data: T, message = "OK") {
@@ -90,6 +91,7 @@ export function renderApp(options: RenderAppOptions): RenderResult {
   if (authenticated) {
     seedAuthenticatedSession(roles, user);
   } else {
+    localStorage.clear();
     sessionStorage.clear();
   }
 

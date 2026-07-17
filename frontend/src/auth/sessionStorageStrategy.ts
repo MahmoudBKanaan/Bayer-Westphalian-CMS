@@ -1,5 +1,17 @@
 import type { AuthenticatedSession, AuthenticatedUser } from "@/api/auth";
 
+/**
+ * Frontend auth persistence strategy.
+ *
+ * Tokens are stored in {@link localStorage} so the same-origin session is shared across
+ * browser tabs/windows. Opening an in-app link in a new tab must not force re-login.
+ *
+ * Historically this module used {@link sessionStorage} (tab-scoped). On load, a complete
+ * legacy sessionStorage payload is migrated once into localStorage and then removed.
+ *
+ * Module name retained for import stability across the codebase.
+ */
+
 export type SystemRoleName =
   | "ADMIN"
   | "CAMPAIGN_MANAGER"
@@ -28,31 +40,48 @@ export type StoredAuthSession = {
 };
 
 export function saveAuthSession(session: AuthenticatedSession) {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, session.tokens.accessToken);
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, session.tokens.refreshToken);
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(session.user));
+  writeAuthPayload(localStorage, {
+    accessToken: session.tokens.accessToken,
+    refreshToken: session.tokens.refreshToken,
+    currentUserJson: JSON.stringify(session.user),
+  });
+  // Avoid dual sources of truth after login/refresh.
+  removeAuthKeys(sessionStorage);
   notifyAuthSessionChanged();
 }
 
 export function loadAuthSession(): StoredAuthSession | null {
-  const accessToken = sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken);
-  const refreshToken = sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken);
-  const user = parseStoredUser(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser));
-
-  if (!accessToken || !refreshToken || user == null) {
-    clearStoredAuthSession();
-    return null;
+  const fromLocal = readAuthPayload(localStorage);
+  if (isCompleteAuthPayload(fromLocal)) {
+    removeAuthKeys(sessionStorage);
+    return toStoredSession(fromLocal);
   }
 
-  return { accessToken, refreshToken, user, roles: extractRolesFromAccessToken(accessToken) };
+  // One-time migration: tab-scoped sessions written by older builds.
+  const fromSession = readAuthPayload(sessionStorage);
+  if (isCompleteAuthPayload(fromSession)) {
+    writeAuthPayload(localStorage, fromSession);
+    removeAuthKeys(sessionStorage);
+    return toStoredSession(fromSession);
+  }
+
+  clearStoredAuthSession();
+  return null;
 }
 
 export function getStoredAccessToken(): string | null {
-  return sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken);
+  // Prefer localStorage; fall back to legacy sessionStorage for partial test seeds / migration.
+  return (
+    localStorage.getItem(AUTH_STORAGE_KEYS.accessToken) ??
+    sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)
+  );
 }
 
 export function getStoredRefreshToken(): string | null {
-  return sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken);
+  return (
+    localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken) ??
+    sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)
+  );
 }
 
 export function extractRolesFromAccessToken(accessToken: string): SystemRoleName[] {
@@ -70,13 +99,74 @@ export function clearAuthSession() {
 }
 
 function clearStoredAuthSession() {
-  sessionStorage.removeItem(AUTH_STORAGE_KEYS.accessToken);
-  sessionStorage.removeItem(AUTH_STORAGE_KEYS.refreshToken);
-  sessionStorage.removeItem(AUTH_STORAGE_KEYS.currentUser);
+  removeAuthKeys(localStorage);
+  removeAuthKeys(sessionStorage);
 }
 
 export function notifyAuthSessionChanged() {
   window.dispatchEvent(new Event(AUTH_SESSION_CHANGED_EVENT));
+}
+
+type AuthPayload = {
+  accessToken: string | null;
+  refreshToken: string | null;
+  currentUserJson: string | null;
+};
+
+function readAuthPayload(storage: Storage): AuthPayload {
+  return {
+    accessToken: storage.getItem(AUTH_STORAGE_KEYS.accessToken),
+    refreshToken: storage.getItem(AUTH_STORAGE_KEYS.refreshToken),
+    currentUserJson: storage.getItem(AUTH_STORAGE_KEYS.currentUser),
+  };
+}
+
+function writeAuthPayload(
+  storage: Storage,
+  payload: { accessToken: string; refreshToken: string; currentUserJson: string },
+) {
+  storage.setItem(AUTH_STORAGE_KEYS.accessToken, payload.accessToken);
+  storage.setItem(AUTH_STORAGE_KEYS.refreshToken, payload.refreshToken);
+  storage.setItem(AUTH_STORAGE_KEYS.currentUser, payload.currentUserJson);
+}
+
+function removeAuthKeys(storage: Storage) {
+  storage.removeItem(AUTH_STORAGE_KEYS.accessToken);
+  storage.removeItem(AUTH_STORAGE_KEYS.refreshToken);
+  storage.removeItem(AUTH_STORAGE_KEYS.currentUser);
+}
+
+function isCompleteAuthPayload(
+  payload: AuthPayload,
+): payload is { accessToken: string; refreshToken: string; currentUserJson: string } {
+  return (
+    typeof payload.accessToken === "string" &&
+    payload.accessToken.length > 0 &&
+    typeof payload.refreshToken === "string" &&
+    payload.refreshToken.length > 0 &&
+    typeof payload.currentUserJson === "string" &&
+    payload.currentUserJson.length > 0 &&
+    parseStoredUser(payload.currentUserJson) != null
+  );
+}
+
+function toStoredSession(payload: {
+  accessToken: string;
+  refreshToken: string;
+  currentUserJson: string;
+}): StoredAuthSession {
+  const user = parseStoredUser(payload.currentUserJson);
+  if (user == null) {
+    clearStoredAuthSession();
+    throw new Error("Auth session user payload was invalid after completeness check");
+  }
+
+  return {
+    accessToken: payload.accessToken,
+    refreshToken: payload.refreshToken,
+    user,
+    roles: extractRolesFromAccessToken(payload.accessToken),
+  };
 }
 
 function parseStoredUser(value: string | null): AuthenticatedUser | null {

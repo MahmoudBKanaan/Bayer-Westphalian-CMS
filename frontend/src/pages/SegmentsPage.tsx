@@ -19,6 +19,7 @@ import {
 import { SegmentCriteriaBuilder } from "@/components/SegmentCriteriaBuilder";
 import { SegmentInsightPanel } from "@/components/SegmentInsightPanel";
 import { SegmentPreviewResults } from "@/components/SegmentPreviewResults";
+import { SegmentSuggestionPanel } from "@/components/SegmentSuggestionPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { countCriteriaRows } from "@/features/segments/criteriaFields";
@@ -218,6 +219,25 @@ export function SegmentsPage() {
           }
         />
       ) : null}
+
+      <SegmentSuggestionPanel
+        onApplyToDraft={({ name, description, criteria, sourceLabel }) => {
+          setCreateForm({
+            ...emptySegmentForm(),
+            name,
+            description,
+            criteria:
+              criteria.length > 0
+                ? criteria
+                : emptySegmentForm().criteria,
+            visibility: "PRIVATE",
+          });
+          setNotice(
+            `AI segment draft loaded for human review (${sourceLabel}). Save explicitly to persist.`,
+          );
+          runPreview(criteria, sourceLabel);
+        }}
+      />
 
       <section className="panel" aria-labelledby="segment-search-heading">
         <div className="section-heading">

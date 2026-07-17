@@ -22,7 +22,7 @@ test.describe("Campaign creation through UI (item 603)", () => {
 
   test("creates a draft campaign from the Campaign Builder", async ({ page }) => {
     test.setTimeout(90_000);
-    await page.getByRole("link", { name: "Builder" }).click();
+    await page.getByRole("link", { name: "Builder", exact: true }).click();
     await expect(
       page.getByRole("heading", { name: CAMPAIGN_BUILDER_PAGE_TITLE, level: 2 }),
     ).toBeVisible();
@@ -53,7 +53,7 @@ test.describe("Campaign creation through UI (item 603)", () => {
   });
 
   test("validates basics before advancing", async ({ page }) => {
-    await page.getByRole("link", { name: "Builder" }).click();
+    await page.getByRole("link", { name: "Builder", exact: true }).click();
     await page.getByRole("button", { name: "Continue to audience" }).click();
 
     await expect(page.getByText(campaignFormValidationMessages.nameRequired)).toBeVisible();

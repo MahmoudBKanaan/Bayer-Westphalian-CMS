@@ -17,9 +17,9 @@ const authenticatedUser = {
 };
 
 function renderLayoutForRoles(roles: SystemRoleName[], initialPath = "/dashboard") {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(authenticatedUser));
+  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
+  localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+  localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(authenticatedUser));
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -56,6 +56,7 @@ function visibleMenuLabels() {
 
 describe("AppLayout role-based navigation", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
@@ -151,9 +152,9 @@ describe("AppLayout role-based navigation", () => {
 
     await userEvent.click(within(menu).getByRole("menuitem", { name: "Sign out" }));
 
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("supports keyboard navigation for the top bar user menu", async () => {

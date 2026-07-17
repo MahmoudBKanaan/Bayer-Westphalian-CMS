@@ -46,6 +46,13 @@ export type AssignFollowUpTaskInput = {
   assignedTo: string;
 };
 
+/** Active Customer Service Agent option for assignment selectors. */
+export type FollowUpAssigneeOption = {
+  id: string;
+  fullName: string;
+  email: string;
+};
+
 type ApiResponse<T> = {
   success: boolean;
   message: string;
@@ -103,6 +110,28 @@ export async function assignFollowUpTask(input: AssignFollowUpTaskInput): Promis
       method: "PUT",
       body: JSON.stringify({ assignedTo: input.assignedTo.trim() }),
     },
+  );
+  return response.data;
+}
+
+/** Marks a follow-up task completed (assignee or manager). */
+export async function completeFollowUpTask(taskId: string): Promise<FollowUpTaskView> {
+  const response = await apiRequest<ApiResponse<FollowUpTaskView>>(
+    `/follow-up-tasks/${taskId}/complete`,
+    {
+      method: "PUT",
+    },
+  );
+  return response.data;
+}
+
+/**
+ * Lists active Customer Service Agent accounts for follow-up assignment (available to
+ * Campaign Manager and other assign roles; not the admin-only /users directory).
+ */
+export async function listFollowUpAssigneeOptions(): Promise<FollowUpAssigneeOption[]> {
+  const response = await apiRequest<ApiResponse<FollowUpAssigneeOption[]>>(
+    "/follow-up-tasks/assignee-options",
   );
   return response.data;
 }

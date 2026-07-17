@@ -71,9 +71,11 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function renderFollowUpTasksPage(user: typeof authorizedUser) {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(user.roles));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+  // Auth session is stored in localStorage (legacy sessionStorage is still migrated on load).
+  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(user.roles));
+  localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+  localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+  sessionStorage.clear();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -93,10 +95,23 @@ function renderFollowUpTasksPage(user: typeof authorizedUser) {
   );
 }
 
+const mockCsaAssignee = {
+  id: "10000000-0000-0000-0000-000000000006",
+  fullName: "Test Customer Service Agent",
+  email: "customer.service@bayer-westphalian.test",
+};
+
 function createFollowUpTasksFetchMock(tasks: unknown[] = [mockTask]) {
   return vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
     const url = String(input);
     if (url.startsWith(`${API_BASE_URL}/follow-up-tasks`)) {
+      if (url.includes("/assignee-options")) {
+        return jsonResponse({
+          success: true,
+          message: "Follow-up assignee options loaded",
+          data: [mockCsaAssignee],
+        });
+      }
       if (init?.method === "POST") {
         return jsonResponse(
           {
@@ -106,6 +121,17 @@ function createFollowUpTasksFetchMock(tasks: unknown[] = [mockTask]) {
           },
           201,
         );
+      }
+      if (init?.method === "PUT" && url.endsWith(`/follow-up-tasks/${mockTask.id}/complete`)) {
+        return jsonResponse({
+          success: true,
+          message: "Follow-up task completed",
+          data: {
+            ...mockTask,
+            status: "COMPLETED",
+            completedAt: "2026-07-11T09:30:00Z",
+          },
+        });
       }
       if (init?.method === "PUT" && url.endsWith(`/follow-up-tasks/${mockTask.id}/assign`)) {
         const body = JSON.parse(String(init.body)) as { assignedTo: string };
@@ -132,24 +158,25 @@ function createFollowUpTasksFetchMock(tasks: unknown[] = [mockTask]) {
 describe("FollowUpTasksPage", () => {
   afterEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     vi.unstubAllGlobals();
   });
 
-  it("loads follow-up tasks and displays worklist context", async () => {
+  it("loads follow-up tasks and displays assigned worklist for agents", async () => {
     vi.stubGlobal("fetch", createFollowUpTasksFetchMock([mockTask]));
 
     renderFollowUpTasksPage(authorizedUser);
 
-    expect(await screen.findByRole("heading", { name: "Follow-up tasks" })).toBeInTheDocument();
-    expect(
-      screen.getByText("Assignee, priority, status, due date, customer, and campaign context"),
-    ).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Assigned worklist" })).toBeInTheDocument();
     expect(await screen.findByRole("table", { name: "Follow-up tasks table" })).toBeInTheDocument();
     expect(screen.getByText("Call Ada")).toBeInTheDocument();
     expect(screen.getByText("Ada Followup")).toBeInTheDocument();
     expect(screen.getByText("Renewal campaign")).toBeInTheDocument();
     expect(screen.getByText("Sales Agent")).toBeInTheDocument();
-    // Priority/status labels can appear in filters and the worklist table.
+    // Assignee can mark own open task complete
+    expect(
+      screen.getByRole("button", { name: "Mark follow-up Call Ada complete" }),
+    ).toBeInTheDocument();
     expect(screen.getAllByText("High").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("Open").length).toBeGreaterThanOrEqual(1);
   });
@@ -161,15 +188,29 @@ describe("FollowUpTasksPage", () => {
     renderFollowUpTasksPage(createAuthorizedUser);
     await screen.findByText("Call Ada");
 
-    await userEvent.type(screen.getByLabelText("Follow-up customer ID"), mockTask.customerId);
-    await userEvent.type(screen.getByLabelText("Follow-up task title"), "Call Ada");
-    await userEvent.type(screen.getByLabelText("Follow-up assigned user ID"), authorizedUser.id);
-    await userEvent.type(screen.getByLabelText("Follow-up campaign ID"), mockTask.campaignId);
-    await userEvent.selectOptions(screen.getByLabelText("Create follow-up priority"), "HIGH");
+    const expandCreate = await screen.findByRole("button", { name: "Expand create task" });
+    await userEvent.click(expandCreate);
+    fireEvent.change(screen.getByLabelText("Follow-up customer ID"), {
+      target: { value: mockTask.customerId },
+    });
+    fireEvent.change(screen.getByLabelText("Follow-up task title"), {
+      target: { value: "Call Ada" },
+    });
+    fireEvent.change(screen.getByLabelText("Follow-up assigned Customer Service Agent"), {
+      target: { value: mockCsaAssignee.id },
+    });
+    fireEvent.change(screen.getByLabelText("Follow-up campaign ID"), {
+      target: { value: mockTask.campaignId },
+    });
+    fireEvent.change(screen.getByLabelText("Create follow-up priority"), {
+      target: { value: "HIGH" },
+    });
     fireEvent.change(screen.getByLabelText("Create follow-up due date"), {
       target: { value: "2026-09-15" },
     });
-    await userEvent.type(screen.getByLabelText("Follow-up description"), "Discuss renewal options");
+    fireEvent.change(screen.getByLabelText("Follow-up description"), {
+      target: { value: "Discuss renewal options" },
+    });
     await userEvent.click(screen.getByRole("button", { name: "Create task" }));
 
     await waitFor(() => {
@@ -186,47 +227,83 @@ describe("FollowUpTasksPage", () => {
     expect(JSON.parse((postCall?.[1] as RequestInit).body as string)).toEqual({
       customerId: mockTask.customerId,
       campaignId: mockTask.campaignId,
-      assignedTo: authorizedUser.id,
+      assignedTo: mockCsaAssignee.id,
       title: "Call Ada",
       description: "Discuss renewal options",
       dueDate: "2026-09-15",
       priority: "HIGH",
     });
+  }, 15_000);
+
+  it("lets campaign managers assign follow-up tasks and refreshes the worklist", async () => {
+    const fetchMock = createFollowUpTasksFetchMock([mockTask]);
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderFollowUpTasksPage(createAuthorizedUser);
+    await screen.findByText("Call Ada");
+
+    const assignSelect = await screen.findByLabelText("Assign follow-up Call Ada");
+    await userEvent.selectOptions(assignSelect, mockCsaAssignee.id);
+    await userEvent.click(screen.getByRole("button", { name: "Assign" }));
+
     await waitFor(() => {
-      expect(fetchMock.mock.calls.filter((call) => String(call[0]).includes("/follow-up-tasks")))
-        .toHaveLength(3);
+      expect(
+        fetchMock.mock.calls.some(
+          (call) =>
+            String(call[0]).endsWith(`/follow-up-tasks/${mockTask.id}/assign`) &&
+            (call[1] as RequestInit | undefined)?.method === "PUT",
+        ),
+      ).toBe(true);
+    });
+    const putCall = fetchMock.mock.calls.find((call) =>
+      String(call[0]).endsWith(`/follow-up-tasks/${mockTask.id}/assign`),
+    );
+    expect(JSON.parse((putCall?.[1] as RequestInit).body as string)).toEqual({
+      assignedTo: mockCsaAssignee.id,
     });
   });
 
-  it("lets authorized users assign follow-up tasks and refreshes the worklist", async () => {
+  it("lets the assignee mark a follow-up task complete", async () => {
     const fetchMock = createFollowUpTasksFetchMock([mockTask]);
     vi.stubGlobal("fetch", fetchMock);
 
     renderFollowUpTasksPage(authorizedUser);
     await screen.findByText("Call Ada");
 
-    const assigneeId = "10000000-0000-0000-0000-000000000371";
-    await userEvent.clear(screen.getByLabelText("Assign follow-up Call Ada"));
-    await userEvent.type(screen.getByLabelText("Assign follow-up Call Ada"), assigneeId);
-    await userEvent.click(screen.getByRole("button", { name: "Assign" }));
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mark follow-up Call Ada complete" }),
+    );
 
     await waitFor(() => {
       expect(
         fetchMock.mock.calls.some(
-          (call) => (call[1] as RequestInit | undefined)?.method === "PUT",
+          (call) =>
+            String(call[0]).endsWith(`/follow-up-tasks/${mockTask.id}/complete`) &&
+            (call[1] as RequestInit | undefined)?.method === "PUT",
         ),
       ).toBe(true);
     });
-    const putCall = fetchMock.mock.calls.find(
-      (call) => (call[1] as RequestInit | undefined)?.method === "PUT",
+  });
+
+  it("lets managers mark any follow-up task complete", async () => {
+    const fetchMock = createFollowUpTasksFetchMock([mockTask]);
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderFollowUpTasksPage(createAuthorizedUser);
+    await screen.findByText("Call Ada");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: "Mark follow-up Call Ada complete" }),
     );
-    expect(putCall?.[0]).toBe(`${API_BASE_URL}/follow-up-tasks/${mockTask.id}/assign`);
-    expect(JSON.parse((putCall?.[1] as RequestInit).body as string)).toEqual({
-      assignedTo: assigneeId,
-    });
+
     await waitFor(() => {
-      expect(fetchMock.mock.calls.filter((call) => String(call[0]).includes("/follow-up-tasks")))
-        .toHaveLength(3);
+      expect(
+        fetchMock.mock.calls.some(
+          (call) =>
+            String(call[0]).endsWith(`/follow-up-tasks/${mockTask.id}/complete`) &&
+            (call[1] as RequestInit | undefined)?.method === "PUT",
+        ),
+      ).toBe(true);
     });
   });
 
@@ -242,14 +319,14 @@ describe("FollowUpTasksPage", () => {
     expect(screen.queryByRole("button", { name: "Create task" })).not.toBeInTheDocument();
   });
 
-  it("applies assignee priority status and due-date filters", async () => {
+  it("applies priority status and due-date filters for assigned worklist", async () => {
     const fetchMock = createFollowUpTasksFetchMock([mockTask]);
     vi.stubGlobal("fetch", fetchMock);
 
     renderFollowUpTasksPage(authorizedUser);
     await screen.findByText("Call Ada");
 
-    await userEvent.type(screen.getByLabelText("Follow-up assignee ID"), authorizedUser.id);
+    await userEvent.click(screen.getByRole("button", { name: "Expand filters" }));
     await userEvent.selectOptions(screen.getByLabelText("Follow-up priority"), "HIGH");
     await userEvent.selectOptions(screen.getByLabelText("Follow-up status"), "OPEN");
     fireEvent.change(screen.getByLabelText("Follow-up due date from"), {
@@ -261,8 +338,15 @@ describe("FollowUpTasksPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Apply filters" }));
 
     await waitFor(() => {
-      const url = new URL(fetchMock.mock.calls[fetchMock.mock.calls.length - 1][0] as string);
+      const listCalls = fetchMock.mock.calls.filter(
+        (call) =>
+          String(call[0]).includes("/follow-up-tasks") &&
+          !String(call[0]).includes("assignee-options") &&
+          !(call[1] as RequestInit | undefined)?.method,
+      );
+      const url = new URL(listCalls[listCalls.length - 1][0] as string);
       expect(url.pathname).toBe("/api/follow-up-tasks");
+      // Agent worklist always forces own assignee
       expect(url.searchParams.get("assignedTo")).toBe(authorizedUser.id);
       expect(url.searchParams.get("priority")).toBe("HIGH");
       expect(url.searchParams.get("status")).toBe("OPEN");

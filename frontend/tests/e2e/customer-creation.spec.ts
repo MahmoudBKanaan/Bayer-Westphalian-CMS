@@ -23,7 +23,7 @@ test.describe("Customer creation through UI (item 599)", () => {
   });
 
   test("creates a customer from the Customers page", async ({ page }) => {
-    await page.getByRole("link", { name: "Customers" }).click();
+    await page.getByRole("link", { name: "Customers", exact: true }).click();
     await expect(page.getByRole("heading", { name: CUSTOMER_CREATE_SECTION_HEADING })).toBeVisible();
 
     const form = page.getByRole("form", { name: CUSTOMER_CREATE_FORM_ARIA_LABEL });
@@ -45,7 +45,7 @@ test.describe("Customer creation through UI (item 599)", () => {
   });
 
   test("shows create validation without posting incomplete data", async ({ page }) => {
-    await page.getByRole("link", { name: "Customers" }).click();
+    await page.getByRole("link", { name: "Customers", exact: true }).click();
     const form = page.getByRole("form", { name: CUSTOMER_CREATE_FORM_ARIA_LABEL });
     await form.getByLabel("Email", { exact: true }).fill("not-an-email");
     await form.getByLabel("Phone").fill("CALLME");

@@ -15,7 +15,7 @@ export async function loginAsHappyPathAdmin(page: Page) {
 }
 
 export async function createHappyPathCustomer(page: Page) {
-  await page.getByRole("link", { name: "Customers" }).click();
+  await page.getByRole("link", { name: "Customers", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Create customer" })).toBeVisible();
 
   const form = page.getByRole("form", { name: "Create customer form" });
@@ -42,7 +42,9 @@ export async function recordHappyPathConsent(page: Page) {
     .first()
     .click();
 
-  await expect(page.getByRole("heading", { name: "Customer details" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Customer details", level: 2, exact: true }),
+  ).toBeVisible();
 
   const consentForm = page.getByRole("form", { name: "Record consent" });
   await consentForm.getByLabel("Purpose").fill(HAPPY_PATH_FIXTURES.consentPurpose);
@@ -54,7 +56,7 @@ export async function recordHappyPathConsent(page: Page) {
 }
 
 export async function createAndSubmitHappyPathCampaign(page: Page) {
-  await page.getByRole("link", { name: "Builder" }).click();
+  await page.getByRole("link", { name: "Builder", exact: true }).click();
   await expect(page.getByRole("heading", { name: "Campaign Builder", level: 2 })).toBeVisible({
     timeout: 15_000,
   });
@@ -93,7 +95,7 @@ export async function approveHappyPathCampaign(page: Page) {
 
   const queue = page.getByRole("table", { name: "Submitted campaigns table" });
   await expect(queue.getByText(HAPPY_PATH_FIXTURES.campaignName)).toBeVisible();
-  await queue.getByRole("button", { name: "Review" }).first().click();
+  await queue.getByRole("button", { name: /Review|Selected/ }).first().click();
 
   await page.getByLabel("Compliance review notes").fill("Approved in Playwright happy-path");
   await page.getByRole("button", { name: "Approve campaign" }).click();
@@ -113,7 +115,9 @@ export async function launchHappyPathCampaign(page: Page) {
     .getByRole("link", { name: "Preview" })
     .click();
 
-  await expect(page.getByRole("heading", { name: "Recipient Preview" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Recipient Preview", level: 2, exact: true }),
+  ).toBeVisible();
   await expect(page.getByLabel("Launch readiness")).toContainText(/ready|approved/i);
 
   await page.getByRole("button", { name: "Launch campaign" }).click();

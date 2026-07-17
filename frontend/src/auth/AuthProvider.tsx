@@ -41,9 +41,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setAuthState(loadStoredAuthState());
     };
 
+    // Same-tab updates (login/logout/refresh via this module).
     window.addEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
+    // Cross-tab updates: localStorage writes from other tabs fire the StorageEvent.
+    const handleStorage = (event: StorageEvent) => {
+      if (
+        event.storageArea === localStorage &&
+        (event.key === null ||
+          event.key === "bwc.accessToken" ||
+          event.key === "bwc.refreshToken" ||
+          event.key === "bwc.currentUser")
+      ) {
+        setAuthState(loadStoredAuthState());
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+
     return () => {
       window.removeEventListener(AUTH_SESSION_CHANGED_EVENT, handleAuthSessionChanged);
+      window.removeEventListener("storage", handleStorage);
     };
   }, []);
 

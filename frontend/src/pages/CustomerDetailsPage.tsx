@@ -84,6 +84,8 @@ import {
 } from "@/api/productOwnerships";
 import { CustomerStatusBadge } from "@/components/CustomerStatusBadge";
 import { ConsentStatusBadge } from "@/components/ConsentStatusBadge";
+import { DefaultRiskScorePanel } from "@/components/DefaultRiskScorePanel";
+import { ProductRecommendationPanel } from "@/components/ProductRecommendationPanel";
 import { StatusBadge } from "@/components/StatusBadge";
 import { usePermissions } from "@/features/auth/usePermissions";
 
@@ -459,6 +461,11 @@ export function CustomerDetailsPage() {
             assignProductOwnershipMutation.error ?? updateProductOwnershipMutation.error
           }
         />
+        <ProductRecommendationPanel
+          customerId={customer.id}
+          customerName={customer.fullName}
+        />
+        <DefaultRiskScorePanel customerId={customer.id} customerName={customer.fullName} />
         {canReadPaymentRecords ? (
           <PaymentRecordsTab
             customerId={customer.id}

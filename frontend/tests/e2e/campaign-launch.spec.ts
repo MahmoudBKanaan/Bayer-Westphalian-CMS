@@ -11,6 +11,7 @@ import {
 } from "../../src/features/campaigns/campaignLaunchFlow";
 import {
   createHappyPathMockState,
+  E2E_API_ROUTE_PATTERN,
   handleHappyPathApiRequest,
 } from "../../src/features/e2e/happyPathApiMock";
 import { HAPPY_PATH_ADMIN, HAPPY_PATH_FIXTURES } from "../../src/features/e2e/happyPathFlow";
@@ -47,7 +48,7 @@ async function installCampaignLaunchApiMock(page: import("@playwright/test").Pag
     updatedAt: "2026-07-12T12:00:00Z",
   };
 
-  await page.route("**/api/**", async (route) => {
+  await page.route(E2E_API_ROUTE_PATTERN, async (route) => {
     const request = route.request();
     const response = handleHappyPathApiRequest(state, {
       method: request.method().toUpperCase() as "GET" | "POST" | "PUT" | "PATCH" | "DELETE",

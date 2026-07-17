@@ -61,6 +61,14 @@ describe("AiRecommendationSections (item 490)", () => {
       "href",
       "/campaign-builder",
     );
+    expect(screen.getByRole("link", { name: "Open campaigns" })).toHaveAttribute(
+      "href",
+      "/campaigns",
+    );
+    expect(
+      screen.getByText(/run Check Duplicate-Contact Risk/i),
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Confidence:\s*82/i)).not.toBeInTheDocument();
     expect(screen.getAllByLabelText("AI explanation")).toHaveLength(sections.length);
     expect(
       screen.getByText(/Drafts campaign copy from objective, product, audience, and channel/i),

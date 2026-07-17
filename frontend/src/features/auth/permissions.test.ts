@@ -9,6 +9,7 @@ import {
   CAMPAIGN_READ_ROLES,
   CAMPAIGN_REVIEW_ROLES,
   FOLLOW_UP_TASK_ASSIGN_ROLES,
+  FOLLOW_UP_TASK_COMPLETE_ROLES,
   FOLLOW_UP_TASK_CREATE_ROLES,
   FOLLOW_UP_TASK_READ_ROLES,
   REMINDER_MANAGE_ROLES,
@@ -208,21 +209,39 @@ describe("follow-up task permissions", () => {
     );
   });
 
-  it("allows KB assignment roles to assign follow-up tasks", () => {
-    expect(FOLLOW_UP_TASK_ASSIGN_ROLES).toEqual([
-      "ADMIN",
-      "CUSTOMER_SERVICE_AGENT",
-      "SALES_AGENT",
-      "CAMPAIGN_MANAGER",
-    ]);
+  it("allows only managers to assign follow-up tasks to agents", () => {
+    expect(FOLLOW_UP_TASK_ASSIGN_ROLES).toEqual(["ADMIN", "CAMPAIGN_MANAGER"]);
 
     for (const role of FOLLOW_UP_TASK_ASSIGN_ROLES) {
       const permissions = createPermissionChecks(checkerFor([role]));
       expect(permissions.canAssignFollowUpTasks()).toBe(true);
     }
+    expect(
+      createPermissionChecks(checkerFor(["CUSTOMER_SERVICE_AGENT"])).canAssignFollowUpTasks(),
+    ).toBe(false);
+    expect(createPermissionChecks(checkerFor(["SALES_AGENT"])).canAssignFollowUpTasks()).toBe(
+      false,
+    );
     expect(createPermissionChecks(checkerFor(["PRODUCT_MANAGER"])).canAssignFollowUpTasks()).toBe(
       false,
     );
+  });
+
+  it("allows assignee roles and managers to complete follow-up tasks", () => {
+    expect(FOLLOW_UP_TASK_COMPLETE_ROLES).toEqual([
+      "ADMIN",
+      "CAMPAIGN_MANAGER",
+      "CUSTOMER_SERVICE_AGENT",
+      "SALES_AGENT",
+    ]);
+
+    for (const role of FOLLOW_UP_TASK_COMPLETE_ROLES) {
+      const permissions = createPermissionChecks(checkerFor([role]));
+      expect(permissions.canCompleteFollowUpTasks()).toBe(true);
+    }
+    expect(
+      createPermissionChecks(checkerFor(["PRODUCT_MANAGER"])).canCompleteFollowUpTasks(),
+    ).toBe(false);
   });
 });
 
@@ -301,12 +320,19 @@ describe("AI recommendation permissions", () => {
     expect(createPermissionChecks(checkerFor(["CAMPAIGN_MANAGER"])).canUseAiCampaignCopy()).toBe(
       true,
     );
+    expect(createPermissionChecks(checkerFor(["ADMIN"])).canUseAiCampaignCopy()).toBe(true);
     expect(createPermissionChecks(checkerFor(["BI_ANALYST"])).canUseAiCampaignCopy()).toBe(false);
   });
 
   it("uses customer-read roles for customer signals and duplicate warnings", () => {
     expect(createPermissionChecks(checkerFor(["CUSTOMER_SERVICE_AGENT"])).canUseAiCustomerSignals())
       .toBe(true);
+    expect(
+      createPermissionChecks(checkerFor(["CAMPAIGN_MANAGER"])).canUseDuplicateContactWarning(),
+    ).toBe(true);
+    expect(
+      createPermissionChecks(checkerFor(["EXECUTIVE_VIEWER"])).canUseDuplicateContactWarning(),
+    ).toBe(false);
     expect(createPermissionChecks(checkerFor(["EXECUTIVE_VIEWER"])).canUseAiCustomerSignals()).toBe(
       false,
     );

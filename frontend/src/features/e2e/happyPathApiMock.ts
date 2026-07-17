@@ -12,6 +12,9 @@ import {
 
 export type MockHttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
+/** Matches backend API paths without intercepting Vite modules such as /src/api/client.ts. */
+export const E2E_API_ROUTE_PATTERN = /^https?:\/\/[^/]+\/api(?:\/|$)/;
+
 export type MockApiRequest = {
   method: MockHttpMethod;
   /** Full request URL. */

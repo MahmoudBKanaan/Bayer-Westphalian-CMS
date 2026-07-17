@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -177,19 +177,19 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function renderAnalyticsPage(roles: SystemRoleName[] = ["BI_ANALYST"]) {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(roles));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-  sessionStorage.setItem(
-    AUTH_STORAGE_KEYS.currentUser,
-    JSON.stringify({
-      id: "10000000-0000-0000-0000-000000000441",
-      email: "bi@bayer-westphalian.test",
-      fullName: "BI Analyst",
-      status: "ACTIVE",
-      lastLoginAt: "2026-07-11T10:00:00Z",
-      roles,
-    }),
-  );
+  const token = createAccessToken(roles);
+  const userJson = JSON.stringify({
+    id: "10000000-0000-0000-0000-000000000441",
+    email: "bi@bayer-westphalian.test",
+    fullName: "BI Analyst",
+    status: "ACTIVE",
+    lastLoginAt: "2026-07-11T10:00:00Z",
+    roles,
+  });
+  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, token);
+  localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+  localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, userJson);
+  sessionStorage.clear();
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -256,6 +256,7 @@ function createAnalyticsFetchMock(options?: {
 describe("AnalyticsPage (item 441)", () => {
   afterEach(() => {
     sessionStorage.clear();
+    localStorage.clear();
     vi.unstubAllGlobals();
   });
 
@@ -281,7 +282,8 @@ describe("AnalyticsPage (item 441)", () => {
     expect(
       await screen.findByRole("table", { name: "Product performance table" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Life Protection Plus")).toBeInTheDocument();
+    // Product name appears in the product filter select and the performance table.
+    expect(screen.getAllByText("Life Protection Plus").length).toBeGreaterThanOrEqual(1);
 
     expect(screen.getByRole("heading", { name: "Campaign analytics" })).toBeInTheDocument();
     expect(
@@ -343,14 +345,82 @@ describe("AnalyticsPage (item 441)", () => {
     renderAnalyticsPage(["ADMIN"]);
 
     expect(
-      await screen.findByText("No campaign metrics are available for rate comparison yet."),
+      await screen.findByText("No campaign metrics match the current filters."),
     ).toBeInTheDocument();
-    expect(screen.getByText("No product performance data is available yet.")).toBeInTheDocument();
-    expect(screen.getByText("No products are linked to campaign metrics yet.")).toBeInTheDocument();
     expect(
-      screen.getByText("No product financial chart data is available yet."),
+      screen.getByText("No product performance data matches the current filters."),
+    ).toBeInTheDocument();
+    expect(screen.getByText("No products match the current filters.")).toBeInTheDocument();
+    expect(
+      screen.getByText("No product financial chart data matches the current filters."),
     ).toBeInTheDocument();
     expect(screen.getByText("Select a campaign to view detailed analytics.")).toBeInTheDocument();
+  });
+
+  it("exposes campaign, product, and time-frame selectors and filters results", async () => {
+    const secondProduct = {
+      productId: "60000000-0000-0000-0000-000000000442",
+      productName: "Auto Saver Plan",
+      productType: "INVESTMENT",
+      campaignCount: 1,
+      audienceSize: 50,
+      eligibleCount: 40,
+      sentCount: 40,
+      openedCount: 10,
+      clickedCount: 4,
+      convertedCount: 1,
+      openRate: 0.25,
+      clickRate: 0.1,
+      conversionRate: 0.025,
+      estimatedCost: 100,
+      estimatedRevenue: 80,
+      estimatedRoi: -0.2,
+    };
+    vi.stubGlobal(
+      "fetch",
+      createAnalyticsFetchMock({
+        products: [...productPerformancePayload, secondProduct],
+        campaigns: [
+          { ...campaignsPayload[0], productIds: [productPerformancePayload[0].productId] },
+          { ...campaignsPayload[1], productIds: [secondProduct.productId] },
+        ],
+      }),
+    );
+
+    renderAnalyticsPage(["BI_ANALYST"]);
+    expect(await screen.findByLabelText("Analytics filters")).toBeInTheDocument();
+    const campaignFilter = screen.getByLabelText("Filter analytics by campaign");
+    const productFilter = screen.getByLabelText("Filter analytics by product");
+    const timeFilter = screen.getByLabelText("Filter analytics by time frame");
+    expect(campaignFilter).toBeInTheDocument();
+    expect(productFilter).toBeInTheDocument();
+    expect(timeFilter).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(productFilter.querySelectorAll("option").length).toBeGreaterThanOrEqual(3);
+    });
+    expect(productFilter).toHaveTextContent("Life Protection Plus");
+    expect(productFilter).toHaveTextContent("Auto Saver Plan");
+
+    fireEvent.change(productFilter, {
+      target: { value: productPerformancePayload[0].productId },
+    });
+    await waitFor(() => {
+      expect(screen.getByRole("table", { name: "Product performance table" })).toHaveTextContent(
+        "Life Protection Plus",
+      );
+      expect(screen.queryByRole("table", { name: "Product performance table" })).not.toHaveTextContent(
+        "Auto Saver Plan",
+      );
+    });
+
+    fireEvent.change(timeFilter, { target: { value: "CUSTOM" } });
+    expect(screen.getByLabelText("Analytics filter date from")).toBeInTheDocument();
+    expect(screen.getByLabelText("Analytics filter date to")).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Reset filters" }));
+    expect(campaignFilter).toHaveValue("");
+    expect(productFilter).toHaveValue("");
   });
 
   it("renders Recharts rate, mix, product, and financial visualizations (item 444)", async () => {
@@ -449,7 +519,14 @@ describe("AnalyticsPage (item 441)", () => {
       );
     });
     expect(
-      fetchMock.mock.calls.some(([url]) => String(url).startsWith(`${API_BASE_URL}/campaigns`)),
+      fetchMock.mock.calls.some(([url]) => {
+        const path = String(url);
+        // Campaign catalog only — not analytics campaign detail.
+        return (
+          path === `${API_BASE_URL}/campaigns` ||
+          path.startsWith(`${API_BASE_URL}/campaigns?`)
+        );
+      }),
     ).toBe(false);
   });
 });

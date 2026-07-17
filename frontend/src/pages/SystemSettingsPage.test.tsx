@@ -53,9 +53,9 @@ function jsonResponse(body: unknown, status = 200) {
 }
 
 function renderSettingsPage(user: typeof adminUser) {
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(user.roles));
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
-  sessionStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
+  localStorage.setItem(AUTH_STORAGE_KEYS.accessToken, createAccessToken(user.roles));
+  localStorage.setItem(AUTH_STORAGE_KEYS.refreshToken, "refresh-token");
+  localStorage.setItem(AUTH_STORAGE_KEYS.currentUser, JSON.stringify(user));
 
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -106,6 +106,7 @@ function createSettingsFetchMock(
 
 describe("SystemSettingsPage (item 534)", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
@@ -131,6 +132,20 @@ describe("SystemSettingsPage (item 534)", () => {
     expect(screen.getByLabelText(/Monthly marketing contact limit/i)).toHaveValue(3);
     expect(screen.getByLabelText(/Send retry limit/i)).toHaveValue(3);
     expect(screen.getByLabelText(/Uninterested exclusion period/i)).toHaveValue(90);
+    expect(
+      screen.getByRole("heading", { name: "Reminder and campaign policies" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Green first, Yellow second, Red third")).toBeInTheDocument();
+    expect(screen.getByText("3, 6, or 12 months before expiration")).toBeInTheDocument();
+    expect(screen.getByText("Required before launch")).toBeInTheDocument();
+    expect(screen.getByText("Blocked")).toBeInTheDocument();
+    expect(
+      screen.getByRole("table", { name: "Environment-managed system settings" }),
+    ).toBeInTheDocument();
+    expect(screen.getByText("Production CORS origins")).toBeInTheDocument();
+    expect(screen.getByText("JWT/session security")).toBeInTheDocument();
+    expect(screen.getByText("Database backups")).toBeInTheDocument();
+    expect(screen.queryByText(/dev-only-change-me/i)).not.toBeInTheDocument();
 
     expect(fetch).toHaveBeenCalledWith(
       `${API_BASE_URL}/system-settings`,

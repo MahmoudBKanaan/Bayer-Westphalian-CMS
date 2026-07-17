@@ -58,6 +58,7 @@ const sessionResponse = {
 
 describe("LoginPage", () => {
   afterEach(() => {
+    localStorage.clear();
     sessionStorage.clear();
     vi.unstubAllGlobals();
   });
@@ -98,9 +99,9 @@ describe("LoginPage", () => {
       },
       method: "POST",
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe("access-token");
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("refresh-token");
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBe(
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBe("access-token");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBe("refresh-token");
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBe(
       JSON.stringify(sessionResponse.data.user),
     );
     expect(screen.queryByRole("alert")).not.toBeInTheDocument();
@@ -186,9 +187,9 @@ describe("LoginPage", () => {
       );
     });
     expect(screen.queryByRole("heading", { name: "Campaign Performance" })).not.toBeInTheDocument();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("does not log in a disabled user account", async () => {
@@ -213,9 +214,9 @@ describe("LoginPage", () => {
       );
     });
     expect(screen.queryByRole("heading", { name: "Campaign Performance" })).not.toBeInTheDocument();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.refreshToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.currentUser)).toBeNull();
   });
 
   it("shows a rate-limit message when login is temporarily locked", async () => {
@@ -237,7 +238,7 @@ describe("LoginPage", () => {
     await waitFor(() => {
       expect(screen.getByTestId("login-error")).toHaveTextContent(LOGIN_RATE_LIMITED_MESSAGE);
     });
-    expect(sessionStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
+    expect(localStorage.getItem(AUTH_STORAGE_KEYS.accessToken)).toBeNull();
   });
 
   it("shows a generic login error when the backend is unavailable", async () => {

@@ -12,6 +12,7 @@ import {
 } from "../../src/features/dashboard/dashboardAnalyticsFlow";
 import {
   createHappyPathMockState,
+  E2E_API_ROUTE_PATTERN,
   handleHappyPathApiRequest,
   type MockHttpMethod,
 } from "../../src/features/e2e/happyPathApiMock";
@@ -26,7 +27,7 @@ async function installDashboardAnalyticsApiMock(page: import("@playwright/test")
   const state = createHappyPathMockState();
   const dashboard = createDashboardAnalyticsFixture();
 
-  await page.route("**/api/**", async (route) => {
+  await page.route(E2E_API_ROUTE_PATTERN, async (route) => {
     const request = route.request();
     const url = request.url();
     if (url.includes(dashboardAnalyticsEndpointPath()) && request.method().toUpperCase() === "GET") {
@@ -68,7 +69,11 @@ test.describe("Dashboard loads analytics (item 606)", () => {
     await expect(page.getByText(DASHBOARD_PAGE_LEAD)).toBeVisible();
 
     await expect(page.getByLabel(DASHBOARD_KPI_CARDS_ARIA_LABEL)).toBeVisible();
-    await expect(page.getByText(String(DASHBOARD_ANALYTICS_FIXTURES.campaignTotal))).toBeVisible();
+    await expect(
+      page
+        .getByLabel(DASHBOARD_KPI_CARDS_ARIA_LABEL)
+        .getByText(String(DASHBOARD_ANALYTICS_FIXTURES.campaignTotal), { exact: true }),
+    ).toBeVisible();
     await expect(page.getByRole("heading", { name: DASHBOARD_PERFORMANCE_HEADING })).toBeVisible();
     await expect(
       page.getByRole("heading", { name: DASHBOARD_RECENT_METRICS_HEADING }),

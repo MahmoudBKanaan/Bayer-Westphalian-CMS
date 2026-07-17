@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 import {
   createHappyPathMockState,
+  E2E_API_ROUTE_PATTERN,
   handleHappyPathApiRequest,
   type MockHttpMethod,
 } from "../../../src/features/e2e/happyPathApiMock";
@@ -12,7 +13,7 @@ import {
 export async function installHappyPathApiMock(page: Page) {
   const state = createHappyPathMockState();
 
-  await page.route("**/api/**", async (route) => {
+  await page.route(E2E_API_ROUTE_PATTERN, async (route) => {
     const request = route.request();
     const method = request.method().toUpperCase() as MockHttpMethod;
     const url = request.url();

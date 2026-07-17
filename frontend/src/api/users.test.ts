@@ -4,6 +4,7 @@ import {
   assignRole,
   createUser,
   disableUser,
+  enableUser,
   listUsers,
   resetPassword,
   updateUser,
@@ -47,7 +48,7 @@ describe("users api", () => {
     });
   });
 
-  it("sends create, update, disable, role, and password requests", async () => {
+  it("sends create, update, disable, enable, role, and password requests", async () => {
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
       json: async () => ({
@@ -65,6 +66,7 @@ describe("users api", () => {
     });
     await updateUser(user.id, { fullName: "Admin Updated", status: "ACTIVE" });
     await disableUser(user.id);
+    await enableUser(user.id, user.fullName);
     await assignRole(user.id, "CAMPAIGN_MANAGER", user.id);
     await resetPassword(user.id, "NewPass!2026");
 
@@ -91,6 +93,13 @@ describe("users api", () => {
         "Content-Type": "application/json",
       },
       method: "PATCH",
+    });
+    expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/users/${user.id}`, {
+      body: JSON.stringify({ fullName: user.fullName, status: "ACTIVE" }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+      method: "PUT",
     });
     expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/users/${user.id}/roles`, {
       body: JSON.stringify({

@@ -62,6 +62,10 @@ export async function disableUser(id: string): Promise<UserView> {
   return response.data;
 }
 
+export async function enableUser(id: string, fullName: string): Promise<UserView> {
+  return updateUser(id, { fullName, status: "ACTIVE" });
+}
+
 export async function assignRole(
   id: string,
   roleName: SystemRoleName,

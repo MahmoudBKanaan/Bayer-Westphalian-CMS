@@ -5,6 +5,7 @@ import {
   assignRole,
   createUser,
   disableUser,
+  enableUser,
   listUsers,
   resetPassword,
   updateUser,
@@ -40,7 +41,12 @@ const emptyCreateForm: CreateUserPayload = {
 };
 
 type CreateUserFormErrors = Partial<Record<keyof CreateUserPayload, string>>;
-type PendingSensitiveAction = "assign-role" | "disable-user" | "reset-password" | null;
+type PendingSensitiveAction =
+  | "assign-role"
+  | "disable-user"
+  | "enable-user"
+  | "reset-password"
+  | null;
 
 type UserEditDraft = {
   userId: string;
@@ -129,11 +135,22 @@ export function UsersPage() {
     },
   });
 
-  const disableMutation = useMutation({
-    mutationFn: () => disableUser(selectedUser?.id ?? ""),
-    onSuccess: async () => {
+  const accountStatusMutation = useMutation({
+    mutationFn: () =>
+      selectedUser?.status === "DISABLED"
+        ? enableUser(selectedUser.id, selectedUser.fullName)
+        : disableUser(selectedUser?.id ?? ""),
+    onSuccess: async (updatedUser) => {
       setPendingSensitiveAction(null);
-      setNotice("User disabled.");
+      setEditDraft(
+        createUserEditDraft(
+          updatedUser.id,
+          updatedUser.fullName,
+          updatedUser.status,
+          updatedUser.roles,
+        ),
+      );
+      setNotice(updatedUser.status === "ACTIVE" ? "User enabled." : "User disabled.");
       await refreshUsers();
     },
   });
@@ -152,7 +169,7 @@ export function UsersPage() {
     createMutation.isPending ||
     updateMutation.isPending ||
     assignRoleMutation.isPending ||
-    disableMutation.isPending ||
+    accountStatusMutation.isPending ||
     resetPasswordMutation.isPending;
 
   const errorMessage =
@@ -161,7 +178,7 @@ export function UsersPage() {
       createMutation.error,
       updateMutation.error,
       assignRoleMutation.error,
-      disableMutation.error,
+      accountStatusMutation.error,
       resetPasswordMutation.error,
     ) ||
     generalErrorMessage(
@@ -169,7 +186,7 @@ export function UsersPage() {
       createMutation.error,
       updateMutation.error,
       assignRoleMutation.error,
-      disableMutation.error,
+      accountStatusMutation.error,
       resetPasswordMutation.error,
     );
 
@@ -368,10 +385,14 @@ export function UsersPage() {
                 </button>
                 <button
                   type="button"
-                  disabled={isBusy || selectedUser.status === "DISABLED"}
-                  onClick={() => setPendingSensitiveAction("disable-user")}
+                  disabled={isBusy}
+                  onClick={() =>
+                    setPendingSensitiveAction(
+                      selectedUser.status === "DISABLED" ? "enable-user" : "disable-user",
+                    )
+                  }
                 >
-                  Disable user
+                  {selectedUser.status === "DISABLED" ? "Enable user" : "Disable user"}
                 </button>
               </div>
               <div>
@@ -455,20 +476,34 @@ export function UsersPage() {
                   onConfirm={() => assignRoleMutation.mutate()}
                 />
               ) : null}
-              {pendingSensitiveAction === "disable-user" ? (
+              {pendingSensitiveAction === "disable-user" ||
+              pendingSensitiveAction === "enable-user" ? (
                 <ConfirmationDialog
-                  id="disable-user-confirmation"
-                  title="Confirm user disable"
-                  description={
-                    <p>
-                      Disable {selectedUser.fullName}? This prevents the user from accessing the
-                      platform until an admin restores access.
-                    </p>
+                  id={`${pendingSensitiveAction}-confirmation`}
+                  title={
+                    pendingSensitiveAction === "enable-user"
+                      ? "Confirm user enable"
+                      : "Confirm user disable"
                   }
-                  confirmLabel="Disable user"
-                  busy={disableMutation.isPending}
+                  description={
+                    pendingSensitiveAction === "enable-user" ? (
+                      <p>
+                        Enable {selectedUser.fullName}? This restores the user&apos;s access using
+                        their assigned roles.
+                      </p>
+                    ) : (
+                      <p>
+                        Disable {selectedUser.fullName}? This prevents the user from accessing the
+                        platform until an admin restores access.
+                      </p>
+                    )
+                  }
+                  confirmLabel={
+                    pendingSensitiveAction === "enable-user" ? "Enable user" : "Disable user"
+                  }
+                  busy={accountStatusMutation.isPending}
                   onCancel={() => setPendingSensitiveAction(null)}
-                  onConfirm={() => disableMutation.mutate()}
+                  onConfirm={() => accountStatusMutation.mutate()}
                 />
               ) : null}
               {pendingSensitiveAction === "reset-password" ? (

@@ -30,12 +30,12 @@ export function buildAiRecommendationSections(
     sections.push({
       id: "duplicate-contact",
       title: "Duplicate-contact warning",
-      signal: "Contact frequency risk",
+      signal: "Navigation only — run check in recipient preview",
       explanation:
-        "Highlights same-campaign contact and monthly contact-limit risk before outreach.",
-      confidenceScore: 82,
-      destination: "/contact-history",
-      cta: "Open contact history",
+        "Open a campaign, open Recipient Preview, select a recipient, and run Check "
+        + "Duplicate-Contact Risk. No score is calculated until that action.",
+      destination: "/campaigns",
+      cta: "Open campaigns",
     });
     sections.push({
       id: "default-risk",

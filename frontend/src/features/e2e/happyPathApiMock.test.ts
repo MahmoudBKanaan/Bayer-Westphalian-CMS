@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createHappyPathMockState,
+  E2E_API_ROUTE_PATTERN,
   handleHappyPathApiRequest,
 } from "@/features/e2e/happyPathApiMock";
 import { HAPPY_PATH_ADMIN, HAPPY_PATH_FIXTURES } from "@/features/e2e/happyPathFlow";
@@ -8,6 +9,11 @@ import { HAPPY_PATH_ADMIN, HAPPY_PATH_FIXTURES } from "@/features/e2e/happyPathF
 const API = "http://localhost:8080/api";
 
 describe("happyPathApiMock (item 597)", () => {
+  it("intercepts backend API requests without replacing Vite source modules", () => {
+    expect(E2E_API_ROUTE_PATTERN.test(`${API}/auth/login`)).toBe(true);
+    expect(E2E_API_ROUTE_PATTERN.test("http://127.0.0.1:5173/src/api/client.ts")).toBe(false);
+  });
+
   it("serves a11y main-screen read endpoints used by item 609", () => {
     const state = createHappyPathMockState();
     expect(

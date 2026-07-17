@@ -53,7 +53,11 @@ async function assertPrimaryContent(
     return;
   }
   await expect(
-    page.getByRole("heading", { name: primary.name, level: primary.level ?? 2 }),
+    page.getByRole("heading", {
+      name: primary.name,
+      level: primary.level ?? 2,
+      exact: true,
+    }),
   ).toBeVisible();
 }
 

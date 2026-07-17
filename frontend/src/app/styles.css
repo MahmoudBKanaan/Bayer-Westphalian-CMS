@@ -1181,6 +1181,121 @@ th[scope="row"] {
   text-decoration: underline;
 }
 
+.duplicate-contact-warning-panel {
+  margin-top: 1rem;
+}
+
+.state-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem;
+}
+
+.state-panel strong {
+  color: #0f172a;
+}
+
+.state-panel p {
+  color: #475569;
+  margin: 0;
+}
+
+.error-panel {
+  border-radius: 8px;
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.9rem 1rem;
+}
+
+.risk-panel {
+  border-radius: 8px;
+  display: grid;
+  gap: 0.85rem;
+  margin-top: 0.75rem;
+  padding: 1rem;
+}
+
+.risk-panel--high {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+}
+
+.risk-panel--clear {
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+}
+
+.risk-panel__header {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  justify-content: space-between;
+}
+
+.duplicate-contact-details {
+  display: grid;
+  gap: 0.65rem;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  margin: 0;
+}
+
+.duplicate-contact-details div {
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+}
+
+.duplicate-contact-details dt {
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin: 0 0 0.2rem;
+  text-transform: uppercase;
+}
+
+.duplicate-contact-details dd {
+  color: #0f172a;
+  margin: 0;
+}
+
+.explanation-block h3 {
+  color: #0f172a;
+  font-size: 0.95rem;
+  margin: 0 0 0.35rem;
+}
+
+.explanation-block p {
+  color: #334155;
+  margin: 0;
+}
+
+.compliance-notice {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 0.75rem 0.9rem;
+}
+
+.compliance-notice strong {
+  color: #1e3a8a;
+}
+
+.compliance-notice p {
+  color: #1e40af;
+  margin: 0;
+}
+
+.recipient-row--selected {
+  background: #eff6ff;
+}
+
 .ai-explanation {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -1279,6 +1394,48 @@ th[scope="row"] {
 .section-heading span {
   color: #64748b;
   font-size: 0.9rem;
+}
+
+/* Collapsible cards (follow-up filters / create task) */
+.collapsible-panel-header {
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0;
+}
+
+.collapsible-panel.is-expanded .collapsible-panel-header {
+  margin-bottom: 1rem;
+}
+
+.collapsible-panel-titles {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.collapsible-panel-titles h2 {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.collapsible-panel-titles span {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.collapsible-panel-toggle {
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  white-space: nowrap;
+}
+
+.collapsible-panel.is-collapsed {
+  padding-bottom: 0.85rem;
+  padding-top: 0.85rem;
+}
+
+.collapsible-panel-body {
+  margin-top: 0;
 }
 
 .modal-backdrop {

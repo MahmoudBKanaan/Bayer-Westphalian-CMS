@@ -531,27 +531,45 @@ function AiCustomerSearchResults({
 
   return (
     <ul className="ai-recommendation-grid" aria-label="AI customer search results">
-      {result.results.map((hit) => (
-        <li className="ai-recommendation-card" key={hit.customerId}>
-          <div>
-            <strong>{hit.fullName}</strong>
-            <span>
-              Score {formatScore(hit.score)} - {formatNullable(hit.city)}
-              {hit.country ? `, ${hit.country}` : ""}
-            </span>
-          </div>
-          <AiExplanationDisplay
-            explanation={`Search explanation for ${hit.fullName}`}
-            factors={hit.explainScore.map((factor) => ({
-              fieldName: factor.factor,
-              weight: factor.weight,
-              contribution: factor.contribution,
-              reason: factor.detail ?? "Matched this customer search signal.",
-            }))}
-          />
-          <Link to={`/customers/${hit.customerId}`}>Details</Link>
-        </li>
-      ))}
+      {result.results.map((hit) => {
+        const matchedFields = hit.explainScore
+          .filter((factor) => Number(factor.contribution) > 0)
+          .map((factor) => factor.factor);
+        const explanation =
+          matchedFields.length > 0
+            ? `Approximate match on: ${matchedFields.join(", ")}.`
+            : `Search explanation for ${hit.fullName}`;
+        return (
+          <li className="ai-recommendation-card" key={hit.customerId}>
+            <div>
+              <strong>{hit.fullName}</strong>
+              <span>
+                Match score: {formatScore(hit.score)}% · AI-assisted search
+                {hit.city ? ` · ${hit.city}` : ""}
+                {hit.country ? `, ${hit.country}` : ""}
+              </span>
+            </div>
+            {matchedFields.length > 0 ? (
+              <p className="table-secondary-text">
+                Matched fields: {matchedFields.join(", ")}
+              </p>
+            ) : null}
+            <AiExplanationDisplay
+              explanation={explanation}
+              confidenceScore={
+                typeof hit.score === "number" ? hit.score : Number(hit.score)
+              }
+              factors={hit.explainScore.map((factor) => ({
+                fieldName: factor.factor,
+                weight: factor.weight,
+                contribution: factor.contribution,
+                reason: factor.detail ?? "Matched this customer search signal.",
+              }))}
+            />
+            <Link to={`/customers/${hit.customerId}`}>Open customer details</Link>
+          </li>
+        );
+      })}
     </ul>
   );
 }

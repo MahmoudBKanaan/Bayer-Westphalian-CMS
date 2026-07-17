@@ -15,6 +15,7 @@ import {
 import type { SegmentExclusionReasonSummary } from "@/api/segments";
 import { CampaignStatusBadge } from "@/components/CampaignStatusBadge";
 import { ConfirmationDialog } from "@/components/ConfirmationDialog";
+import { DuplicateContactWarningPanel } from "@/components/DuplicateContactWarningPanel";
 import { ExclusionReasonSummaryPanel } from "@/components/ExclusionReasonSummaryPanel";
 import { MetricCard } from "@/components/MetricCard";
 import { SegmentPreviewResults } from "@/components/SegmentPreviewResults";
@@ -54,10 +55,12 @@ export function CampaignRecipientPreviewPage() {
   const [notice, setNotice] = useState("");
   const [confirmLaunchOpen, setConfirmLaunchOpen] = useState(false);
   const [showLaunchResult, setShowLaunchResult] = useState(false);
+  const [selectedRecipient, setSelectedRecipient] = useState<CampaignRecipientView | null>(null);
   const queryClient = useQueryClient();
   const permissions = usePermissions();
   const canReadCampaigns = permissions.canReadCampaigns();
   const canManageCampaigns = permissions.canManageCampaigns();
+  const canUseDuplicateContactWarning = permissions.canUseDuplicateContactWarning();
 
   const campaignQuery = useQuery({
     queryKey: ["campaign", campaignId],
@@ -435,14 +438,69 @@ export function CampaignRecipientPreviewPage() {
           recipients={eligibleRecipientsQuery.data ?? []}
           loading={eligibleRecipientsQuery.isLoading}
           error={eligibleRecipientsQuery.isError}
+          selectedRecipientId={selectedRecipient?.id ?? null}
+          onSelectRecipient={setSelectedRecipient}
+          showRiskAction={canUseDuplicateContactWarning}
         />
       ) : (
         <ExcludedRecipientsTab
           recipients={excludedRecipientsQuery.data ?? []}
           loading={excludedRecipientsQuery.isLoading}
           error={excludedRecipientsQuery.isError}
+          selectedRecipientId={selectedRecipient?.id ?? null}
+          onSelectRecipient={setSelectedRecipient}
+          showRiskAction={canUseDuplicateContactWarning}
         />
       )}
+
+      {selectedRecipient != null && campaign != null ? (
+        <section
+          className="panel"
+          aria-labelledby="selected-recipient-heading"
+          data-testid="selected-recipient-details"
+        >
+          <div className="section-heading">
+            <h2 id="selected-recipient-heading">Recipient details</h2>
+            <span>{selectedRecipient.customerFullName}</span>
+          </div>
+          <dl className="details-grid duplicate-contact-details">
+            <div>
+              <dt>Customer</dt>
+              <dd>{selectedRecipient.customerFullName}</dd>
+            </div>
+            <div>
+              <dt>Eligibility</dt>
+              <dd>
+                <StatusBadge value={formatCampaignEnum(selectedRecipient.eligibilityStatus)} />
+              </dd>
+            </div>
+            <div>
+              <dt>Exclusion reason</dt>
+              <dd>
+                {selectedRecipient.exclusionReason != null
+                  ? presentRecipientExclusionReason(selectedRecipient.exclusionReason).title
+                  : "None"}
+              </dd>
+            </div>
+            <div>
+              <dt>Explanation</dt>
+              <dd>
+                {selectedRecipient.eligibilityExplanation ?? "No explanation recorded"}
+              </dd>
+            </div>
+          </dl>
+          {canUseDuplicateContactWarning ? (
+            <DuplicateContactWarningPanel
+              customerId={selectedRecipient.customerId}
+              customerName={selectedRecipient.customerFullName}
+              campaignId={campaign.id}
+              campaignName={campaign.name}
+              currentEligibilityStatus={selectedRecipient.eligibilityStatus}
+              currentExclusionReason={selectedRecipient.exclusionReason}
+            />
+          ) : null}
+        </section>
+      ) : null}
     </section>
   );
 }
@@ -544,10 +602,16 @@ function EligibleRecipientsTab({
   recipients,
   loading,
   error,
+  selectedRecipientId,
+  onSelectRecipient,
+  showRiskAction,
 }: {
   recipients: CampaignRecipientView[];
   loading: boolean;
   error: boolean;
+  selectedRecipientId: string | null;
+  onSelectRecipient: (recipient: CampaignRecipientView) => void;
+  showRiskAction: boolean;
 }) {
   return (
     <section
@@ -564,7 +628,8 @@ function EligibleRecipientsTab({
       </div>
       <p className="recipient-preview-section-hint">
         These recipients passed eligibility checks for this campaign. After launch, status may show
-        Sent when a contact event exists.
+        Sent when a contact event exists. Open recipient details to run a duplicate-contact risk
+        check when authorized.
       </p>
       {loading ? <p className="table-state">Loading eligible recipients.</p> : null}
       {error ? (
@@ -596,11 +661,17 @@ function EligibleRecipientsTab({
                 <th scope="col">Explanation</th>
                 <th scope="col">Sent</th>
                 <th scope="col">Created</th>
+                {showRiskAction ? <th scope="col">Actions</th> : null}
               </tr>
             </thead>
             <tbody>
               {recipients.map((recipient) => (
-                <tr key={recipient.id}>
+                <tr
+                  key={recipient.id}
+                  className={
+                    selectedRecipientId === recipient.id ? "recipient-row--selected" : undefined
+                  }
+                >
                   <th scope="row">
                     <span className="table-primary-text">{recipient.customerFullName}</span>
                     <span className="table-secondary-text">{recipient.customerId}</span>
@@ -611,6 +682,18 @@ function EligibleRecipientsTab({
                   <td>{recipient.eligibilityExplanation ?? "Eligible for campaign contact"}</td>
                   <td>{formatDateTime(recipient.sentAt)}</td>
                   <td>{formatDateTime(recipient.createdAt)}</td>
+                  {showRiskAction ? (
+                    <td>
+                      <button
+                        type="button"
+                        className="table-action-link"
+                        onClick={() => onSelectRecipient(recipient)}
+                        aria-label={`View details for ${recipient.customerFullName}`}
+                      >
+                        View details
+                      </button>
+                    </td>
+                  ) : null}
                 </tr>
               ))}
             </tbody>
@@ -625,10 +708,16 @@ function ExcludedRecipientsTab({
   recipients,
   loading,
   error,
+  selectedRecipientId,
+  onSelectRecipient,
+  showRiskAction,
 }: {
   recipients: CampaignRecipientView[];
   loading: boolean;
   error: boolean;
+  selectedRecipientId: string | null;
+  onSelectRecipient: (recipient: CampaignRecipientView) => void;
+  showRiskAction: boolean;
 }) {
   return (
     <section
@@ -643,7 +732,8 @@ function ExcludedRecipientsTab({
       </div>
       <p className="recipient-preview-section-hint">
         Each row includes a stable reason code and a plain-language explanation for compliance
-        review (BR-001–003, BR-010–011).
+        review (BR-001–003, BR-010–011). Open recipient details to inspect duplicate-contact risk
+        (advisory only).
       </p>
       {loading ? <p className="table-state">Loading excluded recipients.</p> : null}
       {error ? (
@@ -679,13 +769,19 @@ function ExcludedRecipientsTab({
                 <th scope="col">Reason</th>
                 <th scope="col">Explanation</th>
                 <th scope="col">Created</th>
+                {showRiskAction ? <th scope="col">Actions</th> : null}
               </tr>
             </thead>
             <tbody>
               {recipients.map((recipient) => {
                 const reason = presentRecipientExclusionReason(recipient.exclusionReason);
                 return (
-                  <tr key={recipient.id}>
+                  <tr
+                    key={recipient.id}
+                    className={
+                      selectedRecipientId === recipient.id ? "recipient-row--selected" : undefined
+                    }
+                  >
                     <th scope="row">
                       <span className="table-primary-text">{recipient.customerFullName}</span>
                       <span className="table-secondary-text">{recipient.customerId}</span>
@@ -701,6 +797,18 @@ function ExcludedRecipientsTab({
                     </td>
                     <td>{recipient.eligibilityExplanation ?? "No explanation recorded"}</td>
                     <td>{formatDateTime(recipient.createdAt)}</td>
+                    {showRiskAction ? (
+                      <td>
+                        <button
+                          type="button"
+                          className="table-action-link"
+                          onClick={() => onSelectRecipient(recipient)}
+                          aria-label={`View details for ${recipient.customerFullName}`}
+                        >
+                          View details
+                        </button>
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })}

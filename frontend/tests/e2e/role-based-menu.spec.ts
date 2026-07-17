@@ -7,6 +7,7 @@ import {
 } from "../../src/features/auth/roleBasedMenu";
 import {
   createHappyPathMockState,
+  E2E_API_ROUTE_PATTERN,
   handleHappyPathApiRequest,
   type MockHttpMethod,
 } from "../../src/features/e2e/happyPathApiMock";
@@ -18,7 +19,7 @@ import { loginAsHappyPathAdmin } from "./helpers/uiActions";
 
 async function installShellApiMock(page: import("@playwright/test").Page) {
   const state = createHappyPathMockState();
-  await page.route("**/api/**", async (route) => {
+  await page.route(E2E_API_ROUTE_PATTERN, async (route) => {
     const request = route.request();
     const response = handleHappyPathApiRequest(state, {
       method: request.method().toUpperCase() as MockHttpMethod,
@@ -45,9 +46,9 @@ async function seedSession(
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
         .replace(/=+$/g, "");
-      sessionStorage.setItem("bwc.accessToken", `header.${payload}.signature`);
-      sessionStorage.setItem("bwc.refreshToken", "refresh-token");
-      sessionStorage.setItem(
+      localStorage.setItem("bwc.accessToken", `header.${payload}.signature`);
+      localStorage.setItem("bwc.refreshToken", "refresh-token");
+      localStorage.setItem(
         "bwc.currentUser",
         JSON.stringify({
           id: "10000000-0000-0000-0000-000000009907",
@@ -82,7 +83,11 @@ test.describe("Role-based menu hides unauthorized features (item 607)", () => {
     expect(labels).toEqual(EXPECTED_MENU_LABELS_BY_ROLE.ADMIN);
     await expect(page.getByRole("link", { name: "Users" })).toBeVisible();
     await expect(page.getByRole("link", { name: "Settings" })).toBeVisible();
-    await expect(page.getByRole("link", { name: CAMPAIGN_BUILDER_MENU_LABEL })).toBeVisible();
+    await expect(
+      page
+        .getByLabel(MAIN_NAV_ARIA_LABEL)
+        .getByRole("link", { name: CAMPAIGN_BUILDER_MENU_LABEL, exact: true }),
+    ).toBeVisible();
   });
 
   test("campaign manager sees builder but not admin-only links", async ({ page }) => {
@@ -97,7 +102,11 @@ test.describe("Role-based menu hides unauthorized features (item 607)", () => {
 
     const labels = await navLabels(page);
     expect(labels).toEqual(EXPECTED_MENU_LABELS_BY_ROLE.CAMPAIGN_MANAGER);
-    await expect(page.getByRole("link", { name: CAMPAIGN_BUILDER_MENU_LABEL })).toBeVisible();
+    await expect(
+      page
+        .getByLabel(MAIN_NAV_ARIA_LABEL)
+        .getByRole("link", { name: CAMPAIGN_BUILDER_MENU_LABEL, exact: true }),
+    ).toBeVisible();
     for (const label of ADMIN_ONLY_MENU_LABELS) {
       await expect(page.getByRole("link", { name: label })).toHaveCount(0);
     }
@@ -111,7 +120,11 @@ test.describe("Role-based menu hides unauthorized features (item 607)", () => {
     const labels = await navLabels(page);
     expect(labels).toEqual(EXPECTED_MENU_LABELS_BY_ROLE.BI_ANALYST);
     await expect(page.getByRole("link", { name: "Analytics" })).toBeVisible();
-    await expect(page.getByRole("link", { name: CAMPAIGN_BUILDER_MENU_LABEL })).toHaveCount(0);
+    await expect(
+      page
+        .getByLabel(MAIN_NAV_ARIA_LABEL)
+        .getByRole("link", { name: CAMPAIGN_BUILDER_MENU_LABEL, exact: true }),
+    ).toHaveCount(0);
     for (const label of ADMIN_ONLY_MENU_LABELS) {
       await expect(page.getByRole("link", { name: label })).toHaveCount(0);
     }

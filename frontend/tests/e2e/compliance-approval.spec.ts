@@ -10,6 +10,7 @@ import {
 } from "../../src/features/campaigns/complianceApprovalFlow";
 import {
   createHappyPathMockState,
+  E2E_API_ROUTE_PATTERN,
   handleHappyPathApiRequest,
 } from "../../src/features/e2e/happyPathApiMock";
 import { HAPPY_PATH_ADMIN, HAPPY_PATH_FIXTURES } from "../../src/features/e2e/happyPathFlow";
@@ -48,7 +49,7 @@ async function installComplianceApprovalApiMock(
     updatedAt: "2026-07-12T12:05:00Z",
   };
 
-  await page.route("**/api/**", async (route) => {
+  await page.route(E2E_API_ROUTE_PATTERN, async (route) => {
     const request = route.request();
     const response = handleHappyPathApiRequest(state, {
       method: request.method().toUpperCase() as "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
@@ -77,7 +78,7 @@ test.describe("Compliance approval through UI (item 604)", () => {
 
     const queue = page.getByRole("table", { name: COMPLIANCE_QUEUE_TABLE_ARIA_LABEL });
     await expect(queue.getByText(COMPLIANCE_APPROVAL_FIXTURES.campaignName)).toBeVisible();
-    await queue.getByRole("button", { name: "Review" }).first().click();
+    await queue.getByRole("button", { name: /Review|Selected/ }).first().click();
 
     await page
       .getByLabel(COMPLIANCE_REVIEW_NOTES_LABEL)
@@ -104,9 +105,9 @@ test.describe("Compliance approval through UI (item 604)", () => {
         .replace(/\+/g, "-")
         .replace(/\//g, "_")
         .replace(/=+$/g, "");
-      sessionStorage.setItem("bwc.accessToken", `header.${payload}.signature`);
-      sessionStorage.setItem("bwc.refreshToken", "refresh-token");
-      sessionStorage.setItem(
+      localStorage.setItem("bwc.accessToken", `header.${payload}.signature`);
+      localStorage.setItem("bwc.refreshToken", "refresh-token");
+      localStorage.setItem(
         "bwc.currentUser",
         JSON.stringify({
           id: "10000000-0000-0000-0000-000000000101",

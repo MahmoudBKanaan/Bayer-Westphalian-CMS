@@ -88,6 +88,86 @@ export function SystemSettingsPage() {
           />
         ) : null}
       </div>
+
+      <PolicySettingsSection />
+      <EnvironmentSettingsSection />
+    </section>
+  );
+}
+
+const reminderAndCampaignPolicies = [
+  { name: "Payment reminder escalation", value: "Green first, Yellow second, Red third", detail: "The Red level indicates likely default risk (BR-020 to BR-022)." },
+  { name: "Product-expiration reminder windows", value: "3, 6, or 12 months before expiration", detail: "Campaign Managers choose one of the KB-approved windows (BR-023)." },
+  { name: "Completed-payment suppression", value: "Enabled", detail: "Payment reminders are not sent after payment is completed (BR-024)." },
+  { name: "Reminder attempt logging", value: "Required", detail: "Every reminder-processing attempt is recorded for operations and audit review (FR-089)." },
+  { name: "Campaign compliance approval", value: "Required before launch", detail: "Only an approved campaign may launch; AI copy approval does not approve a campaign (BR-005)." },
+  { name: "Recipient eligibility enforcement", value: "Enabled", detail: "Consent, opt-out, do-not-contact, guardian consent, duplicate, conversion, and frequency rules remain authoritative." },
+  { name: "Duplicate campaign contact", value: "Blocked", detail: "The same customer cannot receive the same campaign twice (BR-010)." },
+] as const;
+
+const environmentManagedSettings = [
+  ["Reminder processing schedule", "REMINDER_PROCESSING_CRON / REMINDER_PROCESSING_ZONE"],
+  ["Email provider", "EMAIL_PROVIDER_MODE and SMTP environment variables"],
+  ["SMS provider", "SMS_PROVIDER_MODE and provider environment variables"],
+  ["Consent evidence storage", "FILE_STORAGE_MODE / FILE_STORAGE_LOCAL_PATH"],
+  ["Production CORS origins", "CORS_ALLOWED_ORIGINS"],
+  ["HTTPS and HSTS", "HTTPS_REQUIRED / HTTPS_HSTS_ENABLED"],
+  ["JWT/session security", "JWT_SECRET and token lifetime environment variables"],
+  ["Login rate limiting", "LOGIN_RATE_LIMIT_* environment variables"],
+  ["Production logging", "LOG_LEVEL_* environment variables"],
+  ["Health endpoint", "Spring Actuator health configuration"],
+  ["Database connection and pool", "DB_* environment variables"],
+  ["Database backups", "Deployment scheduler and backup retention policy"],
+] as const;
+
+function PolicySettingsSection() {
+  return (
+    <section className="panel" aria-labelledby="policy-settings-heading">
+      <div className="section-heading">
+        <h2 id="policy-settings-heading">Reminder and campaign policies</h2>
+        <span>KB-controlled rules - read only</span>
+      </div>
+      <p className="table-secondary-text">
+        These fixed compliance and workflow controls are visible for Admin review but cannot be
+        weakened from the browser.
+      </p>
+      <dl className="details-grid" aria-label="Reminder and campaign policy settings">
+        {reminderAndCampaignPolicies.map((setting) => (
+          <div key={setting.name}>
+            <dt>{setting.name}</dt>
+            <dd>
+              <strong>{setting.value}</strong>
+              <span className="table-secondary-text">{setting.detail}</span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  );
+}
+
+function EnvironmentSettingsSection() {
+  return (
+    <section className="panel" aria-labelledby="environment-settings-heading">
+      <div className="section-heading">
+        <h2 id="environment-settings-heading">Environment-managed configuration</h2>
+        <span>Deployment and security settings - read only</span>
+      </div>
+      <p className="table-secondary-text">
+        Production values are managed through approved environment and infrastructure
+        configuration. Secret values and credentials are never displayed here.
+      </p>
+      <div className="table-wrapper">
+        <table aria-label="Environment-managed system settings">
+          <caption>KB production configuration and its management source</caption>
+          <thead><tr><th scope="col">Setting</th><th scope="col">Managed through</th></tr></thead>
+          <tbody>
+            {environmentManagedSettings.map(([name, source]) => (
+              <tr key={name}><th scope="row">{name}</th><td>{source}</td></tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </section>
   );
 }

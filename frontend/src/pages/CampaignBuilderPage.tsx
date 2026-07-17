@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   approveCampaignCopySuggestion,
   generateCampaignCopySuggestion,
@@ -22,6 +22,7 @@ import { listProducts, type ProductView } from "@/api/products";
 import { listSegments, type SegmentView } from "@/api/segments";
 import { AiExplanationDisplay } from "@/components/AiExplanationDisplay";
 import { CampaignStatusBadge } from "@/components/CampaignStatusBadge";
+import { ConfirmationDialog } from "@/components/ConfirmationDialog";
 import { usePermissions } from "@/features/auth/usePermissions";
 import {
   CAMPAIGN_BUILDER_PAGE_LEAD,
@@ -54,6 +55,7 @@ import {
 export function CampaignBuilderPage() {
   const permissions = usePermissions();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const [form, setForm] = useState<CampaignFormPayload>(emptyCampaignForm);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
@@ -63,8 +65,15 @@ export function CampaignBuilderPage() {
   const [copySuggestion, setCopySuggestion] = useState<CampaignCopySuggestionView | null>(null);
   const [copyApproval, setCopyApproval] = useState<AiRecommendationView | null>(null);
   const [copyReviewNotes, setCopyReviewNotes] = useState("");
+  const [editedCopySubject, setEditedCopySubject] = useState("");
+  const [editedCopyBody, setEditedCopyBody] = useState("");
+  const [editedCopyCta, setEditedCopyCta] = useState("");
+  const [copyEditing, setCopyEditing] = useState(false);
+  const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
+  const [copyApprovedAt, setCopyApprovedAt] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [currentStepId, setCurrentStepId] = useState<CampaignBuilderStepId>("basics");
+  const [aiProductNoticeShown, setAiProductNoticeShown] = useState(false);
 
   const segmentsQuery = useQuery({
     queryKey: ["segments", "campaign-builder"],
@@ -78,6 +87,22 @@ export function CampaignBuilderPage() {
   const segments = useMemo(() => segmentsQuery.data ?? [], [segmentsQuery.data]);
   const products = useMemo(() => productsQuery.data ?? [], [productsQuery.data]);
   const selectedProduct = products.find((product) => product.id === selectedProductIds[0]);
+
+  // AI-003 "Use in campaign draft": preselect an active product from ?productId= for human review.
+  useEffect(() => {
+    const productId = searchParams.get("productId")?.trim() ?? "";
+    if (productId.length === 0 || products.length === 0 || aiProductNoticeShown) {
+      return;
+    }
+    const product = products.find((row) => row.id === productId && row.active !== false);
+    if (product == null) {
+      return;
+    }
+    setSelectedProductIds([product.id]);
+    setNotice("AI-recommended product loaded for human review. Campaign remains a draft.");
+    setAiProductNoticeShown(true);
+    setCurrentStepId("audience");
+  }, [searchParams, products, aiProductNoticeShown]);
   const selectedSegment = segments.find((segment) => segment.id === form.segmentId);
   const canBuildCampaigns = permissions.canManageCampaigns();
   const canUseAiCampaignCopy = permissions.canUseAiCampaignCopy();
@@ -120,16 +145,40 @@ export function CampaignBuilderPage() {
     onSuccess: (suggestion) => {
       setCopySuggestion(suggestion);
       setCopyApproval(null);
-      setNotice("AI campaign copy suggestion generated for human review.");
+      setCopyApprovedAt(null);
+      setEditedCopySubject(suggestion.subject);
+      setEditedCopyBody(suggestion.body);
+      setEditedCopyCta(suggestion.callToAction ?? "");
+      setCopyEditing(false);
+      setNotice(
+        "AI campaign copy suggestion generated for human review. Campaign form text was not changed.",
+      );
     },
   });
 
   const approveCopyMutation = useMutation({
     mutationFn: () =>
-      approveCampaignCopySuggestion(copySuggestion?.storedRecommendationId ?? "", copyReviewNotes),
+      approveCampaignCopySuggestion(copySuggestion?.storedRecommendationId ?? "", {
+        reviewNotes: copyReviewNotes,
+        editedSubject: editedCopySubject,
+        editedMessageBody: editedCopyBody,
+        editedCallToAction: editedCopyCta,
+      }),
     onSuccess: (approval) => {
       setCopyApproval(approval);
-      setNotice("AI campaign copy approved by a human reviewer.");
+      setCopyApprovedAt(new Date().toISOString());
+      setApproveConfirmOpen(false);
+      setCopyEditing(false);
+      // Apply approved text into the local draft form only after human approval.
+      updateFormField("messageSubject", editedCopySubject.trim());
+      const bodyWithCta =
+        editedCopyCta.trim().length > 0
+          ? `${editedCopyBody.trim()}\n\n${editedCopyCta.trim()}`
+          : editedCopyBody.trim();
+      updateFormField("messageBody", bodyWithCta);
+      setNotice(
+        "AI campaign copy approved and applied to the draft. Campaign remains DRAFT. Compliance approval is still required.",
+      );
     },
   });
 
@@ -293,26 +342,64 @@ export function CampaignBuilderPage() {
                 <CampaignCopyApprovalPanel
                   suggestion={copySuggestion}
                   approval={copyApproval}
+                  approvedAt={copyApprovedAt}
                   reviewNotes={copyReviewNotes}
+                  editedSubject={editedCopySubject}
+                  editedBody={editedCopyBody}
+                  editedCta={editedCopyCta}
+                  editing={copyEditing}
+                  productName={selectedProduct?.name ?? null}
+                  segmentName={selectedSegment?.name ?? null}
+                  campaignStatus={createdCampaign?.status ?? null}
+                  formSubject={form.messageSubject}
+                  formBody={form.messageBody}
+                  generating={generateCopyMutation.isPending}
+                  approving={approveCopyMutation.isPending}
                   canGenerate={form.objective.trim().length > 0}
                   busy={isBusy}
                   onReviewNotesChange={setCopyReviewNotes}
+                  onEditedSubjectChange={setEditedCopySubject}
+                  onEditedBodyChange={setEditedCopyBody}
+                  onEditedCtaChange={setEditedCopyCta}
+                  onToggleEdit={() => setCopyEditing((value) => !value)}
+                  onDismiss={() => {
+                    setCopySuggestion(null);
+                    setCopyApproval(null);
+                    setCopyApprovedAt(null);
+                    setCopyEditing(false);
+                    setCopyReviewNotes("");
+                    setNotice("AI campaign copy suggestion dismissed. Campaign form was not changed.");
+                  }}
                   onGenerate={() => {
                     setNotice("");
                     generateCopyMutation.mutate();
                   }}
-                  onApprove={() => {
+                  onRequestApprove={() => {
                     setNotice("");
-                    approveCopyMutation.mutate();
+                    setApproveConfirmOpen(true);
                   }}
-                  onApply={() => {
-                    if (copySuggestion == null || copyApproval?.approved !== true) {
-                      return;
-                    }
-                    updateFormField("messageSubject", copySuggestion.subject);
-                    updateFormField("messageBody", copySuggestion.body);
-                    setNotice("Approved AI copy applied to the campaign message.");
-                  }}
+                />
+              ) : null}
+              {approveConfirmOpen ? (
+                <ConfirmationDialog
+                  id="approve-ai-copy-confirmation"
+                  title="Approve AI Copy Suggestion?"
+                  description={
+                    <>
+                      <p>
+                        The suggested copy will be copied into the campaign draft message fields.
+                      </p>
+                      <p>
+                        <strong>This does not approve the campaign for launch.</strong> Compliance
+                        Officer approval is still required before launch.
+                      </p>
+                    </>
+                  }
+                  confirmLabel="Approve and Apply"
+                  confirmVariant="primary"
+                  busy={approveCopyMutation.isPending}
+                  onCancel={() => setApproveConfirmOpen(false)}
+                  onConfirm={() => approveCopyMutation.mutate()}
                 />
               ) : null}
             </>
@@ -824,66 +911,200 @@ function ReviewStepContent({
 function CampaignCopyApprovalPanel({
   suggestion,
   approval,
+  approvedAt,
   reviewNotes,
+  editedSubject,
+  editedBody,
+  editedCta,
+  editing,
+  productName,
+  segmentName,
+  campaignStatus,
+  formSubject,
+  formBody,
+  generating,
+  approving,
   canGenerate,
   busy,
   onReviewNotesChange,
+  onEditedSubjectChange,
+  onEditedBodyChange,
+  onEditedCtaChange,
+  onToggleEdit,
+  onDismiss,
   onGenerate,
-  onApprove,
-  onApply,
+  onRequestApprove,
 }: {
   suggestion: CampaignCopySuggestionView | null;
   approval: AiRecommendationView | null;
+  approvedAt: string | null;
   reviewNotes: string;
+  editedSubject: string;
+  editedBody: string;
+  editedCta: string;
+  editing: boolean;
+  productName: string | null;
+  segmentName: string | null;
+  campaignStatus: string | null;
+  formSubject: string;
+  formBody: string;
+  generating: boolean;
+  approving: boolean;
   canGenerate: boolean;
   busy: boolean;
   onReviewNotesChange: (value: string) => void;
+  onEditedSubjectChange: (value: string) => void;
+  onEditedBodyChange: (value: string) => void;
+  onEditedCtaChange: (value: string) => void;
+  onToggleEdit: () => void;
+  onDismiss: () => void;
   onGenerate: () => void;
-  onApprove: () => void;
-  onApply: () => void;
+  onRequestApprove: () => void;
 }) {
   const isApproved = approval?.approved === true;
   const hasStoredRecommendation = suggestion?.storedRecommendationId != null;
+  const formUnchangedBySuggestion =
+    suggestion != null &&
+    formSubject.trim() !== suggestion.subject.trim() &&
+    !isApproved;
 
   return (
     <section
       className="campaign-builder-ai-panel"
-      aria-labelledby="ai-copy-approval-heading"
+      aria-labelledby="ai-copy-assistant-heading"
+      data-testid="ai-copy-assistant"
     >
       <div className="section-heading">
-        <h3 id="ai-copy-approval-heading">AI campaign copy approval</h3>
-        <span>Human review required before use</span>
+        <h3 id="ai-copy-assistant-heading">AI Copy Assistant</h3>
+        <span>Rule-based decision support (AI-005) · human review required</span>
       </div>
+      <p className="table-secondary-text">
+        Suggestions stay separate from the campaign message form until a human clicks{" "}
+        <strong>Approve and Apply</strong>. This never submits, compliance-approves, or launches
+        the campaign.
+      </p>
       <div className="ai-copy-panel">
-        <button type="button" disabled={!canGenerate || busy} onClick={onGenerate}>
-          Generate AI copy
+        <button
+          type="button"
+          disabled={!canGenerate || busy}
+          onClick={onGenerate}
+          aria-label="Generate AI campaign copy suggestion"
+        >
+          {generating ? "Generating…" : "Generate AI copy"}
         </button>
-        {suggestion == null ? (
-          <p className="table-state">No AI copy suggestion has been generated yet.</p>
-        ) : (
+        {generating ? (
+          <p className="table-state" role="status" aria-live="polite">
+            Generating campaign copy suggestion…
+          </p>
+        ) : null}
+        {!generating && suggestion == null ? (
+          <p className="table-state" data-testid="ai-copy-idle">
+            No AI copy suggestion has been generated yet. Status: idle.
+          </p>
+        ) : null}
+        {suggestion != null ? (
           <div className="ai-copy-suggestion" aria-label="AI campaign copy suggestion">
+            <p className="form-success" role="status" data-testid="ai-copy-pending-banner">
+              {isApproved
+                ? "Suggestion status: APPROVED BY USER"
+                : "Draft suggestion — human review required (PENDING_REVIEW)"}
+            </p>
             <dl className="detail-list">
               <div>
-                <dt>Subject</dt>
-                <dd>{suggestion.subject}</dd>
+                <dt>Product</dt>
+                <dd>{productName ?? "Not selected"}</dd>
               </div>
               <div>
-                <dt>Body</dt>
-                <dd>{suggestion.body}</dd>
+                <dt>Target segment</dt>
+                <dd>{segmentName ?? "Not selected"}</dd>
               </div>
               <div>
-                <dt>Call to action</dt>
-                <dd>{suggestion.callToAction ?? "Not provided"}</dd>
+                <dt>Suggested subject</dt>
+                <dd>
+                  {editing ? (
+                    <input
+                      aria-label="Edit suggested subject"
+                      value={editedSubject}
+                      onChange={(event) => onEditedSubjectChange(event.target.value)}
+                    />
+                  ) : (
+                    editedSubject || suggestion.subject
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>Suggested message</dt>
+                <dd>
+                  {editing ? (
+                    <textarea
+                      aria-label="Edit suggested message"
+                      value={editedBody}
+                      onChange={(event) => onEditedBodyChange(event.target.value)}
+                    />
+                  ) : (
+                    editedBody || suggestion.body
+                  )}
+                </dd>
+              </div>
+              <div>
+                <dt>Suggested CTA</dt>
+                <dd>
+                  {editing ? (
+                    <input
+                      aria-label="Edit suggested call to action"
+                      value={editedCta}
+                      onChange={(event) => onEditedCtaChange(event.target.value)}
+                    />
+                  ) : (
+                    editedCta || suggestion.callToAction || "Not provided"
+                  )}
+                </dd>
               </div>
               <div>
                 <dt>Approval status</dt>
-                <dd>{isApproved ? "Human approved" : "Awaiting human approval"}</dd>
+                <dd>
+                  {isApproved ? "Human approved" : "Awaiting human approval"}
+                </dd>
               </div>
+              {isApproved ? (
+                <>
+                  <div>
+                    <dt>Approved by</dt>
+                    <dd>{approval?.approvedByFullName ?? "Campaign Manager"}</dd>
+                  </div>
+                  <div>
+                    <dt>Approved at</dt>
+                    <dd>
+                      {approvedAt
+                        ? new Intl.DateTimeFormat("en", {
+                            dateStyle: "medium",
+                            timeStyle: "short",
+                          }).format(new Date(approvedAt))
+                        : "Just now"}
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Campaign status</dt>
+                    <dd>
+                      {campaignStatus ?? "DRAFT"} — remains DRAFT after copy approval
+                    </dd>
+                  </div>
+                  <div>
+                    <dt>Compliance approval</dt>
+                    <dd>Still required before launch</dd>
+                  </div>
+                </>
+              ) : null}
               <div>
                 <dt>AI audit notes</dt>
                 <dd>{approval?.reviewNotes ?? "No review notes recorded"}</dd>
               </div>
             </dl>
+            {formUnchangedBySuggestion ? (
+              <p className="campaign-builder-step-hint" data-testid="ai-copy-form-unchanged">
+                Campaign message form is unchanged until Approve and Apply.
+              </p>
+            ) : null}
             <AiExplanationDisplay
               explanation={suggestion.explanation}
               confidenceScore={suggestion.confidenceScore}
@@ -894,23 +1115,38 @@ function CampaignCopyApprovalPanel({
               <textarea
                 aria-label="AI copy review notes"
                 value={reviewNotes}
+                disabled={isApproved}
                 onChange={(event) => onReviewNotesChange(event.target.value)}
               />
             </label>
             <div className="button-row">
               <button
                 type="button"
-                disabled={!hasStoredRecommendation || isApproved || busy}
-                onClick={onApprove}
+                className="secondary-button"
+                disabled={isApproved || busy}
+                onClick={onToggleEdit}
               >
-                Approve AI copy
+                {editing ? "Done editing" : "Edit"}
               </button>
-              <button type="button" disabled={!isApproved || busy} onClick={onApply}>
-                Apply approved copy
+              <button
+                type="button"
+                className="secondary-button"
+                disabled={isApproved || busy}
+                onClick={onDismiss}
+              >
+                Reject/Dismiss
+              </button>
+              <button
+                type="button"
+                disabled={!hasStoredRecommendation || isApproved || busy || approving}
+                onClick={onRequestApprove}
+                aria-label="Approve and Apply AI copy"
+              >
+                {approving ? "Approving…" : "Approve and Apply"}
               </button>
             </div>
           </div>
-        )}
+        ) : null}
       </div>
     </section>
   );

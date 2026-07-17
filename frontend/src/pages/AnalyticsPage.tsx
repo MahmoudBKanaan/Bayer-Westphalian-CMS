@@ -25,6 +25,15 @@ import {
   toProductPerformanceChartRows,
   toRateComparisonChartRows,
 } from "@/features/analytics/analyticsCharts";
+import {
+  ANALYTICS_TIMEFRAME_OPTIONS,
+  areAnalyticsFiltersActive,
+  dashboardFromMetrics,
+  emptyAnalyticsFilters,
+  filterCampaignMetrics,
+  filterProductPerformance,
+  type AnalyticsFilterState,
+} from "@/features/analytics/analyticsFilters";
 import { usePermissions } from "@/features/auth/usePermissions";
 import { formatMoney, formatNumber, formatRate } from "@/utils/format";
 
@@ -32,13 +41,14 @@ import { formatMoney, formatNumber, formatRate } from "@/utils/format";
  * Analytics screen (KB item 441 / E19 / FR-104–FR-108 / item 444 Recharts).
  *
  * Loads engagement, conversion, ROI, product performance comparisons, and optional
- * campaign analytics drill-down for authorized analytics roles.
+ * campaign analytics drill-down. Supports selectors/filters for **campaign**, **product**,
+ * and **time frame** so analysts can narrow KPIs and charts (KB Analytics workflows).
  */
 export function AnalyticsPage() {
   const permissions = usePermissions();
   const canViewAnalytics = permissions.canViewAnalytics();
   const canReadCampaigns = permissions.canReadCampaigns();
-  const [selectedCampaignId, setSelectedCampaignId] = useState("");
+  const [filters, setFilters] = useState<AnalyticsFilterState>(emptyAnalyticsFilters);
 
   const dashboardQuery = useQuery({
     queryKey: ["analytics", "dashboard"],
@@ -60,16 +70,46 @@ export function AnalyticsPage() {
 
   const campaignOptions = useMemo(
     () =>
-      buildCampaignOptions(
-        campaignsQuery.data,
-        dashboardQuery.data?.recentCampaignMetrics,
-      ),
+      buildCampaignOptions(campaignsQuery.data, dashboardQuery.data?.recentCampaignMetrics),
     [campaignsQuery.data, dashboardQuery.data?.recentCampaignMetrics],
   );
 
+  const productOptions = useMemo(
+    () => buildProductOptions(productPerformanceQuery.data),
+    [productPerformanceQuery.data],
+  );
+
+  const filtersActive = areAnalyticsFiltersActive(filters);
+
+  const filteredMetrics = useMemo(
+    () =>
+      filterCampaignMetrics(
+        dashboardQuery.data?.recentCampaignMetrics,
+        filters,
+        campaignsQuery.data,
+      ),
+    [dashboardQuery.data?.recentCampaignMetrics, filters, campaignsQuery.data],
+  );
+
+  const filteredProducts = useMemo(
+    () =>
+      filterProductPerformance(
+        productPerformanceQuery.data,
+        filters,
+        campaignsQuery.data,
+        filteredMetrics,
+      ),
+    [productPerformanceQuery.data, filters, campaignsQuery.data, filteredMetrics],
+  );
+
+  const filteredDashboard = useMemo(
+    () => dashboardFromMetrics(dashboardQuery.data, filteredMetrics, filtersActive),
+    [dashboardQuery.data, filteredMetrics, filtersActive],
+  );
+
   const resolvedCampaignId =
-    selectedCampaignId !== ""
-      ? selectedCampaignId
+    filters.campaignId !== ""
+      ? filters.campaignId
       : (campaignOptions[0]?.id ?? "");
 
   const campaignAnalyticsQuery = useQuery({
@@ -92,8 +132,8 @@ export function AnalyticsPage() {
     );
   }
 
-  const dashboard = dashboardQuery.data;
-  const products = productPerformanceQuery.data ?? [];
+  const dashboard = filteredDashboard;
+  const products = filteredProducts;
   const isLoadingOverview =
     dashboardQuery.isLoading || productPerformanceQuery.isLoading;
   const overviewError = firstErrorMessage(
@@ -119,12 +159,23 @@ export function AnalyticsPage() {
         ) : null}
       </div>
 
+      <AnalyticsFiltersPanel
+        filters={filters}
+        campaignOptions={campaignOptions}
+        productOptions={productOptions}
+        campaignsLoading={campaignsQuery.isLoading}
+        productsLoading={productPerformanceQuery.isLoading}
+        filtersActive={filtersActive}
+        onChange={setFilters}
+        onReset={() => setFilters(emptyAnalyticsFilters)}
+      />
+
       {dashboard != null ? <EngagementKpiGrid dashboard={dashboard} /> : null}
 
       <section className="panel">
         <div className="section-heading">
           <h2>Campaign rate comparison</h2>
-          <span>Open, click, and conversion rates across recent campaigns</span>
+          <span>Open, click, and conversion rates across filtered campaigns</span>
         </div>
         <MultiSeriesBarChart
           data={toRateComparisonChartRows(dashboard?.recentCampaignMetrics)}
@@ -140,7 +191,7 @@ export function AnalyticsPage() {
           ariaLabel="Campaign open click and conversion rate comparison chart"
           isLoading={dashboardQuery.isLoading}
           loadingMessage="Loading campaign rate comparison…"
-          emptyMessage="No campaign metrics are available for rate comparison yet."
+          emptyMessage="No campaign metrics match the current filters."
           yAxisUnit="%"
         />
       </section>
@@ -155,7 +206,7 @@ export function AnalyticsPage() {
           ariaLabel="Analytics engagement mix pie chart"
           isLoading={dashboardQuery.isLoading}
           loadingMessage="Loading engagement mix chart…"
-          emptyMessage="No engagement mix data is available yet."
+          emptyMessage="No engagement mix data matches the current filters."
         />
       </section>
 
@@ -174,7 +225,7 @@ export function AnalyticsPage() {
             ariaLabel="Product sent messages versus conversions chart"
             isLoading={productPerformanceQuery.isLoading}
             loadingMessage="Loading product performance chart…"
-            emptyMessage="No product performance data is available yet."
+            emptyMessage="No product performance data matches the current filters."
           />
         </div>
         <FinancialLineChart
@@ -182,7 +233,7 @@ export function AnalyticsPage() {
           ariaLabel="Product cost revenue and ROI line chart"
           isLoading={productPerformanceQuery.isLoading}
           loadingMessage="Loading product financial chart…"
-          emptyMessage="No product financial chart data is available yet."
+          emptyMessage="No product financial chart data matches the current filters."
         />
         <ProductPerformanceTable
           rows={products}
@@ -201,7 +252,9 @@ export function AnalyticsPage() {
             <select
               aria-label="Select campaign for analytics"
               value={resolvedCampaignId}
-              onChange={(event) => setSelectedCampaignId(event.target.value)}
+              onChange={(event) =>
+                setFilters((current) => ({ ...current, campaignId: event.target.value }))
+              }
               disabled={campaignOptions.length === 0}
             >
               {campaignOptions.length === 0 ? (
@@ -226,6 +279,119 @@ export function AnalyticsPage() {
           hasSelection={resolvedCampaignId !== ""}
         />
       </section>
+    </section>
+  );
+}
+
+function AnalyticsFiltersPanel({
+  filters,
+  campaignOptions,
+  productOptions,
+  campaignsLoading,
+  productsLoading,
+  filtersActive,
+  onChange,
+  onReset,
+}: {
+  filters: AnalyticsFilterState;
+  campaignOptions: CampaignOption[];
+  productOptions: ProductOption[];
+  campaignsLoading: boolean;
+  productsLoading: boolean;
+  filtersActive: boolean;
+  onChange: (filters: AnalyticsFilterState) => void;
+  onReset: () => void;
+}) {
+  return (
+    <section className="panel" aria-label="Analytics filters">
+      <div className="section-heading">
+        <h2>Filters</h2>
+        <span>
+          {filtersActive
+            ? "Results narrowed by campaign, product, and/or time frame"
+            : "Filter by campaign, product, and time frame (KB Analytics)"}
+        </span>
+      </div>
+      <div className="form-grid">
+        <label>
+          Campaign
+          <select
+            aria-label="Filter analytics by campaign"
+            value={filters.campaignId}
+            disabled={campaignsLoading && campaignOptions.length === 0}
+            onChange={(event) => onChange({ ...filters, campaignId: event.target.value })}
+          >
+            <option value="">All campaigns</option>
+            {campaignOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Product
+          <select
+            aria-label="Filter analytics by product"
+            value={filters.productId}
+            disabled={productsLoading && productOptions.length === 0}
+            onChange={(event) => onChange({ ...filters, productId: event.target.value })}
+          >
+            <option value="">All products</option>
+            {productOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Time frame
+          <select
+            aria-label="Filter analytics by time frame"
+            value={filters.timeframe}
+            onChange={(event) =>
+              onChange({
+                ...filters,
+                timeframe: event.target.value as AnalyticsFilterState["timeframe"],
+              })
+            }
+          >
+            {ANALYTICS_TIMEFRAME_OPTIONS.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        {filters.timeframe === "CUSTOM" ? (
+          <>
+            <label>
+              From
+              <input
+                type="date"
+                aria-label="Analytics filter date from"
+                value={filters.dateFrom}
+                onChange={(event) => onChange({ ...filters, dateFrom: event.target.value })}
+              />
+            </label>
+            <label>
+              To
+              <input
+                type="date"
+                aria-label="Analytics filter date to"
+                value={filters.dateTo}
+                onChange={(event) => onChange({ ...filters, dateTo: event.target.value })}
+              />
+            </label>
+          </>
+        ) : null}
+        <div className="form-actions">
+          <button type="button" className="secondary-button" onClick={onReset}>
+            Reset filters
+          </button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -278,7 +444,7 @@ function ProductPerformanceTable({
     return <p>Loading product performance table…</p>;
   }
   if (rows.length === 0) {
-    return <p>No products are linked to campaign metrics yet.</p>;
+    return <p>No products match the current filters.</p>;
   }
 
   return (
@@ -425,6 +591,7 @@ function CampaignMetricsDetailTable({ metrics }: { metrics: CampaignMetricsView 
 }
 
 type CampaignOption = { id: string; label: string };
+type ProductOption = { id: string; label: string };
 
 function buildCampaignOptions(
   campaigns: CampaignView[] | undefined,
@@ -433,7 +600,6 @@ function buildCampaignOptions(
   const options: CampaignOption[] = [];
   const seen = new Set<string>();
 
-  // Prefer campaign list order from the API when available.
   for (const campaign of campaigns ?? []) {
     if (seen.has(campaign.id)) {
       continue;
@@ -445,7 +611,6 @@ function buildCampaignOptions(
     });
   }
 
-  // Fall back to recent metrics (e.g. MARKETING_ANALYST without campaign list access).
   for (const metrics of recentMetrics ?? []) {
     if (seen.has(metrics.campaignId)) {
       continue;
@@ -460,6 +625,15 @@ function buildCampaignOptions(
   }
 
   return options;
+}
+
+function buildProductOptions(
+  products: ProductPerformanceView[] | undefined,
+): ProductOption[] {
+  return (products ?? []).map((row) => ({
+    id: row.productId,
+    label: row.productName?.trim() || row.productId,
+  }));
 }
 
 function formatEnumLabel(value: string | null | undefined): string {

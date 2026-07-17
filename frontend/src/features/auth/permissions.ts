@@ -89,11 +89,20 @@ export const FOLLOW_UP_TASK_CREATE_ROLES: SystemRoleName[] = [
   "CAMPAIGN_MANAGER",
 ];
 
-export const FOLLOW_UP_TASK_ASSIGN_ROLES: SystemRoleName[] = [
+/**
+ * Only managers may assign follow-ups to Customer Service Agents (KB follow-up ownership).
+ * Non-managers auto-own tasks they create.
+ */
+export const FOLLOW_UP_TASK_ASSIGN_ROLES: SystemRoleName[] = ["ADMIN", "CAMPAIGN_MANAGER"];
+
+/**
+ * Assignee roles and managers may complete follow-up tasks (backend also enforces assignee-or-manager).
+ */
+export const FOLLOW_UP_TASK_COMPLETE_ROLES: SystemRoleName[] = [
   "ADMIN",
+  "CAMPAIGN_MANAGER",
   "CUSTOMER_SERVICE_AGENT",
   "SALES_AGENT",
-  "CAMPAIGN_MANAGER",
 ];
 
 export const REMINDER_READ_ROLES: SystemRoleName[] = [
@@ -194,7 +203,7 @@ export const AI_PRODUCT_RECOMMENDATION_ROLES: SystemRoleName[] = [
   "CAMPAIGN_MANAGER",
 ];
 
-export const AI_CAMPAIGN_COPY_ROLES: SystemRoleName[] = ["CAMPAIGN_MANAGER"];
+export const AI_CAMPAIGN_COPY_ROLES: SystemRoleName[] = ["ADMIN", "CAMPAIGN_MANAGER"];
 
 export function createPermissionChecks(hasAnyRole: RoleChecker) {
   return {
@@ -222,6 +231,7 @@ export function createPermissionChecks(hasAnyRole: RoleChecker) {
     canReadFollowUpTasks: () => hasAnyRole(FOLLOW_UP_TASK_READ_ROLES),
     canCreateFollowUpTasks: () => hasAnyRole(FOLLOW_UP_TASK_CREATE_ROLES),
     canAssignFollowUpTasks: () => hasAnyRole(FOLLOW_UP_TASK_ASSIGN_ROLES),
+    canCompleteFollowUpTasks: () => hasAnyRole(FOLLOW_UP_TASK_COMPLETE_ROLES),
     canReadReminders: () => hasAnyRole(REMINDER_READ_ROLES),
     canManageReminders: () => hasAnyRole(REMINDER_MANAGE_ROLES),
     canManuallyTriggerReminderProcessing: () => hasAnyRole(REMINDER_MANUAL_TRIGGER_ROLES),
@@ -248,6 +258,11 @@ export function createPermissionChecks(hasAnyRole: RoleChecker) {
     canManageSystemSettings: () => hasAnyRole(SYSTEM_SETTINGS_MANAGE_ROLES),
     /** AI-001 customer search and AI-006 duplicate-contact warnings. */
     canUseAiCustomerSignals: () => hasAnyRole(CUSTOMER_READ_ROLES),
+    /**
+     * AI-006 duplicate-contact warning (mirrors backend {@code @authz.canReadCustomers()}).
+     * Backend remains authoritative for 403 responses.
+     */
+    canUseDuplicateContactWarning: () => hasAnyRole(CUSTOMER_READ_ROLES),
     /** AI-002 segment suggestions. */
     canUseAiSegmentSuggestions: () => hasAnyRole(AI_SEGMENT_RECOMMENDATION_ROLES),
     /** AI-003 product recommendations. */

@@ -193,7 +193,7 @@ describe("UsersPage", () => {
     });
   });
 
-  it("assigns roles and disables selected users", async () => {
+  it("assigns roles and toggles selected users between disabled and enabled", async () => {
     const fetchMock = createFetchMock();
     vi.stubGlobal("fetch", fetchMock);
 
@@ -268,6 +268,31 @@ describe("UsersPage", () => {
         },
       );
     });
+
+    const enableButton = await screen.findByRole("button", { name: "Enable user" });
+    expect(enableButton).toBeEnabled();
+    expect(screen.getByRole("status")).toHaveTextContent("User disabled.");
+
+    await userEvent.click(enableButton);
+    const enableDialog = await screen.findByRole("dialog", { name: "Confirm user enable" });
+    expect(within(enableDialog).getByText(/restores the user's access/i)).toBeInTheDocument();
+    await userEvent.click(within(enableDialog).getByRole("button", { name: "Enable user" }));
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(`${API_BASE_URL}/users/${campaignManager.id}`, {
+        body: JSON.stringify({
+          fullName: campaignManager.fullName,
+          status: "ACTIVE",
+        }),
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + createAccessToken(["ADMIN"]),
+        },
+        method: "PUT",
+      });
+    });
+    expect(await screen.findByRole("button", { name: "Disable user" })).toBeEnabled();
+    expect(screen.getByRole("status")).toHaveTextContent("User enabled.");
   });
 
   it("requires confirmation before resetting a user password", async () => {
@@ -354,6 +379,8 @@ describe("UsersPage", () => {
 });
 
 function createFetchMock() {
+  let currentCampaignManager = { ...campaignManager };
+
   return vi.fn().mockImplementation((url: string, init?: RequestInit) => {
     if (url.endsWith("/users") && init?.method === "POST") {
       return jsonResponse({
@@ -366,18 +393,31 @@ function createFetchMock() {
     }
 
     if (url.includes("/roles")) {
-      return jsonResponse({ ...campaignManager, roles: ["BI_ANALYST", "CAMPAIGN_MANAGER"] });
+      currentCampaignManager = {
+        ...currentCampaignManager,
+        roles: ["BI_ANALYST", "CAMPAIGN_MANAGER"],
+      };
+      return jsonResponse(currentCampaignManager);
     }
 
     if (url.endsWith("/disable")) {
-      return jsonResponse({ ...campaignManager, status: "DISABLED" });
+      currentCampaignManager = { ...currentCampaignManager, status: "DISABLED" };
+      return jsonResponse(currentCampaignManager);
+    }
+
+    if (url.endsWith(`/users/${campaignManager.id}`) && init?.method === "PUT") {
+      currentCampaignManager = {
+        ...currentCampaignManager,
+        ...JSON.parse(init.body as string),
+      };
+      return jsonResponse(currentCampaignManager);
     }
 
     if (url.endsWith("/password")) {
       return jsonResponse(campaignManager);
     }
 
-    return jsonResponse([adminUser, campaignManager]);
+    return jsonResponse([adminUser, currentCampaignManager]);
   });
 }
 

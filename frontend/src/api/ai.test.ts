@@ -2,9 +2,10 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   approveCampaignCopySuggestion,
   generateCampaignCopySuggestion,
+  generateDuplicateContactWarning,
   searchAiCustomers,
 } from "@/api/ai";
-import { API_BASE_URL } from "@/api/client";
+import { ApiError, API_BASE_URL } from "@/api/client";
 import { AUTH_STORAGE_KEYS } from "@/auth/sessionStorageStrategy";
 
 const suggestion = {
@@ -119,6 +120,9 @@ describe("ai api", () => {
     );
     expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
       reviewNotes: "Reviewed by manager",
+      editedSubject: null,
+      editedMessageBody: null,
+      editedCallToAction: null,
     });
   });
 
@@ -135,6 +139,68 @@ describe("ai api", () => {
         headers: expect.objectContaining({ Authorization: "Bearer access-token" }),
       }),
     );
+  });
+
+  it("requests a duplicate-contact warning", async () => {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    const warning = {
+      customerId: "customer-1",
+      campaignId: "campaign-1",
+      riskDetected: true,
+      warning: "Duplicate-contact risk detected",
+      explanation: "Same campaign previously contacted.",
+      contactsInCurrentMonth: 3,
+      monthlyContactLimit: 3,
+      sameCampaignAlreadyContacted: true,
+      storedRecommendationId: "recommendation-1",
+    };
+    const fetchMock = vi.fn().mockResolvedValue(apiResponse(warning));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      generateDuplicateContactWarning({
+        customerId: " customer-1 ",
+        campaignId: " campaign-1 ",
+      }),
+    ).resolves.toEqual(warning);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      `${API_BASE_URL}/ai/duplicate-contact-warning`,
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({ Authorization: "Bearer access-token" }),
+      }),
+    );
+    expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
+      customerId: "customer-1",
+      campaignId: "campaign-1",
+    });
+  });
+
+  it("rejects blank customer or campaign IDs for duplicate-contact warning", async () => {
+    await expect(
+      generateDuplicateContactWarning({ customerId: "  ", campaignId: "campaign-1" }),
+    ).rejects.toThrow("Customer ID is required.");
+    await expect(
+      generateDuplicateContactWarning({ customerId: "customer-1", campaignId: "" }),
+    ).rejects.toThrow("Campaign ID is required.");
+  });
+
+  it("propagates backend errors for duplicate-contact warning", async () => {
+    sessionStorage.setItem(AUTH_STORAGE_KEYS.accessToken, "access-token");
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 403,
+      json: async () => ({ success: false, message: "Forbidden", data: null }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    await expect(
+      generateDuplicateContactWarning({
+        customerId: "customer-1",
+        campaignId: "campaign-1",
+      }),
+    ).rejects.toEqual(expect.any(ApiError));
   });
 });
 
