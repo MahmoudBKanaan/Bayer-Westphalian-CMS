@@ -42,7 +42,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
@@ -50,6 +49,7 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -61,7 +61,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
             "spring.jpa.hibernate.ddl-auto=validate"
         })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@AutoConfigureMockMvc(addFilters = false)
 @Testcontainers(disabledWithoutDocker = true)
 @Import({
     SegmentService.class,
@@ -80,7 +79,9 @@ class SegmentControllerIntegrationTests {
                     .withUsername("bwc_app")
                     .withPassword("bwc_app");
 
-    @Autowired private MockMvc mockMvc;
+    private MockMvc mockMvc;
+
+    @Autowired private SegmentController segmentController;
 
     @Autowired private TestEntityManager entityManager;
 
@@ -100,6 +101,10 @@ class SegmentControllerIntegrationTests {
 
     @BeforeEach
     void setUp() {
+        mockMvc =
+                MockMvcBuilders.standaloneSetup(segmentController)
+                        .setControllerAdvice(new GlobalExceptionHandler())
+                        .build();
         owner = persistUser("segment-controller-owner");
         when(authorizationExpressions.currentUserId()).thenReturn(owner.getId());
         when(authorizationExpressions.hasRole(SystemRoleName.ADMIN.name())).thenReturn(false);
