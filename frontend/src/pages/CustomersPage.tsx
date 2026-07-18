@@ -1025,10 +1025,6 @@ function formatContactableFilter(value: CustomerSearchFilters["contactable"]) {
   return value === "true" ? "Contactable" : "Do not contact";
 }
 
-function formatNullable(value: string | null | undefined) {
-  return value == null || value.trim() === "" ? "Not provided" : value;
-}
-
 function formatScore(value: number | string) {
   const numeric = typeof value === "number" ? value : Number(value);
   if (!Number.isFinite(numeric)) {

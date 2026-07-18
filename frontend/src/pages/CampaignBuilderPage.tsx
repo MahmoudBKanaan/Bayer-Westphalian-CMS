@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   approveCampaignCopySuggestion,
@@ -57,8 +57,11 @@ export function CampaignBuilderPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const queryClient = useQueryClient();
+  const recommendedProductId = searchParams.get("productId")?.trim() ?? "";
   const [form, setForm] = useState<CampaignFormPayload>(emptyCampaignForm);
-  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>(() =>
+    recommendedProductId === "" ? [] : [recommendedProductId],
+  );
   const [createdCampaign, setCreatedCampaign] = useState<CampaignView | null>(null);
   const [formErrors, setFormErrors] = useState<CampaignFormErrors>({});
   const [productSelectionError, setProductSelectionError] = useState("");
@@ -71,9 +74,14 @@ export function CampaignBuilderPage() {
   const [copyEditing, setCopyEditing] = useState(false);
   const [approveConfirmOpen, setApproveConfirmOpen] = useState(false);
   const [copyApprovedAt, setCopyApprovedAt] = useState<string | null>(null);
-  const [notice, setNotice] = useState("");
-  const [currentStepId, setCurrentStepId] = useState<CampaignBuilderStepId>("basics");
-  const [aiProductNoticeShown, setAiProductNoticeShown] = useState(false);
+  const [notice, setNotice] = useState(() =>
+    recommendedProductId === ""
+      ? ""
+      : "AI-recommended product loaded for human review. Campaign remains a draft.",
+  );
+  const [currentStepId, setCurrentStepId] = useState<CampaignBuilderStepId>(() =>
+    recommendedProductId === "" ? "basics" : "audience",
+  );
 
   const segmentsQuery = useQuery({
     queryKey: ["segments", "campaign-builder"],
@@ -88,21 +96,6 @@ export function CampaignBuilderPage() {
   const products = useMemo(() => productsQuery.data ?? [], [productsQuery.data]);
   const selectedProduct = products.find((product) => product.id === selectedProductIds[0]);
 
-  // AI-003 "Use in campaign draft": preselect an active product from ?productId= for human review.
-  useEffect(() => {
-    const productId = searchParams.get("productId")?.trim() ?? "";
-    if (productId.length === 0 || products.length === 0 || aiProductNoticeShown) {
-      return;
-    }
-    const product = products.find((row) => row.id === productId && row.active !== false);
-    if (product == null) {
-      return;
-    }
-    setSelectedProductIds([product.id]);
-    setNotice("AI-recommended product loaded for human review. Campaign remains a draft.");
-    setAiProductNoticeShown(true);
-    setCurrentStepId("audience");
-  }, [searchParams, products, aiProductNoticeShown]);
   const selectedSegment = segments.find((segment) => segment.id === form.segmentId);
   const canBuildCampaigns = permissions.canManageCampaigns();
   const canUseAiCampaignCopy = permissions.canUseAiCampaignCopy();
@@ -352,7 +345,6 @@ export function CampaignBuilderPage() {
                   segmentName={selectedSegment?.name ?? null}
                   campaignStatus={createdCampaign?.status ?? null}
                   formSubject={form.messageSubject}
-                  formBody={form.messageBody}
                   generating={generateCopyMutation.isPending}
                   approving={approveCopyMutation.isPending}
                   canGenerate={form.objective.trim().length > 0}
@@ -921,7 +913,6 @@ function CampaignCopyApprovalPanel({
   segmentName,
   campaignStatus,
   formSubject,
-  formBody,
   generating,
   approving,
   canGenerate,
@@ -947,7 +938,6 @@ function CampaignCopyApprovalPanel({
   segmentName: string | null;
   campaignStatus: string | null;
   formSubject: string;
-  formBody: string;
   generating: boolean;
   approving: boolean;
   canGenerate: boolean;

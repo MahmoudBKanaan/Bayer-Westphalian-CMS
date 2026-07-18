@@ -140,7 +140,7 @@ describe("customer creation UI integration (item 599)", () => {
   });
 
   it("creates a customer through the UI and shows success plus list row", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const fetchMock = customerCreationHandlers();
     vi.stubGlobal("fetch", fetchMock);
 
