@@ -148,8 +148,9 @@ Base path: `/api/ai`
 | Method | Path | Description | Feature |
 | --- | --- | --- | --- |
 | `GET` | `/api/ai/customer-search` | Fuzzy/weighted customer search (`q`, optional `limit`) | AI-001 |
-| `POST` | `/api/ai/segment-suggestions` | Segment suggestion list | AI-002 |
+| `POST` | `/api/ai/segment-suggestions` | Segment suggestion list (structured criteria + summaries) | AI-002 |
 | `POST` | `/api/ai/product-recommendations` | Product recommendation list | AI-003 |
+| `POST` | `/api/ai/default-risk-score` | Default-risk score with factors (advisory) | AI-004 |
 | `POST` | `/api/ai/duplicate-contact-warning` | Duplicate-contact risk warning | AI-006 |
 | `POST` | `/api/ai/campaign-copy` | Generate campaign copy suggestion | AI-005 |
 | `POST` | `/api/ai/campaign-copy/{recommendationId}/approve` | Human-approve stored copy suggestion | AI-005 / COMP-005 |

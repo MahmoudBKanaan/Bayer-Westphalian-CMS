@@ -316,7 +316,7 @@ describe("AI recommendation permissions", () => {
   });
 
   it("limits campaign copy generation to campaign managers", () => {
-    expect(AI_CAMPAIGN_COPY_ROLES).toEqual(["CAMPAIGN_MANAGER"]);
+    expect(AI_CAMPAIGN_COPY_ROLES).toEqual(["ADMIN", "CAMPAIGN_MANAGER"]);
     expect(createPermissionChecks(checkerFor(["CAMPAIGN_MANAGER"])).canUseAiCampaignCopy()).toBe(
       true,
     );

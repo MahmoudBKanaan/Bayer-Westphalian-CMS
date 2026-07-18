@@ -48,8 +48,8 @@ import org.springframework.test.web.servlet.MockMvc;
  * KB item 392 / E17 Follow-up management: follow-up task can be completed via {@code PUT
  * /api/follow-up-tasks/{id}/complete}.
  *
- * <p>Authorized complete roles per KB role matrix: Admin, Customer Service Agent, and Sales Agent.
- * Completion marks the task {@code COMPLETED} and records {@code completed_at}.
+ * <p>The assignee or a manager (Admin, Campaign Manager) may complete a task. Completion marks the
+ * task {@code COMPLETED} and records {@code completed_at}.
  */
 @WebMvcTest(controllers = FollowUpController.class)
 @Import({
@@ -81,7 +81,7 @@ class FollowUpTaskCanBeCompletedTests {
     void salesAgentCanCompleteFollowUpTaskViaPutApi() throws Exception {
         when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
-        when(followUpService.completeTask(eq(TASK_ID))).thenReturn(completedTask());
+        when(followUpService.completeTaskView(eq(TASK_ID))).thenReturn(completedTaskView());
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/complete", TASK_ID)
@@ -100,7 +100,7 @@ class FollowUpTaskCanBeCompletedTests {
                 .andExpect(jsonPath("$.data.completedAt").value(COMPLETED_AT.toString()));
 
         ArgumentCaptor<UUID> taskIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(followUpService).completeTask(taskIdCaptor.capture());
+        verify(followUpService).completeTaskView(taskIdCaptor.capture());
         assertThat(taskIdCaptor.getValue()).isEqualTo(TASK_ID);
     }
 
@@ -108,7 +108,7 @@ class FollowUpTaskCanBeCompletedTests {
     void customerServiceAgentCanCompleteFollowUpTask() throws Exception {
         when(jwtService.validateToken("csa-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.CUSTOMER_SERVICE_AGENT));
-        when(followUpService.completeTask(eq(TASK_ID))).thenReturn(completedTask());
+        when(followUpService.completeTaskView(eq(TASK_ID))).thenReturn(completedTaskView());
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/complete", TASK_ID)
@@ -118,14 +118,14 @@ class FollowUpTaskCanBeCompletedTests {
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.data.completedAt").value(COMPLETED_AT.toString()));
 
-        verify(followUpService).completeTask(TASK_ID);
+        verify(followUpService).completeTaskView(TASK_ID);
     }
 
     @Test
     void adminCanCompleteFollowUpTask() throws Exception {
         when(jwtService.validateToken("admin-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.ADMIN));
-        when(followUpService.completeTask(eq(TASK_ID))).thenReturn(completedTask());
+        when(followUpService.completeTaskView(eq(TASK_ID))).thenReturn(completedTaskView());
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/complete", TASK_ID)
@@ -135,7 +135,23 @@ class FollowUpTaskCanBeCompletedTests {
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.data.completedAt").exists());
 
-        verify(followUpService).completeTask(TASK_ID);
+        verify(followUpService).completeTaskView(TASK_ID);
+    }
+
+    @Test
+    void campaignManagerCanCompleteFollowUpTask() throws Exception {
+        when(jwtService.validateToken("campaign-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
+        when(followUpService.completeTaskView(eq(TASK_ID))).thenReturn(completedTaskView());
+
+        mockMvc.perform(
+                        put("/api/follow-up-tasks/{id}/complete", TASK_ID)
+                                .header("Authorization", "Bearer campaign-token"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Follow-up task completed"))
+                .andExpect(jsonPath("$.data.status").value("COMPLETED"));
+
+        verify(followUpService).completeTaskView(TASK_ID);
     }
 
     @Test
@@ -170,21 +186,7 @@ class FollowUpTaskCanBeCompletedTests {
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(not(containsString("Follow-up task completed"))));
 
-        verify(followUpService, never()).completeTask(eq(TASK_ID));
-    }
-
-    @Test
-    void campaignManagerCannotCompleteFollowUpTask() throws Exception {
-        when(jwtService.validateToken("campaign-token", JwtTokenType.ACCESS))
-                .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
-
-        mockMvc.perform(
-                        put("/api/follow-up-tasks/{id}/complete", TASK_ID)
-                                .header("Authorization", "Bearer campaign-token"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string(not(containsString("Follow-up task completed"))));
-
-        verify(followUpService, never()).completeTask(eq(TASK_ID));
+        verify(followUpService, never()).completeTaskView(eq(TASK_ID));
     }
 
     @Test
@@ -193,14 +195,14 @@ class FollowUpTaskCanBeCompletedTests {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(not(containsString("Follow-up task completed"))));
 
-        verify(followUpService, never()).completeTask(eq(TASK_ID));
+        verify(followUpService, never()).completeTaskView(eq(TASK_ID));
     }
 
     @Test
     void completeReturnsNotFoundWhenTaskDoesNotExist() throws Exception {
         when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
-        when(followUpService.completeTask(eq(TASK_ID)))
+        when(followUpService.completeTaskView(eq(TASK_ID)))
                 .thenThrow(new ResourceNotFoundException("FollowUpTask", TASK_ID));
 
         mockMvc.perform(
@@ -251,5 +253,9 @@ class FollowUpTaskCanBeCompletedTests {
         ReflectionTestUtils.setField(task, "status", FollowUpTaskStatus.COMPLETED);
         ReflectionTestUtils.setField(task, "completedAt", COMPLETED_AT);
         return task;
+    }
+
+    private static FollowUpTaskView completedTaskView() {
+        return FollowUpTaskView.from(completedTask());
     }
 }

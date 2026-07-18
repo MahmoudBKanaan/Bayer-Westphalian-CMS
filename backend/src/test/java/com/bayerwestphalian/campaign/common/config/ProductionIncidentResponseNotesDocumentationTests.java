@@ -13,7 +13,7 @@ class ProductionIncidentResponseNotesDocumentationTests {
 
     @Test
     void notesDefineSeverityOwnershipAndImmediateResponse() throws Exception {
-        String notes = Files.readString(NOTES, StandardCharsets.UTF_8);
+        String notes = DocumentationTestText.normalize(Files.readString(NOTES, StandardCharsets.UTF_8));
 
         assertThat(notes)
                 .contains("Sprint 18 item 740")
@@ -28,7 +28,7 @@ class ProductionIncidentResponseNotesDocumentationTests {
 
     @Test
     void notesCoverCriticalScenariosAndUnsafeActions() throws Exception {
-        String notes = Files.readString(NOTES, StandardCharsets.UTF_8);
+        String notes = DocumentationTestText.normalize(Files.readString(NOTES, StandardCharsets.UTF_8));
 
         assertThat(notes)
                 .contains("Secret or credential exposure")
@@ -42,7 +42,7 @@ class ProductionIncidentResponseNotesDocumentationTests {
 
     @Test
     void notesRequireSafeEvidenceRecoveryValidationAndHumanApproval() throws Exception {
-        String notes = Files.readString(NOTES, StandardCharsets.UTF_8);
+        String notes = DocumentationTestText.normalize(Files.readString(NOTES, StandardCharsets.UTF_8));
 
         assertThat(notes)
                 .contains("Safe Evidence Collection")
@@ -56,7 +56,7 @@ class ProductionIncidentResponseNotesDocumentationTests {
 
     @Test
     void notesAreIndexedAndCrossLinkedFromOperationalControls() throws Exception {
-        String index = Files.readString(Path.of("../docs/README.md"), StandardCharsets.UTF_8);
+        String index = DocumentationTestText.normalize(Files.readString(Path.of("../docs/README.md"), StandardCharsets.UTF_8));
         String rollback =
                 Files.readString(
                         Path.of("../docs/deployment/rollback-plan.md"), StandardCharsets.UTF_8);
@@ -67,7 +67,7 @@ class ProductionIncidentResponseNotesDocumentationTests {
 
         assertThat(index)
                 .contains("deployment/incident-response-notes.md")
-                .contains("item **740**");
+                .contains("items **740** / **766**");
         assertThat(rollback).contains("incident-response-notes.md").contains("item **740**");
         assertThat(security).contains("incident-response-notes.md").contains("item **740**");
     }

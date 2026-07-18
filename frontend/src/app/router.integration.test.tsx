@@ -357,7 +357,9 @@ describe("application routing", () => {
 
     renderRoute("/follow-up-tasks");
 
-    expect(await screen.findByRole("heading", { name: "Follow-up tasks" })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Follow-ups", level: 1 }),
+    ).toBeInTheDocument();
     expect(await screen.findByText("Call Ada")).toBeInTheDocument();
     expect(screen.getByText("Ada Followup")).toBeInTheDocument();
   });

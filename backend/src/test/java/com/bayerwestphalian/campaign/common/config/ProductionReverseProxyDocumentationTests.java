@@ -20,7 +20,7 @@ class ProductionReverseProxyDocumentationTests {
         String nginx = Files.readString(NGINX, StandardCharsets.UTF_8);
 
         assertThat(nginx)
-                .contains("item 721")
+                .contains("items 721-722")
                 .contains("server backend:8080")
                 .contains("server frontend:80")
                 .contains("location /api/")
@@ -37,9 +37,9 @@ class ProductionReverseProxyDocumentationTests {
 
         assertThat(nginx)
                 .contains("X-Forwarded-For $proxy_add_x_forwarded_for")
-                .contains("X-Forwarded-Proto $scheme")
+                .contains("X-Forwarded-Proto https")
                 .contains("X-Forwarded-Host $host")
-                .contains("X-Forwarded-Port $server_port")
+                .contains("X-Forwarded-Port 443")
                 .contains("client_max_body_size 20m")
                 .contains("proxy_connect_timeout 10s")
                 .contains("server_tokens off");
@@ -66,12 +66,12 @@ class ProductionReverseProxyDocumentationTests {
 
     @Test
     void guideDocumentsRoutingAndHttpsBoundary() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Sprint 18 item 721")
                 .contains("only published HTTP entry point")
-                .contains("item 722 HTTPS/TLS")
+                .contains("Item **722** adds [HTTPS/TLS]")
                 .contains("ProductionReverseProxyDocumentationTests");
     }
 

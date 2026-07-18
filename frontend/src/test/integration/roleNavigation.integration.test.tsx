@@ -133,6 +133,8 @@ describe("role-based navigation integration (item 596)", () => {
     stubDashboardAndEmptyLists();
     renderApp({ path: "/audit", roles: ["SYSTEM_AUDITOR"] });
 
-    expect(await screen.findByRole("heading", { name: /audit/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { name: "Audit", level: 1 }),
+    ).toBeInTheDocument();
   });
 });

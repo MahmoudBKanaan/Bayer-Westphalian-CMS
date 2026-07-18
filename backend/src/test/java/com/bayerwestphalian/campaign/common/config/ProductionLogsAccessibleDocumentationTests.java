@@ -40,7 +40,7 @@ class ProductionLogsAccessibleDocumentationTests {
 
     @Test
     void documentationRecordsBlockedProductionOnlyAcceptance() throws Exception {
-        String doc = Files.readString(DOC, StandardCharsets.UTF_8);
+        String doc = DocumentationTestText.normalize(Files.readString(DOC, StandardCharsets.UTF_8));
 
         assertThat(doc)
                 .contains("Production Log Accessibility Verification (Item 758)")

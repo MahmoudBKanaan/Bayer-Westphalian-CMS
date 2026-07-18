@@ -1,0 +1,18 @@
+# Local-only overlay for production-profile backend + Postgres.
+# Use with docker-compose.prod.yml — does not start reverse-proxy, frontend, or backup.
+# Publishes the API on the host and relaxes HTTPS enforcement for direct localhost access.
+#
+# Example:
+#   docker compose --env-file .env.production \
+#     -f docker-compose.prod.yml \
+#     -f docker-compose.prod.backend-local.yml \
+#     up -d --build postgres backend
+
+services:
+  backend:
+    ports:
+      - "${BACKEND_HOST_PORT:-8080}:8080"
+    environment:
+      # Direct host→container HTTP. Real deployments keep HTTPS_REQUIRED=true behind Nginx TLS.
+      HTTPS_REQUIRED: ${HTTPS_REQUIRED_LOCAL:-false}
+      HTTPS_HSTS_ENABLED: ${HTTPS_HSTS_ENABLED_LOCAL:-false}

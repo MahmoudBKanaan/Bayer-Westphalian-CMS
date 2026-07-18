@@ -64,6 +64,8 @@ Dashboard data comes from `GET /api/analytics/dashboard`. KPI formulas are defin
 
 BI Analysts can use the **Analytics** screen (`/analytics`) to:
 
+- **Filter** results with selectors for **campaign**, **product**, and **time frame** (presets or
+  custom date range). KPIs and charts update to the filtered subset.
 - Inspect platform KPIs alongside **campaign analytics** detail for a selected campaign
   (`GET /api/analytics/campaigns/{campaignId}`).
 - Compare **product performance** rows (`GET /api/analytics/products/performance`).

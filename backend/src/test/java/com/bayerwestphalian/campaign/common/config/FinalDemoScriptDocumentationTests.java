@@ -15,7 +15,9 @@ class FinalDemoScriptDocumentationTests {
 
     @Test
     void scriptDefinesTimedKbJourneyWithDeterministicAnchors() throws Exception {
-        String script = Files.readString(SCRIPT, StandardCharsets.UTF_8);
+        String script =
+                DocumentationTestText.normalize(
+                        Files.readString(SCRIPT, StandardCharsets.UTF_8));
 
         assertThat(script)
                 .contains("Item 782")
@@ -32,7 +34,9 @@ class FinalDemoScriptDocumentationTests {
 
     @Test
     void scriptPreservesConsentHumanApprovalProviderAndReleaseSafety() throws Exception {
-        String script = Files.readString(SCRIPT, StandardCharsets.UTF_8);
+        String script =
+                DocumentationTestText.normalize(
+                        Files.readString(SCRIPT, StandardCharsets.UTF_8));
 
         assertThat(script)
                 .contains("PROVIDER_REAL_SENDING_ENABLED=false")

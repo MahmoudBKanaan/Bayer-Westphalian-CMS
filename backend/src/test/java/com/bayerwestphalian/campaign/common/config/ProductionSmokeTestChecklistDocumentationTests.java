@@ -15,10 +15,10 @@ class ProductionSmokeTestChecklistDocumentationTests {
 
     @Test
     void checklistDefinesTraceableExecutionAndHardReleaseDecision() throws Exception {
-        String checklist = Files.readString(CHECKLIST, StandardCharsets.UTF_8);
+        String checklist = DocumentationTestText.normalize(Files.readString(CHECKLIST, StandardCharsets.UTF_8));
 
         assertThat(checklist)
-                .contains("Sprint 18 item 737")
+                .contains("Sprint 18 items 737 and 763")
                 .contains("Release version / image digest")
                 .contains("Git commit")
                 .contains("Operator")
@@ -29,7 +29,7 @@ class ProductionSmokeTestChecklistDocumentationTests {
 
     @Test
     void checklistCoversInfrastructureSecurityAndCriticalWorkflows() throws Exception {
-        String checklist = Files.readString(CHECKLIST, StandardCharsets.UTF_8);
+        String checklist = DocumentationTestText.normalize(Files.readString(CHECKLIST, StandardCharsets.UTF_8));
 
         assertThat(checklist)
                 .contains("SMK-002")
@@ -48,7 +48,7 @@ class ProductionSmokeTestChecklistDocumentationTests {
 
     @Test
     void checklistProtectsProductionDataAndRequiresCleanup() throws Exception {
-        String checklist = Files.readString(CHECKLIST, StandardCharsets.UTF_8);
+        String checklist = DocumentationTestText.normalize(Files.readString(CHECKLIST, StandardCharsets.UTF_8));
 
         assertThat(checklist)
                 .contains("approved synthetic")
@@ -61,10 +61,10 @@ class ProductionSmokeTestChecklistDocumentationTests {
 
     @Test
     void documentationIndexLinksItem737Checklist() throws Exception {
-        String index = Files.readString(DOCS_INDEX, StandardCharsets.UTF_8);
+        String index = DocumentationTestText.normalize(Files.readString(DOCS_INDEX, StandardCharsets.UTF_8));
 
         assertThat(index)
                 .contains("deployment/production-smoke-test-checklist.md")
-                .contains("item **737**");
+                .contains("items **737** / **763**");
     }
 }

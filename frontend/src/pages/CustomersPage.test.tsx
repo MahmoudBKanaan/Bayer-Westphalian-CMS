@@ -348,11 +348,10 @@ describe("CustomersPage", () => {
     await userEvent.click(screen.getByRole("button", { name: "Search with AI" }));
 
     const aiResults = await screen.findByRole("list", { name: "AI customer search results" });
-    expect(within(aiResults).getByText("Score 73 - Berlin, Germany")).toBeInTheDocument();
+    expect(within(aiResults).getByText(/Match score: 73%/i)).toBeInTheDocument();
+    expect(within(aiResults).getByText(/Berlin, Germany/i)).toBeInTheDocument();
     expect(within(aiResults).getByLabelText("AI explanation")).toBeInTheDocument();
-    expect(
-      within(aiResults).getByText("Search explanation for Ada Policyholder"),
-    ).toBeInTheDocument();
+    expect(within(aiResults).getByText("Approximate match on: full name.")).toBeInTheDocument();
     expect(within(aiResults).getByLabelText("AI score factors")).toBeInTheDocument();
     expect(within(aiResults).getByText("full name")).toBeInTheDocument();
     expect(within(aiResults).getByText("40 / 45")).toBeInTheDocument();

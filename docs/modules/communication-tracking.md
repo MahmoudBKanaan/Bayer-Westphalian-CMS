@@ -66,6 +66,8 @@ Outbound email and SMS sending must go through the communication service send-an
 
 ## Provider Adapter Architecture
 
+Full environment and profile matrix: [Communication Provider Configuration](../communication-provider-configuration.md).
+
 Delivery logic is decoupled from the campaign engine using replaceable adapter interfaces.
 
 - **EmailProvider**: Defines `EmailDeliveryResult send(EmailMessage message)`.

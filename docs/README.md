@@ -48,6 +48,10 @@ deployment, and university report evidence.
 - [Eligibility Rules Documentation](architecture/eligibility-rules.md)
 - [Security Hardening Documentation](architecture/security-hardening.md)
 
+## Security
+
+- [Production Security Configuration](security/production-security-configuration.md) (CORS/HTTPS notes, prod profile, secrets, headers, logging)
+
 ## Modules
 
 - [Customer Module Documentation](modules/customer-module.md)
@@ -131,6 +135,7 @@ deployment, and university report evidence.
 - [Production CORS](deployment/production-cors.md) (item **723**)
 - [Production JWT Secret](deployment/jwt-secret.md) (item **724**)
 - [Production Database Credentials](deployment/database-credentials.md) (item **725**)
+- [Communication Provider Configuration](communication-provider-configuration.md) (KB email/SMS adapters)
 - [Production Email Provider](deployment/email-provider.md) (item **726**)
 - [Production SMS Provider](deployment/sms-provider.md) (item **727**)
 - [Consent Evidence File Storage](deployment/consent-evidence-storage.md) (item **728**)

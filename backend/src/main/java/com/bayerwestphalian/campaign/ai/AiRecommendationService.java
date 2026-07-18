@@ -73,7 +73,7 @@ public class AiRecommendationService {
         this.systemSettingsService = systemSettingsService;
     }
 
-    @PreAuthorize("@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')")
     @Transactional
     public SegmentSuggestionView.ListResponse suggestSegments(SegmentSuggestionRequest request) {
         SegmentSuggestionRequest normalized = request == null ? emptySegmentRequest() : request;
@@ -100,7 +100,7 @@ public class AiRecommendationService {
         return new SegmentSuggestionView.ListResponse(suggestions);
     }
 
-    @PreAuthorize("@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')")
     @Transactional
     public ProductRecommendationView.ListResponse recommendProducts(
             ProductRecommendationRequest request) {
@@ -138,7 +138,8 @@ public class AiRecommendationService {
         return new ProductRecommendationView.ListResponse(customer.getId(), recommendations);
     }
 
-    @PreAuthorize("@authz.canReadCustomers()")
+    @PreAuthorize(
+            "@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER', 'CUSTOMER_SERVICE_AGENT')")
     @Transactional
     public DefaultRiskScoreView calculateDefaultRisk(DefaultRiskScoreRequest request) {
         validateCustomerRequest(request == null ? null : request.customerId());
@@ -394,21 +395,32 @@ public class AiRecommendationService {
         if (city == null && country == null) {
             return null;
         }
-        String criteria = city != null ? "city equals " + city : "country equals " + country;
+        ArrayList<SuggestedSegmentCriterion> structured = new ArrayList<>();
+        if (city != null) {
+            structured.add(SuggestedSegmentCriterion.equals("city", city));
+        }
+        if (country != null) {
+            structured.add(SuggestedSegmentCriterion.equals("country", country));
+        }
         String name = (city != null ? city : country) + " audience";
+        String inputSummary =
+                structured.stream()
+                        .map(SuggestedSegmentCriterion::toSummary)
+                        .collect(Collectors.joining("; "));
         AiRecommendation stored =
                 store(
                         AiRecommendationType.SEGMENT,
                         "segment",
                         null,
-                        criteria,
+                        inputSummary,
                         name,
-                        segmentExplanation("customer/location signal: " + criteria),
+                        segmentExplanation("customer/location signal: " + inputSummary),
                         BigDecimal.valueOf(72));
         return new SegmentSuggestionView(
                 name,
                 "Customers matching a strong location signal.",
-                List.of(criteria),
+                structured,
+                null,
                 stored.getExplanation(),
                 stored.getConfidenceScore(),
                 stored.getId());
@@ -418,25 +430,35 @@ public class AiRecommendationService {
         if (customer == null) {
             return null;
         }
-        ArrayList<String> criteria = new ArrayList<>();
-        criteria.add("customer_type EQUALS " + customer.getCustomerType().name());
+        ArrayList<SuggestedSegmentCriterion> structured = new ArrayList<>();
+        structured.add(
+                SuggestedSegmentCriterion.equals(
+                        "customer_type", customer.getCustomerType().name()));
         if (customer.getAgeGroup() != null) {
-            criteria.add("age_group EQUALS " + customer.getAgeGroup().getDatabaseValue());
+            structured.add(
+                    SuggestedSegmentCriterion.equals(
+                            "age_group", customer.getAgeGroup().getDatabaseValue()));
         }
         if (customer.getStatus() != null) {
-            criteria.add("status EQUALS " + customer.getStatus().name());
+            structured.add(
+                    SuggestedSegmentCriterion.equals("status", customer.getStatus().name()));
         }
         if (customer.getSource() != null && !customer.getSource().isBlank()) {
-            criteria.add("source CONTAINS " + customer.getSource().trim());
+            structured.add(
+                    SuggestedSegmentCriterion.contains("source", customer.getSource().trim()));
         }
 
         String name = customer.getCustomerType().name() + " profile audience";
+        String inputSummary =
+                structured.stream()
+                        .map(SuggestedSegmentCriterion::toSummary)
+                        .collect(Collectors.joining("; "));
         AiRecommendation stored =
                 store(
                         AiRecommendationType.SEGMENT,
                         "segment",
                         null,
-                        String.join("; ", criteria),
+                        inputSummary,
                         name,
                         segmentExplanation(
                                 "customer profile, age, status, and behavior/source signals."),
@@ -444,7 +466,8 @@ public class AiRecommendationService {
         return new SegmentSuggestionView(
                 name,
                 "Customers matching profile and behavior/status criteria.",
-                criteria,
+                structured,
+                null,
                 stored.getExplanation(),
                 stored.getConfidenceScore(),
                 stored.getId());
@@ -456,20 +479,22 @@ public class AiRecommendationService {
         if (productType == null) {
             return null;
         }
-        String criteria = "product_type EQUALS " + productType;
+        List<SuggestedSegmentCriterion> structured =
+                List.of(SuggestedSegmentCriterion.equals("product_type", productType));
         AiRecommendation stored =
                 store(
                         AiRecommendationType.SEGMENT,
                         "segment",
                         null,
-                        criteria,
+                        "product_type EQUALS " + productType,
                         productType + " owners",
                         segmentExplanation("product ownership/type signal: " + productType),
                         BigDecimal.valueOf(78));
         return new SegmentSuggestionView(
                 productType + " owners",
                 "Customers or prospects associated with the product type.",
-                List.of(criteria),
+                structured,
+                null,
                 stored.getExplanation(),
                 stored.getConfidenceScore(),
                 stored.getId());
@@ -496,26 +521,34 @@ public class AiRecommendationService {
             return null;
         }
 
-        ArrayList<String> criteria = new ArrayList<>();
+        ArrayList<SuggestedSegmentCriterion> structured = new ArrayList<>();
         if (hasDefaultRisk) {
-            criteria.add("default_risk EQUALS true");
+            structured.add(SuggestedSegmentCriterion.equals("default_risk", "true"));
         } else if (hasOverdue) {
-            criteria.add("payment_status EQUALS OVERDUE");
+            structured.add(SuggestedSegmentCriterion.equals("payment_status", "OVERDUE"));
         }
         if (maxReminderCount > 0) {
-            criteria.add("reminder_count AFTER 0");
+            structured.add(
+                    new SuggestedSegmentCriterion(
+                            "reminder_count", "GREATER_THAN", "0", null, "AND"));
         }
         if (maxDaysOverdue > 0) {
-            criteria.add("days_overdue AFTER 0");
+            structured.add(
+                    new SuggestedSegmentCriterion(
+                            "days_overdue", "GREATER_THAN", "0", null, "AND"));
         }
 
         String name = hasDefaultRisk ? "Default-risk payment audience" : "Overdue payment audience";
+        String inputSummary =
+                structured.stream()
+                        .map(SuggestedSegmentCriterion::toSummary)
+                        .collect(Collectors.joining("; "));
         AiRecommendation stored =
                 store(
                         AiRecommendationType.SEGMENT,
                         "segment",
                         null,
-                        String.join("; ", criteria),
+                        inputSummary,
                         name,
                         segmentExplanation(
                                 "payment history, reminders, overdue days, and default-risk signals."),
@@ -523,7 +556,8 @@ public class AiRecommendationService {
         return new SegmentSuggestionView(
                 name,
                 "Customers matching payment-history risk criteria.",
-                criteria,
+                structured,
+                null,
                 stored.getExplanation(),
                 stored.getConfidenceScore(),
                 stored.getId());
@@ -539,20 +573,26 @@ public class AiRecommendationService {
                     "AI segment suggestion validation failed",
                     List.of("expirationWithinMonths must be greater than or equal to 1"));
         }
-        String criteria = "expiring_within_months EQUALS " + months;
+        List<SuggestedSegmentCriterion> structured =
+                List.of(
+                        SuggestedSegmentCriterion.equals(
+                                "expiring_within_months", String.valueOf(months)));
         AiRecommendation stored =
                 store(
                         AiRecommendationType.SEGMENT,
                         "segment",
                         null,
-                        criteria,
+                        "expiring_within_months EQUALS " + months,
                         months + "-month expiration audience",
-                        segmentExplanation("renewal/expiration campaign rule: " + criteria),
+                        segmentExplanation(
+                                "renewal/expiration campaign rule: expiring_within_months EQUALS "
+                                        + months),
                         BigDecimal.valueOf(70));
         return new SegmentSuggestionView(
                 months + "-month expiration audience",
                 "Customers with products approaching expiration.",
-                List.of(criteria),
+                structured,
+                null,
                 stored.getExplanation(),
                 stored.getConfidenceScore(),
                 stored.getId());

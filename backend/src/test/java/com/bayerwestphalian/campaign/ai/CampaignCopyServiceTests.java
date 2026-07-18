@@ -64,14 +64,22 @@ class CampaignCopyServiceTests {
     private final UserRepository userRepository = Mockito.mock(UserRepository.class);
     private final AuthorizationExpressions authorizationExpressions =
             Mockito.mock(AuthorizationExpressions.class);
+    private final com.bayerwestphalian.campaign.campaign.CampaignProductRepository
+            campaignProductRepository =
+                    Mockito.mock(
+                            com.bayerwestphalian.campaign.campaign.CampaignProductRepository.class);
+    private final com.bayerwestphalian.campaign.audit.AuditService auditService =
+            Mockito.mock(com.bayerwestphalian.campaign.audit.AuditService.class);
     private final CampaignCopyService service =
             new CampaignCopyService(
                     productRepository,
                     segmentRepository,
                     campaignRepository,
+                    campaignProductRepository,
                     aiRecommendationRepository,
                     userRepository,
-                    authorizationExpressions);
+                    authorizationExpressions,
+                    auditService);
 
     @Test
     void declaresKbServiceContractAndCampaignManagerAuthorization() throws Exception {
@@ -83,19 +91,19 @@ class CampaignCopyServiceTests {
         assertMethodAuthorization(
                 "generateCopySuggestion",
                 new Class<?>[] {CampaignCopyRequest.class},
-                "@authz.hasAnyRole('CAMPAIGN_MANAGER')");
+                "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')");
         assertMethodAuthorization(
                 "requireHumanApproval",
                 new Class<?>[] {CampaignCopySuggestionView.class},
-                "@authz.hasAnyRole('CAMPAIGN_MANAGER')");
+                "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')");
         assertMethodAuthorization(
                 "saveSuggestion",
                 new Class<?>[] {CampaignCopyRequest.class, CampaignCopySuggestionView.class},
-                "@authz.hasAnyRole('CAMPAIGN_MANAGER')");
+                "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')");
         assertMethodAuthorization(
                 "approveCampaignCopy",
                 new Class<?>[] {UUID.class, ApproveAiRecommendationRequest.class},
-                "@authz.hasAnyRole('CAMPAIGN_MANAGER')");
+                "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')");
     }
 
     @Test
@@ -119,7 +127,7 @@ class CampaignCopyServiceTests {
         assertThat(suggestion.subject()).contains("Life Protect");
         assertThat(suggestion.body())
                 .contains("Family guardians", "Life Protect", "cross-sell life cover");
-        assertThat(suggestion.callToAction()).isEqualTo("Review the offer");
+        assertThat(suggestion.callToAction()).isEqualTo("Request more information");
         assertThat(suggestion.explanation()).contains("AI-005", "human approval");
         assertThat(suggestion.confidenceScore()).isEqualByComparingTo("72.00");
         assertThat(suggestion.requiresHumanApproval()).isTrue();
@@ -312,6 +320,33 @@ class CampaignCopyServiceTests {
         assertThat(recommendation.getReviewNotes()).isEqualTo("Reviewed by CM");
         assertThat(view.explanation()).isEqualTo("Generated for human review only");
         verify(aiRecommendationRepository).save(recommendation);
+        verify(auditService).recordChange(any());
+    }
+
+    @Test
+    void approveCampaignCopyAppliesMessageToDraftCampaignOnly() {
+        Segment segment = segment();
+        Campaign campaign = campaign(segment);
+        AiRecommendation recommendation = copyRecommendation();
+        User approver = approver();
+        when(aiRecommendationRepository.findById(RECOMMENDATION_ID))
+                .thenReturn(Optional.of(recommendation));
+        when(campaignRepository.findById(CAMPAIGN_ID)).thenReturn(Optional.of(campaign));
+        when(authorizationExpressions.currentUserId()).thenReturn(APPROVER_ID);
+        when(userRepository.findById(APPROVER_ID)).thenReturn(Optional.of(approver));
+        when(aiRecommendationRepository.save(recommendation)).thenReturn(recommendation);
+        when(campaignRepository.save(campaign)).thenReturn(campaign);
+
+        service.approveCampaignCopy(
+                RECOMMENDATION_ID, new ApproveAiRecommendationRequest("Apply to draft"));
+
+        assertThat(campaign.getStatus()).isEqualTo(CampaignStatus.DRAFT);
+        assertThat(campaign.getMessageSubject()).isEqualTo("Subject for review");
+        assertThat(campaign.getMessageBody()).contains("Body for review");
+        assertThat(campaign.getApprovedBy()).isNull();
+        assertThat(campaign.getApprovedAt()).isNull();
+        verify(campaignRepository).save(campaign);
+        verify(auditService).recordChange(any());
     }
 
     @Test
@@ -324,6 +359,7 @@ class CampaignCopyServiceTests {
         User approver = approver();
         when(aiRecommendationRepository.findById(RECOMMENDATION_ID))
                 .thenReturn(Optional.of(recommendation));
+        when(campaignRepository.findById(CAMPAIGN_ID)).thenReturn(Optional.of(campaign));
         when(authorizationExpressions.currentUserId()).thenReturn(APPROVER_ID);
         when(userRepository.findById(APPROVER_ID)).thenReturn(Optional.of(approver));
         when(aiRecommendationRepository.save(recommendation)).thenReturn(recommendation);
@@ -338,6 +374,7 @@ class CampaignCopyServiceTests {
         assertThat(campaign.getStatus()).isEqualTo(CampaignStatus.SUBMITTED);
         assertThat(campaign.getApprovedBy()).isNull();
         assertThat(campaign.getApprovedAt()).isNull();
+        // Non-DRAFT campaigns are not mutated by copy approval.
         verify(campaignRepository, Mockito.never()).save(any(Campaign.class));
     }
 
@@ -426,7 +463,7 @@ class CampaignCopyServiceTests {
                         "campaign",
                         CAMPAIGN_ID,
                         "campaign copy input",
-                        "Subject: Protect what matters",
+                        "Subject: Subject for review\nBody: Body for review\nCall to action: Request more information",
                         "Generated for human review only");
         ReflectionTestUtils.setField(recommendation, "id", RECOMMENDATION_ID);
         ReflectionTestUtils.setField(recommendation, "createdAt", Instant.now());

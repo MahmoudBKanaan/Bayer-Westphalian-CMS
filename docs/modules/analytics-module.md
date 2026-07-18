@@ -39,10 +39,12 @@ The analytics package contains:
 Frontend surfaces (item 440–444, readability item **591** / NFR-005):
 
 - `DashboardPage` — platform KPIs and charts with grouped inventory / engagement / financial KPI sections
-- `AnalyticsPage` — campaign and product analytics
+- `AnalyticsPage` — campaign and product analytics with **campaign**, **product**, and **time
+  frame** selectors/filters (KB item 441; FR-104–FR-108 charts respect the filtered subset)
 - `ExecutiveDashboardPage` — management aggregates with the same grouped KPI layout
 - API client: `frontend/src/api/analytics.ts`
 - Chart helpers under `frontend/src/components/charts` and `frontend/src/features/analytics`
+- Filter helpers: `frontend/src/features/analytics/analyticsFilters.ts`
 - Readability helpers: `frontend/src/features/dashboard/dashboardReadability.ts`
 
 ## KB Traceability

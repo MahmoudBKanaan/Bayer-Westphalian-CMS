@@ -37,7 +37,7 @@ class ProductionReleaseGateDocumentationTests {
     @Test
     void exampleIsFailClosedAndGuideForbidsEvidenceByAssertion() throws Exception {
         String template = Files.readString(TEMPLATE, StandardCharsets.UTF_8);
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(template)
                 .contains("\"decision\": \"BLOCKED\"")
@@ -45,7 +45,7 @@ class ProductionReleaseGateDocumentationTests {
                 .doesNotContain("\"decision\": \"PASS\"");
         assertThat(guide)
                 .contains("Sprint 18 item 770")
-                .contains("Green CI alone is not production approval")
+                .contains("green CI alone is not production approval")
                 .contains("all seven gate statuses are `PASS`")
                 .contains("A validator failure blocks release")
                 .contains("rather than editing a status to `PASS`");

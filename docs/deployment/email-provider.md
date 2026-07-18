@@ -2,6 +2,9 @@
 
 **Sprint 18 item 726** - Configure a real email provider or disable sending until configured.
 
+Umbrella guide (modes, env vars, retries, contact-event path):
+[Communication Provider Configuration](../communication-provider-configuration.md).
+
 The repository's `SmtpEmailProvider` is a provider-ready placeholder and does not transmit email.
 Therefore production uses the safe branch of the KB requirement: email sending is explicitly
 disabled until a real, tested provider adapter replaces it.

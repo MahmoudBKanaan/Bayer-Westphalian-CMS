@@ -94,15 +94,15 @@ class AiRecommendationServiceTests {
         assertMethodAuthorization(
                 "recommendProducts",
                 new Class<?>[] {ProductRecommendationRequest.class},
-                "@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')");
+                "@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')");
         assertMethodAuthorization(
                 "suggestSegments",
                 new Class<?>[] {SegmentSuggestionRequest.class},
-                "@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')");
+                "@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')");
         assertMethodAuthorization(
                 "calculateDefaultRisk",
                 new Class<?>[] {DefaultRiskScoreRequest.class},
-                "@authz.canReadCustomers()");
+                "@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER', 'CUSTOMER_SERVICE_AGENT')");
         assertMethodAuthorization(
                 "detectDuplicateRisk",
                 new Class<?>[] {DuplicateContactRiskRequest.class},
@@ -311,7 +311,10 @@ class AiRecommendationServiceTests {
                         .findFirst()
                         .orElseThrow();
         assertThat(locationSuggestion.explanation())
-                .contains("customer/location signal", "city equals Berlin");
+                .contains("customer/location signal", "city EQUALS Berlin");
+        assertThat(locationSuggestion.suggestedCriteria())
+                .extracting(SuggestedSegmentCriterion::fieldName)
+                .contains("city");
         ArgumentCaptor<AiRecommendation> storedRecommendations =
                 ArgumentCaptor.forClass(AiRecommendation.class);
         verify(aiRecommendationRepository, Mockito.atLeastOnce()).save(storedRecommendations.capture());
@@ -372,8 +375,8 @@ class AiRecommendationServiceTests {
                             assertThat(suggestion.suggestedCriteriaSummary())
                                     .contains(
                                             "default_risk EQUALS true",
-                                            "reminder_count AFTER 0",
-                                            "days_overdue AFTER 0");
+                                            "reminder_count GREATER_THAN 0",
+                                            "days_overdue GREATER_THAN 0");
                             assertThat(suggestion.explanation())
                                     .contains("payment history", "default-risk");
                             assertThat(suggestion.confidenceScore()).isEqualByComparingTo("88");

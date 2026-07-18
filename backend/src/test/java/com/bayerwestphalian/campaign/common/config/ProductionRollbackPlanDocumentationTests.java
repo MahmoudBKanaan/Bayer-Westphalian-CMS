@@ -14,10 +14,10 @@ class ProductionRollbackPlanDocumentationTests {
 
     @Test
     void rollbackPlanDefinesOwnershipTriggersContainmentAndEvidence() throws Exception {
-        String plan = Files.readString(PLAN, StandardCharsets.UTF_8);
+        String plan = DocumentationTestText.normalize(Files.readString(PLAN, StandardCharsets.UTF_8));
 
         assertThat(plan)
-                .contains("Sprint 18 item 739")
+                .contains("Sprint 18 items 739 and 764")
                 .contains("rollback operator")
                 .contains("release/incident approver")
                 .contains("System Auditor")
@@ -29,7 +29,7 @@ class ProductionRollbackPlanDocumentationTests {
 
     @Test
     void rollbackPlanSeparatesCompatibleImagesStateRestoreAndForwardFix() throws Exception {
-        String plan = Files.readString(PLAN, StandardCharsets.UTF_8);
+        String plan = DocumentationTestText.normalize(Files.readString(PLAN, StandardCharsets.UTF_8));
 
         assertThat(plan)
                 .contains("Path A: Application Image And Configuration Rollback")
@@ -44,7 +44,7 @@ class ProductionRollbackPlanDocumentationTests {
 
     @Test
     void rollbackPlanForbidsUnsafeFlywayAndRequiresFullValidation() throws Exception {
-        String plan = Files.readString(PLAN, StandardCharsets.UTF_8);
+        String plan = DocumentationTestText.normalize(Files.readString(PLAN, StandardCharsets.UTF_8));
 
         assertThat(plan)
                 .contains("Never run `flyway clean`")
@@ -57,13 +57,15 @@ class ProductionRollbackPlanDocumentationTests {
 
     @Test
     void rollbackPlanIsIndexedAndLinkedFromSmokeGate() throws Exception {
-        String index = Files.readString(INDEX, StandardCharsets.UTF_8);
+        String index = DocumentationTestText.normalize(Files.readString(INDEX, StandardCharsets.UTF_8));
         String smoke =
                 Files.readString(
                         Path.of("../docs/deployment/production-smoke-test-checklist.md"),
                         StandardCharsets.UTF_8);
 
-        assertThat(index).contains("deployment/rollback-plan.md").contains("item **739**");
+        assertThat(index)
+                .contains("deployment/rollback-plan.md")
+                .contains("items **739** / **764**");
         assertThat(smoke).contains("Production Rollback Plan").contains("rollback-plan.md");
     }
 }

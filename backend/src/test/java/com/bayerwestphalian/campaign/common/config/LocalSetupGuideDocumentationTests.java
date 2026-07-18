@@ -15,7 +15,7 @@ class LocalSetupGuideDocumentationTests {
 
     @Test
     void guideCoversReproducibleLocalSetupAndVerification() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Item 774")
@@ -32,7 +32,7 @@ class LocalSetupGuideDocumentationTests {
 
     @Test
     void guideSeparatesLocalSetupFromProductionAndProtectsSecrets() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("development and test use only")

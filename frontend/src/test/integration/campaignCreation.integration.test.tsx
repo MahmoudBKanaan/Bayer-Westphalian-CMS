@@ -199,7 +199,7 @@ describe("campaign creation UI integration (item 603)", () => {
     renderApp({ path: "/campaign-builder", roles: ["BI_ANALYST"] });
 
     expect(
-      await screen.findByText(/not authorized to build campaigns/i),
+      await screen.findByRole("heading", { name: /campaign performance/i }),
     ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: CAMPAIGN_CREATE_DRAFT_LABEL })).not.toBeInTheDocument();
   });

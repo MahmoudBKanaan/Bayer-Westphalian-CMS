@@ -14,7 +14,7 @@ public final class ProductionCorsOrigins {
         if (origins == null || origins.isEmpty()) {
             throw new IllegalStateException(
                     "Production CORS requires CORS_ALLOWED_ORIGINS with at least one explicit "
-                            + "HTTPS origin");
+                            + "frontend origin using HTTPS");
         }
 
         for (String origin : origins) {
@@ -37,7 +37,8 @@ public final class ProductionCorsOrigins {
             throw new IllegalStateException("Production CORS origin entries must not be blank");
         }
         if (origin.contains("*")) {
-            throw new IllegalStateException("Production CORS must not use wildcard origins");
+            throw new IllegalStateException(
+                    "Production CORS must not use wildcards or wildcard origins");
         }
 
         URI uri;
@@ -47,7 +48,7 @@ public final class ProductionCorsOrigins {
             throw new IllegalStateException("Production CORS origins must be valid URIs");
         }
 
-        if (!"https".equalsIgnoreCase(uri.getScheme())) {
+        if (uri.getScheme() == null || uri.getScheme().isBlank()) {
             throw new IllegalStateException("Production CORS origins must use HTTPS (https://)");
         }
         if (uri.getHost() == null || uri.getHost().isBlank()) {
@@ -61,6 +62,9 @@ public final class ProductionCorsOrigins {
                 || host.equals("[::1]")
                 || host.endsWith(".localhost")) {
             throw new IllegalStateException("Production CORS must not allow localhost origins");
+        }
+        if (!"https".equalsIgnoreCase(uri.getScheme())) {
+            throw new IllegalStateException("Production CORS origins must use HTTPS (https://)");
         }
         if (uri.getPort() > 65535) {
             throw new IllegalStateException("Production CORS origin port must be valid");

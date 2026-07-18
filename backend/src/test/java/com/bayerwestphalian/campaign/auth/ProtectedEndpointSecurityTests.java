@@ -759,13 +759,14 @@ class ProtectedEndpointSecurityTests {
                 .andExpect(status().isOk())
                 .andExpect(content().string("follow-up task created"));
 
+        // Managers may update/complete status as well as assign (KB assignee-or-manager complete).
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/status", taskId)
                                 .header("Authorization", "Bearer campaign-manager-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{}"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string(not(containsString("follow-up task status updated"))));
+                .andExpect(status().isOk())
+                .andExpect(content().string("follow-up task status updated"));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", taskId)
@@ -786,8 +787,8 @@ class ProtectedEndpointSecurityTests {
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/complete", taskId)
                                 .header("Authorization", "Bearer campaign-manager-token"))
-                .andExpect(status().isForbidden())
-                .andExpect(content().string(not(containsString("follow-up task completed"))));
+                .andExpect(status().isOk())
+                .andExpect(content().string("follow-up task completed"));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/complete", taskId)

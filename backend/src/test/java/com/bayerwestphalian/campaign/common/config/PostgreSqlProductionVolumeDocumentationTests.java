@@ -49,7 +49,7 @@ class PostgreSqlProductionVolumeDocumentationTests {
 
     @Test
     void guideDocumentsLifecycleAndBackupSafety() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Sprint 18 item 720")

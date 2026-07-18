@@ -38,13 +38,13 @@ class ProductionLoggingConfigurationDocumentationTests {
                 .contains("driver: local")
                 .contains("max-size: ${LOG_MAX_SIZE:-10m}")
                 .contains("max-file: \"${LOG_MAX_FILES:-5}\"");
-        assertThat(count(compose, "logging: *production-logging")).isEqualTo(4);
+        assertThat(count(compose, "logging: *production-logging")).isEqualTo(5);
     }
 
     @Test
     void templateAndGuideDocumentSafeOperations() throws Exception {
         String template = Files.readString(TEMPLATE, StandardCharsets.UTF_8);
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(template)
                 .contains("LOG_LEVEL_APPLICATION=INFO")

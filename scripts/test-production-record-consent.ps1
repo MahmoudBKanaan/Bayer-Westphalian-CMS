@@ -57,7 +57,7 @@ function New-RoleSession($Credential, [string]$RequiredRole) {
 }
 
 try {
-    $agentToken = New-RoleSession $AgentCredential "CUSTOMER_SERVICE_AGENT"
+    $agentToken = New-RoleSession -Credential $AgentCredential -RequiredRole "CUSTOMER_SERVICE_AGENT"
     $agentHeaders = @{ Authorization = "Bearer $agentToken" }
 
     $customerBody = @{
@@ -121,7 +121,7 @@ try {
     }
     $consentWithdrawn = $true
 
-    $adminToken = New-RoleSession $AdminCleanupCredential "ADMIN"
+    $adminToken = New-RoleSession -Credential $AdminCleanupCredential -RequiredRole "ADMIN"
     $deleted = Invoke-RestMethod -Method Delete -Uri "$origin/api/customers/$customerId" `
         -Headers @{ Authorization = "Bearer $adminToken" } -TimeoutSec $TimeoutSeconds
     if (-not $deleted.success -or -not $deleted.data.deletedAt) {
@@ -148,7 +148,9 @@ finally {
     }
     if ($customerId -and -not $customerDeleted) {
         try {
-            if (-not $adminToken) { $adminToken = New-RoleSession $AdminCleanupCredential "ADMIN" }
+            if (-not $adminToken) {
+                $adminToken = New-RoleSession -Credential $AdminCleanupCredential -RequiredRole "ADMIN"
+            }
             Invoke-RestMethod -Method Delete -Uri "$origin/api/customers/$customerId" `
                 -Headers @{ Authorization = "Bearer $adminToken" } -TimeoutSec $TimeoutSeconds |
                 Out-Null

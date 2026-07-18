@@ -48,6 +48,20 @@ public class SecurityConfiguration {
     public static final String[] ADMIN_ROLES = roles(SystemRoleName.ADMIN);
     public static final String[] ADMIN_OR_AGENT_ROLES =
             roles(SystemRoleName.ADMIN, SystemRoleName.CUSTOMER_SERVICE_AGENT);
+    /**
+     * Payment record list/search (matches {@code PaymentRecordService} read {@code @PreAuthorize}
+     * and frontend {@code PAYMENT_RECORD_READ_ROLES}).
+     */
+    public static final String[] PAYMENT_RECORD_READ_ROLES =
+            roles(
+                    SystemRoleName.ADMIN,
+                    SystemRoleName.CAMPAIGN_MANAGER,
+                    SystemRoleName.BI_ANALYST,
+                    SystemRoleName.COMPLIANCE_OFFICER,
+                    SystemRoleName.CUSTOMER_SERVICE_AGENT,
+                    SystemRoleName.SALES_AGENT,
+                    SystemRoleName.EXECUTIVE_VIEWER,
+                    SystemRoleName.SYSTEM_AUDITOR);
     public static final String[] AUTHORIZED_CUSTOMER_ROLES =
             roles(
                     SystemRoleName.ADMIN,
@@ -290,27 +304,20 @@ public class SecurityConfiguration {
                                         .hasAnyRole(CAMPAIGN_MANAGER_ROLES)
                                         .requestMatchers(HttpMethod.GET, "/api/campaigns/**")
                                         .hasAnyRole(CAMPAIGN_READ_ROLES)
+                                        // Payment write: Admin / CSA only (matches PaymentRecordService
+                                        // @PreAuthorize). Sales Agent is read-only on payments.
                                         .requestMatchers(HttpMethod.PUT, "/api/payment-records/**")
-                                        .hasAnyRole(
-                                                SystemRoleName.ADMIN.name(),
-                                                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
-                                                SystemRoleName.SALES_AGENT.name())
+                                        .hasAnyRole(ADMIN_OR_AGENT_ROLES)
                                         .requestMatchers(
                                                 HttpMethod.PATCH, "/api/payment-records/**")
-                                        .hasAnyRole(
-                                                SystemRoleName.ADMIN.name(),
-                                                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
-                                                SystemRoleName.SALES_AGENT.name())
+                                        .hasAnyRole(ADMIN_OR_AGENT_ROLES)
                                         .requestMatchers(HttpMethod.POST, "/api/payment-records/**")
-                                        .hasAnyRole(
-                                                SystemRoleName.ADMIN.name(),
-                                                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
-                                                SystemRoleName.SALES_AGENT.name())
+                                        .hasAnyRole(ADMIN_OR_AGENT_ROLES)
+                                        // Payment read: align HTTP security with PaymentRecordService
+                                        // search/list PreAuthorize and frontend PAYMENT_RECORD_READ_ROLES
+                                        // so Campaign Manager / BI Analyst customer payment tabs load.
                                         .requestMatchers(HttpMethod.GET, "/api/payment-records/**")
-                                        .hasAnyRole(
-                                                SystemRoleName.ADMIN.name(),
-                                                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
-                                                SystemRoleName.SALES_AGENT.name())
+                                        .hasAnyRole(PAYMENT_RECORD_READ_ROLES)
                                         // PathPattern forbids segments after **; list generate paths
                                         // explicitly so CSA can bulk-generate without opening all POST.
                                         .requestMatchers(
@@ -336,10 +343,13 @@ public class SecurityConfiguration {
                                         .requestMatchers(
                                                 HttpMethod.POST,
                                                 "/api/ai/segment-suggestions",
-                                                "/api/ai/product-recommendations")
+                                                "/api/ai/product-recommendations",
+                                                "/api/ai/default-risk-score")
                                         .hasAnyRole(
+                                                SystemRoleName.ADMIN.name(),
                                                 SystemRoleName.BI_ANALYST.name(),
-                                                SystemRoleName.CAMPAIGN_MANAGER.name())
+                                                SystemRoleName.CAMPAIGN_MANAGER.name(),
+                                                SystemRoleName.CUSTOMER_SERVICE_AGENT.name())
                                         .requestMatchers(
                                                 HttpMethod.POST,
                                                 "/api/ai/duplicate-contact-warning")
@@ -348,7 +358,9 @@ public class SecurityConfiguration {
                                                 HttpMethod.POST,
                                                 "/api/ai/campaign-copy",
                                                 "/api/ai/campaign-copy/**")
-                                        .hasAnyRole(CAMPAIGN_MANAGER_ROLES)
+                                        .hasAnyRole(
+                                                SystemRoleName.ADMIN.name(),
+                                                SystemRoleName.CAMPAIGN_MANAGER.name())
                                         // AI-001 search is customer-read scoped; other AI GETs use
                                         // AI recommendation roles (ProtectedEndpointSecurityTests).
                                         .requestMatchers(HttpMethod.GET, "/api/ai/customer-search")
@@ -369,21 +381,22 @@ public class SecurityConfiguration {
                                                 SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
                                                 SystemRoleName.SALES_AGENT.name(),
                                                 SystemRoleName.CAMPAIGN_MANAGER.name())
+                                        // Manager-only reassignment (method security also enforces).
                                         .requestMatchers(
                                                 HttpMethod.PUT,
                                                 "/api/follow-up-tasks/*/assign",
                                                 "/api/follow-up-tasks/{id}/assign")
                                         .hasAnyRole(
                                                 SystemRoleName.ADMIN.name(),
-                                                SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
-                                                SystemRoleName.SALES_AGENT.name(),
                                                 SystemRoleName.CAMPAIGN_MANAGER.name())
+                                        // Complete / status / update: assignee roles + managers.
                                         .requestMatchers(
                                                 HttpMethod.PUT,
                                                 "/api/follow-up-tasks",
                                                 "/api/follow-up-tasks/**")
                                         .hasAnyRole(
                                                 SystemRoleName.ADMIN.name(),
+                                                SystemRoleName.CAMPAIGN_MANAGER.name(),
                                                 SystemRoleName.CUSTOMER_SERVICE_AGENT.name(),
                                                 SystemRoleName.SALES_AGENT.name())
                                         .requestMatchers(

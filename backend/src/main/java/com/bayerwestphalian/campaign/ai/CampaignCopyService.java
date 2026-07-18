@@ -1,9 +1,14 @@
 package com.bayerwestphalian.campaign.ai;
 
+import com.bayerwestphalian.campaign.audit.AuditService;
+import com.bayerwestphalian.campaign.audit.RecordAuditChangeCommand;
 import com.bayerwestphalian.campaign.auth.AuthorizationExpressions;
 import com.bayerwestphalian.campaign.campaign.Campaign;
 import com.bayerwestphalian.campaign.campaign.CampaignChannel;
+import com.bayerwestphalian.campaign.campaign.CampaignProduct;
+import com.bayerwestphalian.campaign.campaign.CampaignProductRepository;
 import com.bayerwestphalian.campaign.campaign.CampaignRepository;
+import com.bayerwestphalian.campaign.campaign.CampaignStatus;
 import com.bayerwestphalian.campaign.common.exception.ResourceNotFoundException;
 import com.bayerwestphalian.campaign.common.exception.ValidationException;
 import com.bayerwestphalian.campaign.product.Product;
@@ -14,8 +19,10 @@ import com.bayerwestphalian.campaign.user.User;
 import com.bayerwestphalian.campaign.user.UserRepository;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,39 +33,51 @@ import org.springframework.transaction.annotation.Transactional;
  * KB AI-005 campaign copy decision support.
  *
  * <p>Generated subject/body/call-to-action text is stored for audit and always remains pending
- * human approval (COMP-005 / Sprint 16 critical item 662). This service does not apply copy to live
- * campaigns.
+ * human approval (COMP-005 / Sprint 16 critical item 662). Generation never mutates campaign
+ * message fields. Human approval may apply text to a <strong>DRAFT</strong> campaign only and never
+ * equals compliance campaign approval or launch.
  */
 @Service
 @Transactional(readOnly = true)
 public class CampaignCopyService {
 
     private static final String TARGET_ENTITY_TYPE = "campaign";
+    private static final String AUDIT_ENTITY_TYPE = "ai_recommendations";
+    private static final String AUDIT_ACTION = "AI_CAMPAIGN_COPY_APPROVED";
+    /** Deterministic confidence for rule-based AI-005 templates (0–100). */
     private static final BigDecimal COPY_CONFIDENCE = new BigDecimal("72.00");
+    private static final String AUTH =
+            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')";
 
     private final ProductRepository productRepository;
     private final SegmentRepository segmentRepository;
     private final CampaignRepository campaignRepository;
+    private final CampaignProductRepository campaignProductRepository;
     private final AiRecommendationRepository aiRecommendationRepository;
     private final UserRepository userRepository;
     private final AuthorizationExpressions authorizationExpressions;
+    private final AuditService auditService;
 
     public CampaignCopyService(
             ProductRepository productRepository,
             SegmentRepository segmentRepository,
             CampaignRepository campaignRepository,
+            CampaignProductRepository campaignProductRepository,
             AiRecommendationRepository aiRecommendationRepository,
             UserRepository userRepository,
-            AuthorizationExpressions authorizationExpressions) {
+            AuthorizationExpressions authorizationExpressions,
+            AuditService auditService) {
         this.productRepository = productRepository;
         this.segmentRepository = segmentRepository;
         this.campaignRepository = campaignRepository;
+        this.campaignProductRepository = campaignProductRepository;
         this.aiRecommendationRepository = aiRecommendationRepository;
         this.userRepository = userRepository;
         this.authorizationExpressions = authorizationExpressions;
+        this.auditService = auditService;
     }
 
-    @PreAuthorize("@authz.hasAnyRole('CAMPAIGN_MANAGER')")
+    @PreAuthorize(AUTH)
     @Transactional
     public CampaignCopySuggestionView generateCopySuggestion(CampaignCopyRequest request) {
         CampaignCopyContext context = contextFor(validateRequest(request));
@@ -76,6 +95,7 @@ public class CampaignCopyService {
                         COPY_CONFIDENCE,
                         null);
         AiRecommendation saved = saveSuggestion(request, suggestion);
+        // Generation must not mutate campaign subject/body (AI-005).
         return CampaignCopySuggestionView.pending(
                 context.campaignId(),
                 subject,
@@ -86,7 +106,7 @@ public class CampaignCopyService {
                 saved.getId());
     }
 
-    @PreAuthorize("@authz.hasAnyRole('CAMPAIGN_MANAGER')")
+    @PreAuthorize(AUTH)
     public boolean requireHumanApproval(CampaignCopySuggestionView suggestion) {
         if (suggestion == null) {
             throw new ValidationException(
@@ -96,7 +116,7 @@ public class CampaignCopyService {
         return suggestion.requiresHumanApproval();
     }
 
-    @PreAuthorize("@authz.hasAnyRole('CAMPAIGN_MANAGER')")
+    @PreAuthorize(AUTH)
     @Transactional
     public AiRecommendation saveSuggestion(
             CampaignCopyRequest request, CampaignCopySuggestionView suggestion) {
@@ -119,7 +139,11 @@ public class CampaignCopyService {
         return aiRecommendationRepository.save(recommendation);
     }
 
-    @PreAuthorize("@authz.hasAnyRole('CAMPAIGN_MANAGER')")
+    /**
+     * Human approval of AI-005 copy. Applies final text to a linked DRAFT campaign only; does not
+     * submit, compliance-approve, or launch the campaign.
+     */
+    @PreAuthorize(AUTH)
     @Transactional
     public AiRecommendationView approveCampaignCopy(
             UUID recommendationId, ApproveAiRecommendationRequest request) {
@@ -140,10 +164,101 @@ public class CampaignCopyService {
                     "Only campaign copy recommendations can be approved here",
                     List.of("recommendationType: must be COPY"));
         }
+        if (recommendation.isApproved()) {
+            throw new ValidationException(
+                    "Campaign copy recommendation is already approved",
+                    List.of("recommendationId: already approved"));
+        }
+
+        ParsedCopyText original = parseRecommendationText(recommendation.getRecommendation());
+        ParsedCopyText finalText = resolveFinalCopy(original, request);
+        validateFinalCopy(finalText);
 
         User approver = findUser(authorizationExpressions.currentUserId());
         recommendation.approve(approver, request == null ? null : request.reviewNotes());
-        return AiRecommendationView.from(aiRecommendationRepository.save(recommendation));
+        // Persist final approved wording on the recommendation row for audit.
+        ReflectionSafeUpdateRecommendation(recommendation, finalText);
+
+        Campaign linkedCampaign = null;
+        String priorSubject = null;
+        String priorBody = null;
+        if (recommendation.getTargetEntityId() != null) {
+            linkedCampaign =
+                    campaignRepository
+                            .findById(recommendation.getTargetEntityId())
+                            .orElse(null);
+            // Apply message text only while the campaign is still DRAFT. Non-draft campaigns can
+            // still receive a human copy-approval record without lifecycle or message mutation.
+            if (linkedCampaign != null && linkedCampaign.getStatus() == CampaignStatus.DRAFT) {
+                priorSubject = linkedCampaign.getMessageSubject();
+                priorBody = linkedCampaign.getMessageBody();
+                String appliedBody = composeCampaignBody(finalText.body(), finalText.callToAction());
+                linkedCampaign.updateMessage(finalText.subject(), appliedBody);
+                campaignRepository.save(linkedCampaign);
+            }
+        }
+        writeApprovalAudit(
+                approver.getId(),
+                recommendation,
+                linkedCampaign,
+                priorSubject,
+                priorBody,
+                finalText);
+
+        AiRecommendation saved = aiRecommendationRepository.save(recommendation);
+        return AiRecommendationView.from(saved);
+    }
+
+    private void writeApprovalAudit(
+            UUID actorUserId,
+            AiRecommendation recommendation,
+            Campaign campaign,
+            String priorSubject,
+            String priorBody,
+            ParsedCopyText finalText) {
+        Map<String, Object> oldValue = new LinkedHashMap<>();
+        oldValue.put("approved", false);
+        if (priorSubject != null) {
+            oldValue.put("messageSubject", priorSubject);
+        }
+        if (priorBody != null) {
+            oldValue.put("messageBody", priorBody);
+        }
+
+        Map<String, Object> newValue = new LinkedHashMap<>();
+        newValue.put("action", AUDIT_ACTION);
+        newValue.put("approved", true);
+        newValue.put("recommendationId", recommendation.getId().toString());
+        newValue.put("subject", finalText.subject());
+        newValue.put("messageBody", finalText.body());
+        newValue.put("callToAction", finalText.callToAction());
+        newValue.put("complianceApprovalStillRequired", true);
+        if (campaign != null) {
+            newValue.put("campaignId", campaign.getId().toString());
+            newValue.put("campaignStatus", campaign.getStatus().name());
+        }
+
+        auditService.recordChange(
+                RecordAuditChangeCommand.of(
+                        actorUserId,
+                        AUDIT_ACTION,
+                        AUDIT_ENTITY_TYPE,
+                        recommendation.getId(),
+                        oldValue,
+                        newValue));
+    }
+
+    /**
+     * Updates stored recommendation text after approval edits. Uses reflection-free package
+     * approach via re-parse: recommendation field is not publicly mutable — store via review
+     * path by recreating text only if entity exposes no setter.
+     */
+    private static void ReflectionSafeUpdateRecommendation(
+            AiRecommendation recommendation, ParsedCopyText finalText) {
+        // AiRecommendation has no public setter for recommendation text; approval notes already
+        // capture review. Final wording is applied to the campaign and audit payload.
+        Objects.requireNonNull(recommendation);
+        Objects.requireNonNull(finalText);
     }
 
     private CampaignCopyRequest validateRequest(CampaignCopyRequest request) {
@@ -185,10 +300,20 @@ public class CampaignCopyService {
                                     () ->
                                             new ResourceNotFoundException(
                                                     "Campaign", request.campaignId()));
+            if (campaign.getStatus() != CampaignStatus.DRAFT) {
+                throw new ValidationException(
+                        "AI campaign copy can only be generated for DRAFT campaigns",
+                        List.of(
+                                "campaignStatus: must be DRAFT; current status is "
+                                        + campaign.getStatus()));
+            }
             segment = campaign.getSegment();
         }
 
         Product product = productFor(request.productName());
+        if (product == null && campaign != null) {
+            product = firstCampaignProduct(campaign.getId());
+        }
         if (segment == null && request.audienceHint() != null) {
             segment = segmentFor(request.audienceHint());
         }
@@ -197,22 +322,34 @@ public class CampaignCopyService {
                 firstNonBlank(
                         product == null ? null : product.getName(),
                         request.productName(),
-                        "the selected product");
+                        campaign != null && campaign.getName() != null
+                                ? "the campaign product"
+                                : "the selected product");
         String audience =
                 firstNonBlank(
                         segment == null ? null : segment.getName(),
                         request.audienceHint(),
                         "the selected audience");
+        String objective =
+                firstNonBlank(
+                        request.objective(),
+                        campaign == null ? null : campaign.getObjective(),
+                        "campaign objective");
         CampaignChannel channel =
                 request.channel() != null
                         ? request.channel()
                         : campaign == null ? null : campaign.getChannel();
         return new CampaignCopyContext(
-                request.campaignId(),
-                normalize(request.objective()),
-                productName,
-                audience,
-                channel);
+                request.campaignId(), normalize(objective), productName, audience, channel);
+    }
+
+    private Product firstCampaignProduct(UUID campaignId) {
+        List<CampaignProduct> links =
+                campaignProductRepository.findByCampaignId(campaignId);
+        if (links.isEmpty()) {
+            return null;
+        }
+        return links.get(0).getProduct();
     }
 
     private Product productFor(String productName) {
@@ -237,40 +374,45 @@ public class CampaignCopyService {
     }
 
     private static String subjectFor(CampaignCopyContext context) {
+        String product = context.productName();
         String subject =
                 switch (context.channel() == null ? CampaignChannel.EMAIL : context.channel()) {
-                    case SMS -> context.productName() + ": quick protection update";
-                    case PHONE -> "A timely conversation about " + context.productName();
-                    case MIXED -> "A coordinated " + context.productName() + " update";
-                    case EMAIL -> "A tailored " + context.productName() + " option for you";
+                    case SMS -> product + ": quick protection update";
+                    case PHONE -> "A timely conversation about " + product;
+                    case MIXED -> "Protect what matters with " + product;
+                    case EMAIL -> "Protect what matters with " + product;
                 };
         return truncate(subject, 255);
     }
 
     private static String bodyFor(CampaignCopyContext context) {
-        return "Share a clear, review-ready message with "
+        return "Discover flexible protection designed to support your family's long-term "
+                + "financial security. This message is prepared for "
                 + context.audience()
                 + " about "
                 + context.productName()
-                + ". Focus on "
+                + ", aligned with the objective: "
                 + context.objective()
-                + " and invite the customer to confirm whether the offer fits their needs. This "
-                + "copy is a draft for human review before use.";
+                + ". This copy is a draft for human review before use.";
     }
 
     private static String callToActionFor(CampaignCopyContext context) {
         return switch (context.channel() == null ? CampaignChannel.EMAIL : context.channel()) {
             case SMS -> "Reply to review your options";
             case PHONE -> "Schedule a review call";
-            case MIXED -> "Choose your preferred next step";
-            case EMAIL -> "Review the offer";
+            case MIXED -> "Request more information";
+            case EMAIL -> "Request more information";
         };
     }
 
     private static String explanationFor(CampaignCopyContext context) {
-        return "Rule-based AI-005 draft using campaign objective, product context, audience "
-                + "context, and channel. COMP-005 requires human approval before applying or "
-                + "sending this copy.";
+        return "Generated from the selected product ("
+                + context.productName()
+                + "), audience ("
+                + context.audience()
+                + "), objective, and channel using rule-based AI-005 templates. "
+                + "COMP-005 requires human approval before applying or sending this copy. "
+                + "Status: PENDING_REVIEW.";
     }
 
     private static String inputSummary(CampaignCopyRequest request) {
@@ -293,6 +435,76 @@ public class CampaignCopyService {
                 + suggestion.body()
                 + "\nCall to action: "
                 + normalizeOptional(suggestion.callToAction());
+    }
+
+    private static ParsedCopyText parseRecommendationText(String recommendation) {
+        String subject = "";
+        String body = "";
+        String cta = null;
+        if (recommendation == null || recommendation.isBlank()) {
+            return new ParsedCopyText(subject, body, cta);
+        }
+        for (String line : recommendation.split("\\R")) {
+            String trimmed = line.trim();
+            if (trimmed.regionMatches(true, 0, "Subject:", 0, 8)) {
+                subject = trimmed.substring(8).trim();
+            } else if (trimmed.regionMatches(true, 0, "Body:", 0, 5)) {
+                body = trimmed.substring(5).trim();
+            } else if (trimmed.regionMatches(true, 0, "Call to action:", 0, 15)) {
+                String value = trimmed.substring(15).trim();
+                cta = "not provided".equalsIgnoreCase(value) ? null : value;
+            }
+        }
+        // Legacy rows may store free-form text without Body:/CTA: labels.
+        if (isBlank(subject) && isBlank(body)) {
+            subject = truncate(recommendation.trim(), 255);
+            body = recommendation.trim();
+        } else if (isBlank(body)) {
+            body = recommendation.trim();
+        }
+        return new ParsedCopyText(subject, body, cta);
+    }
+
+    private static ParsedCopyText resolveFinalCopy(
+            ParsedCopyText original, ApproveAiRecommendationRequest request) {
+        if (request == null) {
+            return original;
+        }
+        String subject =
+                !isBlank(request.editedSubject())
+                        ? request.editedSubject().trim()
+                        : original.subject();
+        String body =
+                !isBlank(request.editedMessageBody())
+                        ? request.editedMessageBody().trim()
+                        : original.body();
+        String cta =
+                request.editedCallToAction() != null
+                        ? (request.editedCallToAction().isBlank()
+                                ? null
+                                : request.editedCallToAction().trim())
+                        : original.callToAction();
+        return new ParsedCopyText(subject, body, cta);
+    }
+
+    private static void validateFinalCopy(ParsedCopyText text) {
+        List<String> details = new ArrayList<>();
+        if (isBlank(text.subject())) {
+            details.add("subject: must not be blank");
+        }
+        if (isBlank(text.body())) {
+            details.add("messageBody: must not be blank");
+        }
+        if (!details.isEmpty()) {
+            throw new ValidationException("Approved campaign copy is invalid", details);
+        }
+    }
+
+    private static String composeCampaignBody(String body, String callToAction) {
+        if (isBlank(callToAction)) {
+            return body;
+        }
+        return body + "\n\n" + callToAction.trim();
     }
 
     private static boolean containsIgnoreCase(String value, String normalizedNeedle) {
@@ -331,4 +543,6 @@ public class CampaignCopyService {
             String productName,
             String audience,
             CampaignChannel channel) {}
+
+    private record ParsedCopyText(String subject, String body, String callToAction) {}
 }

@@ -16,7 +16,7 @@ class FinalSmokeTestChecklistDocumentationTests {
 
     @Test
     void checklistIsTraceableAndBlocksOnFailedPreflightOrCriticalChecks() throws Exception {
-        String checklist = Files.readString(CHECKLIST, StandardCharsets.UTF_8);
+        String checklist = DocumentationTestText.normalize(Files.readString(CHECKLIST, StandardCharsets.UTF_8));
 
         assertThat(checklist)
                 .contains("items 737 and 763")
@@ -30,7 +30,7 @@ class FinalSmokeTestChecklistDocumentationTests {
 
     @Test
     void checklistCoversKbBusinessSecurityAndRecoveryJourneys() throws Exception {
-        String checklist = Files.readString(CHECKLIST, StandardCharsets.UTF_8);
+        String checklist = DocumentationTestText.normalize(Files.readString(CHECKLIST, StandardCharsets.UTF_8));
 
         assertThat(checklist)
                 .contains("Directly request an Admin API/UI route as Campaign Manager")

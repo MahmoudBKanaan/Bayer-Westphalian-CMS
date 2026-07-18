@@ -43,7 +43,7 @@ public class AiController {
     }
 
     @PostMapping("/segment-suggestions")
-    @PreAuthorize("@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')")
     public ResponseEntity<ApiResponse<SegmentSuggestionView.ListResponse>> segmentSuggestions(
             @Valid @RequestBody(required = false) SegmentSuggestionRequest request) {
         SegmentSuggestionView.ListResponse suggestions =
@@ -53,13 +53,26 @@ public class AiController {
     }
 
     @PostMapping("/product-recommendations")
-    @PreAuthorize("@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')")
     public ResponseEntity<ApiResponse<ProductRecommendationView.ListResponse>>
             productRecommendations(@Valid @RequestBody ProductRecommendationRequest request) {
         ProductRecommendationView.ListResponse recommendations =
                 aiRecommendationService.recommendProducts(request);
         return ResponseEntity.ok(
                 ApiResponse.success("AI product recommendations generated", recommendations));
+    }
+
+    /**
+     * Default-risk score (KB AI-004) — advisory only; does not block marketing by itself.
+     */
+    @PostMapping("/default-risk-score")
+    @PreAuthorize(
+            "@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER', 'CUSTOMER_SERVICE_AGENT')")
+    public ResponseEntity<ApiResponse<DefaultRiskScoreView>> defaultRiskScore(
+            @Valid @RequestBody DefaultRiskScoreRequest request) {
+        DefaultRiskScoreView score = aiRecommendationService.calculateDefaultRisk(request);
+        return ResponseEntity.ok(
+                ApiResponse.success("AI default-risk score generated", score));
     }
 
     @PostMapping("/duplicate-contact-warning")
@@ -72,7 +85,7 @@ public class AiController {
     }
 
     @PostMapping("/campaign-copy")
-    @PreAuthorize("@authz.hasAnyRole('CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')")
     public ResponseEntity<ApiResponse<CampaignCopySuggestionView>> campaignCopy(
             @Valid @RequestBody CampaignCopyRequest request) {
         CampaignCopySuggestionView suggestion = campaignCopyService.generateCopySuggestion(request);
@@ -81,7 +94,7 @@ public class AiController {
     }
 
     @PostMapping("/campaign-copy/{recommendationId}/approve")
-    @PreAuthorize("@authz.hasAnyRole('CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')")
     public ResponseEntity<ApiResponse<AiRecommendationView>> approveCampaignCopy(
             @PathVariable UUID recommendationId,
             @Valid @RequestBody(required = false) ApproveAiRecommendationRequest request) {

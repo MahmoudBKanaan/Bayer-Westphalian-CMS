@@ -39,7 +39,7 @@ class ProductionDockerComposeDocumentationTests {
                 .contains("JWT_SECRET is required")
                 .contains("CORS_ALLOWED_ORIGINS is required")
                 .contains("bwc_postgres_prod_data:/var/lib/postgresql/data")
-                .contains("bwc_consent_evidence:/app/data/files")
+                .contains("bwc_consent_evidence:/app/data/consent-evidence")
                 .contains("internal: true")
                 .contains("no-new-privileges:true")
                 .contains("read_only: true")
@@ -49,13 +49,13 @@ class ProductionDockerComposeDocumentationTests {
 
     @Test
     void productionComposeGuideExplainsSafeOperation() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Sprint 18 item 717")
                 .contains("docker-compose.prod.yml")
                 .contains("uncommitted env file")
-                .contains("do not expose this stack directly")
+                .contains("only service publishing an HTTP host port")
                 .contains("ProductionDockerComposeDocumentationTests");
     }
 }

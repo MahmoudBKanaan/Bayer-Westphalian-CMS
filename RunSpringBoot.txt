@@ -1,0 +1,7 @@
+cd D:\Documents\IU\AgileApp
+docker compose up -d postgres
+
+cd D:\Documents\IU\AgileApp\backend
+$env:SPRING_PROFILES_ACTIVE = "dev"
+mvn -B spring-boot:run "-Dspring-boot.run.profiles=dev"
+

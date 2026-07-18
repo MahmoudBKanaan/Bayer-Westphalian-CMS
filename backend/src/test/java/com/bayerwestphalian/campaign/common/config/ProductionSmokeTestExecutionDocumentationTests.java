@@ -16,7 +16,7 @@ class ProductionSmokeTestExecutionDocumentationTests {
 
     @Test
     void blockedExecutionRecordsImmutableDeploymentEvidenceAndReason() throws Exception {
-        String execution = Files.readString(EXECUTION, StandardCharsets.UTF_8);
+        String execution = DocumentationTestText.normalize(Files.readString(EXECUTION, StandardCharsets.UTF_8));
 
         assertThat(execution)
                 .contains("item 738")
@@ -31,7 +31,7 @@ class ProductionSmokeTestExecutionDocumentationTests {
 
     @Test
     void executionDoesNotMisrepresentDevelopmentServicesAsProductionEvidence() throws Exception {
-        String execution = Files.readString(EXECUTION, StandardCharsets.UTF_8);
+        String execution = DocumentationTestText.normalize(Files.readString(EXECUTION, StandardCharsets.UTF_8));
 
         assertThat(execution)
                 .contains("Vite development page, not production deployment")
@@ -43,7 +43,7 @@ class ProductionSmokeTestExecutionDocumentationTests {
 
     @Test
     void checklistLinksTimestampedExecutionHistory() throws Exception {
-        String checklist = Files.readString(CHECKLIST, StandardCharsets.UTF_8);
+        String checklist = DocumentationTestText.normalize(Files.readString(CHECKLIST, StandardCharsets.UTF_8));
 
         assertThat(checklist)
                 .contains("Item 738 execution history")

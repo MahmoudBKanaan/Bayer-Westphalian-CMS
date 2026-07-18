@@ -32,32 +32,44 @@ public class FollowUpController {
     @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'CAMPAIGN_MANAGER')")
     public ResponseEntity<ApiResponse<FollowUpTaskView>> createTask(
             @Valid @RequestBody CreateFollowUpTaskRequest request) {
-        FollowUpTask task = followUpService.createTask(request.toCommand());
+        FollowUpTaskView task = followUpService.createTaskView(request.toCommand());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("Follow-up task created", FollowUpTaskView.from(task)));
+                .body(ApiResponse.success("Follow-up task created", task));
+    }
+
+    /**
+     * Active Customer Service Agent options for manager assignment selectors (not admin-only
+     * /users). Mapped before {@code /{id}/assign} so {@code assignee-options} is not treated as an
+     * id.
+     */
+    @GetMapping("/assignee-options")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')")
+    public ResponseEntity<ApiResponse<List<FollowUpAssigneeOption>>> listAssigneeOptions() {
+        List<FollowUpAssigneeOption> options =
+                followUpService.listCustomerServiceAssigneeOptions();
+        return ResponseEntity.ok(
+                ApiResponse.success("Follow-up assignee options loaded", options));
     }
 
     @PutMapping("/{id}/assign")
-    @PreAuthorize(
-            "@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT', "
-                    + "'CAMPAIGN_MANAGER')")
+    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')")
     public ResponseEntity<ApiResponse<FollowUpTaskView>> assignTask(
             @PathVariable UUID id, @Valid @RequestBody AssignFollowUpTaskRequest request) {
-        FollowUpTask task = followUpService.assignTask(id, request.assignedTo());
-        return ResponseEntity.ok(
-                ApiResponse.success("Follow-up task assigned", FollowUpTaskView.from(task)));
+        FollowUpTaskView task = followUpService.assignTaskView(id, request.assignedTo());
+        return ResponseEntity.ok(ApiResponse.success("Follow-up task assigned", task));
     }
 
     @PutMapping("/{id}/complete")
-    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
+    @PreAuthorize(
+            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
     public ResponseEntity<ApiResponse<FollowUpTaskView>> completeTask(@PathVariable UUID id) {
-        FollowUpTask task = followUpService.completeTask(id);
-        return ResponseEntity.ok(
-                ApiResponse.success("Follow-up task completed", FollowUpTaskView.from(task)));
+        FollowUpTaskView task = followUpService.completeTaskView(id);
+        return ResponseEntity.ok(ApiResponse.success("Follow-up task completed", task));
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
+    @PreAuthorize(
+            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
     public ResponseEntity<ApiResponse<FollowUpTaskView>> updateTaskStatus(
             @PathVariable UUID id, @Valid @RequestBody UpdateFollowUpStatusRequest request) {
         FollowUpTask task = followUpService.updateTaskStatus(id, request.status());
@@ -66,7 +78,8 @@ public class FollowUpController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("@authz.hasAnyRole('ADMIN', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
+    @PreAuthorize(
+            "@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER', 'CUSTOMER_SERVICE_AGENT', 'SALES_AGENT')")
     public ResponseEntity<ApiResponse<FollowUpTaskView>> updateTask(
             @PathVariable UUID id, @Valid @RequestBody UpdateFollowUpTaskRequest request) {
         FollowUpTask task =
@@ -87,11 +100,10 @@ public class FollowUpController {
                     LocalDate dueDateFrom,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                     LocalDate dueDateTo) {
-        List<FollowUpTask> tasks =
-                followUpService.searchTasks(
+        List<FollowUpTaskView> taskViews =
+                followUpService.searchTaskViews(
                         new FollowUpTaskSearchCriteria(
                                 customerId, assignedTo, priority, status, dueDateFrom, dueDateTo));
-        List<FollowUpTaskView> taskViews = tasks.stream().map(FollowUpTaskView::from).toList();
         return ResponseEntity.ok(ApiResponse.success("Follow-up tasks loaded", taskViews));
     }
 }

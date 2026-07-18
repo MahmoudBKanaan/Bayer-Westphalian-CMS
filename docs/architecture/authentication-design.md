@@ -22,7 +22,8 @@ status. Primary suite: `DisabledUserCannotLogInTests` (companions: `AuthServiceT
 `AuthControllerTests`). Frontend catalog:
 `frontend/src/features/auth/disabledUserCannotLogIn.ts`.
 5. Successful login returns an authenticated user view plus a JWT access token and refresh token.
-6. The frontend stores the session in `sessionStorage`, not `localStorage`.
+6. The frontend stores the session in `localStorage` so the same employee session is shared across
+   browser tabs of the same origin (opening an in-app link in a new tab must not force re-login).
 
 ## Token Model
 
@@ -34,7 +35,10 @@ status. Primary suite: `DisabledUserCannotLogInTests` (companions: `AuthServiceT
 ## Frontend Session Strategy
 
 - `AuthProvider` owns frontend authentication state.
-- `sessionStorageStrategy` persists the access token, refresh token, current user, and role claims.
+- `sessionStorageStrategy` (module name retained) persists the access token, refresh token, current
+  user, and role claims in **`localStorage`** (not tab-scoped `sessionStorage`).
+- Legacy tab-only sessions written to `sessionStorage` are migrated once into `localStorage` on load.
+- Cross-tab logout/login is reflected via the `storage` event plus an in-app session-changed event.
 - The API client attaches the stored access token to authenticated requests by default.
 - Public auth requests, such as login, explicitly skip stored token attachment.
 - Protected frontend routes redirect unauthenticated users to `/login` and preserve the requested path.

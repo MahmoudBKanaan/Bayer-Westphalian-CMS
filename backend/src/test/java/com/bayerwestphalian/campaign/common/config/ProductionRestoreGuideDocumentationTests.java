@@ -15,7 +15,7 @@ class ProductionRestoreGuideDocumentationTests {
 
     @Test
     void guideDefinesApprovedVerifiedAndRehearsedRestore() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Sprint 18 item 762")
@@ -31,7 +31,7 @@ class ProductionRestoreGuideDocumentationTests {
 
     @Test
     void guideFailsClosedAndRequiresBusinessValidation() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("flyway_schema_history")

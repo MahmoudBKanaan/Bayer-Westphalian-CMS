@@ -122,7 +122,7 @@ describe("segment creation UI integration (item 602)", () => {
   });
 
   it("creates a segment through the UI and shows success plus list row", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const fetchMock = segmentCreationHandlers();
     vi.stubGlobal("fetch", fetchMock);
 

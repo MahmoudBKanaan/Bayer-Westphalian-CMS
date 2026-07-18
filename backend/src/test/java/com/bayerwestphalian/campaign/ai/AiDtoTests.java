@@ -218,18 +218,24 @@ class AiDtoTests {
 
         @Test
         void segmentSuggestionViewCopiesCriteriaSummary() {
-            List<String> criteria =
-                    new ArrayList<>(List.of("city=Munich", "productExpirationWithinMonths=6"));
+            List<SuggestedSegmentCriterion> criteria =
+                    new ArrayList<>(
+                            List.of(
+                                    SuggestedSegmentCriterion.equals("city", "Munich"),
+                                    SuggestedSegmentCriterion.equals(
+                                            "expiring_within_months", "6")));
             SegmentSuggestionView suggestion =
                     new SegmentSuggestionView(
                             "Munich expiring policies",
                             "Location + expiration audience",
                             criteria,
+                            null,
                             "High density of expiring products in Munich",
                             new BigDecimal("70.00"),
                             null);
             criteria.clear();
 
+            assertThat(suggestion.suggestedCriteria()).hasSize(2);
             assertThat(suggestion.suggestedCriteriaSummary()).hasSize(2);
             assertThat(suggestion.suggestedName()).isEqualTo("Munich expiring policies");
 

@@ -59,7 +59,7 @@ class ProductionAgentCreateCustomerDocumentationTests {
 
     @Test
     void documentationRecordsBlockedRoleSpecificAcceptance() throws Exception {
-        String doc = Files.readString(DOC, StandardCharsets.UTF_8);
+        String doc = DocumentationTestText.normalize(Files.readString(DOC, StandardCharsets.UTF_8));
 
         assertThat(doc)
                 .contains("Sprint 18 item 747")

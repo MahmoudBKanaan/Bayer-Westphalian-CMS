@@ -103,9 +103,14 @@ class AiSupportsHumanDecisionMakingOnlyTests {
                         productRepository,
                         segmentRepository,
                         campaignRepository,
+                        org.mockito.Mockito.mock(
+                                com.bayerwestphalian.campaign.campaign.CampaignProductRepository
+                                        .class),
                         aiRecommendationRepository,
                         userRepository,
-                        authorizationExpressions);
+                        authorizationExpressions,
+                        org.mockito.Mockito.mock(
+                                com.bayerwestphalian.campaign.audit.AuditService.class));
         aiSearchService =
                 new AiSearchService(
                         customerRepository, productOwnershipRepository, contactEventRepository);
@@ -211,6 +216,7 @@ class AiSupportsHumanDecisionMakingOnlyTests {
                             "/segment-suggestions",
                             "/product-recommendations",
                             "/duplicate-contact-warning",
+                            "/default-risk-score",
                             "/campaign-copy",
                             "/campaign-copy/{recommendationId}/approve");
 

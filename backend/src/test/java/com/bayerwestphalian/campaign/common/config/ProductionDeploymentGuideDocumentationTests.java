@@ -15,7 +15,7 @@ class ProductionDeploymentGuideDocumentationTests {
 
     @Test
     void guideDefinesAControlledEndToEndProductionDeployment() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Sprint 18 item 760")
@@ -32,7 +32,7 @@ class ProductionDeploymentGuideDocumentationTests {
 
     @Test
     void guideProtectsSecretsAndPersistentProductionData() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("deployment secret manager")

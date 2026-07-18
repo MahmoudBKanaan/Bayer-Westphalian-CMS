@@ -100,8 +100,9 @@ Repository helpers used by the service layer:
 
 ### Assign payload
 
-`AssignFollowUpTaskRequest` requires `assignedTo` (active user UUID). Assignment is required for
-Sales Agent lead ownership and for filtering the follow-up worklist by assignee (KB item 391).
+`AssignFollowUpTaskRequest` requires `assignedTo` (active **Customer Service Agent** user UUID).
+Only `ADMIN` and `CAMPAIGN_MANAGER` may call assign. The value drives agent **Assigned Worklist**
+filtering (`assigned_to`) for Sales/CSA ownership (KB item 391 / E17).
 
 ## Domain Rules
 
@@ -124,17 +125,21 @@ backend role authorization.
 | Operation | Allowed roles |
 | --- | --- |
 | Create task | `ADMIN`, `CUSTOMER_SERVICE_AGENT`, `CAMPAIGN_MANAGER` |
-| Assign task | `ADMIN`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`, `CAMPAIGN_MANAGER` |
-| Complete task | `ADMIN`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT` |
-| Update status / description / priority | `ADMIN`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT` |
-| List / search / assignee worklist | `ADMIN`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`, `CAMPAIGN_MANAGER` |
+| Assign task (to active CSA only) | `ADMIN`, `CAMPAIGN_MANAGER` only |
+| Complete task | **Assignee** or **manager** (`ADMIN`, `CAMPAIGN_MANAGER`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`; agents: own tasks only) |
+| Update status / description / priority | Assignee or manager (`ADMIN`, `CAMPAIGN_MANAGER`, CSA, Sales; agents: own tasks only) |
+| List / search | `ADMIN`, `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT`, `CAMPAIGN_MANAGER` |
+| Manager full worklist + assign to CSA | `ADMIN`, `CAMPAIGN_MANAGER` only |
+| Agent **Assigned Worklist** (own tasks only) | `CUSTOMER_SERVICE_AGENT`, `SALES_AGENT` (and any non-manager reader) |
+| Assignee options (`GET .../assignee-options`) | `ADMIN`, `CAMPAIGN_MANAGER` |
 
 KB role summary alignment:
 
-- **Campaign Manager**: create, assign, update follow-ups; view campaign-related work.
-- **Customer Service Agent**: create/update customers and contact outcomes; manage follow-up tasks.
-- **Sales Agent**: view assigned leads; complete follow-up tasks; update outcomes.
-- **Admin**: full operational access to follow-up workflows.
+- **Campaign Manager / Admin (managers)**: create tasks, **assign** only to active **Customer Service Agent** accounts, view full operational worklist, and **complete** any follow-up task.
+- **Customer Service Agent**: create tasks (**auto-assigned to creator**), complete/update **own** work; **Assigned Worklist** only (cannot expand via `assignedTo` filter).
+- **Sales Agent**: view/complete **Assigned Worklist** (tasks assigned to them); cannot assign or create.
+- Non-managers cannot reassign tasks to other agents; create always sets `assigned_to` to the creator regardless of request body.
+- **Complete**: either the task **assignee** or a **manager** may mark the task complete (`PUT .../complete`).
 
 ## Frontend Boundary
 

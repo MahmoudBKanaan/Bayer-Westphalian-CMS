@@ -1,0 +1,20 @@
+# Production-profile backend (postgres + backend) with log stream in the terminal
+# From VS Code terminal / PowerShell:
+
+cd D:\Documents\IU\AgileApp
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-ProductionBackend.ps1
+
+# After start, backend logs keep flowing here.
+# Ctrl+C = leave the log view only (containers keep running).
+
+# Start without attaching to logs:
+# powershell -ExecutionPolicy Bypass -File .\scripts\Start-ProductionBackend.ps1 -Detached
+
+# Attach logs only (if already started):
+# docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.prod.backend-local.yml logs -f backend
+
+# Health:
+# curl http://localhost:8080/actuator/health
+
+# Stop:
+# docker compose --env-file .env.production -f docker-compose.prod.yml -f docker-compose.prod.backend-local.yml stop postgres backend

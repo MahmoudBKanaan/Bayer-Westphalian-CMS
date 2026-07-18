@@ -40,7 +40,7 @@ class FinalDemoDatasetDocumentationTests {
 
     @Test
     void guidePreventsProductionLoadingAndDocumentsReadOnlyVerification() throws Exception {
-        String guide = Files.readString(GUIDE, StandardCharsets.UTF_8);
+        String guide = DocumentationTestText.normalize(Files.readString(GUIDE, StandardCharsets.UTF_8));
 
         assertThat(guide)
                 .contains("Item 781")

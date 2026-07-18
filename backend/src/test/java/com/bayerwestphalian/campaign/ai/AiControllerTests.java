@@ -94,7 +94,7 @@ class AiControllerTests {
         assertThat(segmentMethod.getAnnotation(PostMapping.class).value())
                 .containsExactly("/segment-suggestions");
         assertThat(segmentMethod.getAnnotation(PreAuthorize.class).value())
-                .isEqualTo("@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')");
+                .isEqualTo("@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')");
 
         Method productMethod =
                 AiController.class.getMethod(
@@ -102,7 +102,7 @@ class AiControllerTests {
         assertThat(productMethod.getAnnotation(PostMapping.class).value())
                 .containsExactly("/product-recommendations");
         assertThat(productMethod.getAnnotation(PreAuthorize.class).value())
-                .isEqualTo("@authz.hasAnyRole('BI_ANALYST', 'CAMPAIGN_MANAGER')");
+                .isEqualTo("@authz.hasAnyRole('ADMIN', 'BI_ANALYST', 'CAMPAIGN_MANAGER')");
 
         Method duplicateMethod =
                 AiController.class.getMethod(
@@ -116,7 +116,7 @@ class AiControllerTests {
         assertThat(method.getAnnotation(PostMapping.class).value())
                 .containsExactly("/campaign-copy");
         assertThat(method.getAnnotation(PreAuthorize.class).value())
-                .isEqualTo("@authz.hasAnyRole('CAMPAIGN_MANAGER')");
+                .isEqualTo("@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')");
 
         Method approveMethod =
                 AiController.class.getMethod(
@@ -124,7 +124,7 @@ class AiControllerTests {
         assertThat(approveMethod.getAnnotation(PostMapping.class).value())
                 .containsExactly("/campaign-copy/{recommendationId}/approve");
         assertThat(approveMethod.getAnnotation(PreAuthorize.class).value())
-                .isEqualTo("@authz.hasAnyRole('CAMPAIGN_MANAGER')");
+                .isEqualTo("@authz.hasAnyRole('ADMIN', 'CAMPAIGN_MANAGER')");
     }
 
     @Test
@@ -564,7 +564,11 @@ class AiControllerTests {
                 new SegmentSuggestionView(
                         "Berlin Life",
                         "Customers in Berlin with life product signals",
-                        List.of("city = Berlin", "productType = LIFE_INSURANCE"),
+                        List.of(
+                                SuggestedSegmentCriterion.equals("city", "Berlin"),
+                                SuggestedSegmentCriterion.equals(
+                                        "product_type", "LIFE_INSURANCE")),
+                        null,
                         "AI-002 rule-based segment suggestion for human decision support from location and product rules",
                         BigDecimal.valueOf(88),
                         RECOMMENDATION_ID);

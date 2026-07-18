@@ -2,6 +2,9 @@
 
 **Sprint 18 item 727** - Configure a real SMS provider or disable sending until configured.
 
+Umbrella guide (modes, env vars, retries, contact-event path):
+[Communication Provider Configuration](../communication-provider-configuration.md).
+
 The repository's `ProviderReadySmsProvider` is a provider placeholder and does not transmit SMS.
 Production therefore uses the safe branch of the KB requirement: SMS sending is explicitly
 disabled until a real, tested provider adapter replaces it.

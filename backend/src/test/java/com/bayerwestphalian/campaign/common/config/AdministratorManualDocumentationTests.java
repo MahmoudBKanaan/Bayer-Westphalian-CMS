@@ -15,7 +15,7 @@ class AdministratorManualDocumentationTests {
 
     @Test
     void manualCoversAccountRolePasswordSettingsAndAuditAdministration() throws Exception {
-        String manual = Files.readString(MANUAL, StandardCharsets.UTF_8);
+        String manual = DocumentationTestText.normalize(Files.readString(MANUAL, StandardCharsets.UTF_8));
 
         assertThat(manual)
                 .contains("Item 777")
@@ -32,7 +32,7 @@ class AdministratorManualDocumentationTests {
 
     @Test
     void manualEnforcesLeastPrivilegeAuditAndOperationalBoundaries() throws Exception {
-        String manual = Files.readString(MANUAL, StandardCharsets.UTF_8);
+        String manual = DocumentationTestText.normalize(Files.readString(MANUAL, StandardCharsets.UTF_8));
 
         assertThat(manual)
                 .contains("Apply least privilege")

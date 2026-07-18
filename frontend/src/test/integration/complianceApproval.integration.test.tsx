@@ -127,7 +127,7 @@ describe("compliance approval UI integration (item 604)", () => {
     renderApp({ path: "/compliance", roles: ["BI_ANALYST"] });
 
     expect(
-      await screen.findByText(/not authorized to review campaigns/i),
+      await screen.findByRole("heading", { name: /campaign performance/i }),
     ).toBeInTheDocument();
     expect(
       screen.queryByRole("table", { name: COMPLIANCE_QUEUE_TABLE_ARIA_LABEL }),

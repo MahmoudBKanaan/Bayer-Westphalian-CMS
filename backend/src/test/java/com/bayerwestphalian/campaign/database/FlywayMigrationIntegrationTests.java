@@ -1590,20 +1590,22 @@ class FlywayMigrationIntegrationTests {
 
             try (ResultSet resultSet =
                     statement.executeQuery(
-                            "select count(*) as workflow_count from "
+                            "select exists(select 1 from "
                                     + TEST_SCHEMA
-                                    + ".follow_up_tasks fut"
-                                    + " join "
+                                    + ".follow_up_tasks where id ="
+                                    + " '53000000-0000-0000-0000-000000000101') as has_follow_up,"
+                                    + " exists(select 1 from "
                                     + TEST_SCHEMA
-                                    + ".reminder_schedules rs"
-                                    + " on rs.customer_id = '20000000-0000-0000-0000-000000000101'"
-                                    + " join "
+                                    + ".reminder_schedules where customer_id ="
+                                    + " '20000000-0000-0000-0000-000000000101') as has_reminder,"
+                                    + " exists(select 1 from "
                                     + TEST_SCHEMA
-                                    + ".ai_recommendations ar"
-                                    + " on ar.target_entity_id = '20000000-0000-0000-0000-000000000102'"
-                                    + " where fut.id = '53000000-0000-0000-0000-000000000101'")) {
+                                    + ".ai_recommendations where target_entity_id ="
+                                    + " '20000000-0000-0000-0000-000000000102') as has_ai_recommendation")) {
                 assertThat(resultSet.next()).isTrue();
-                assertThat(resultSet.getInt("workflow_count")).isEqualTo(1);
+                assertThat(resultSet.getBoolean("has_follow_up")).isTrue();
+                assertThat(resultSet.getBoolean("has_reminder")).isTrue();
+                assertThat(resultSet.getBoolean("has_ai_recommendation")).isTrue();
             }
 
             try (ResultSet resultSet =

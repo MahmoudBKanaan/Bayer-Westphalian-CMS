@@ -85,9 +85,13 @@ class AiGeneratedCampaignCopyRequiresHumanApprovalTests {
     @Mock private ProductRepository productRepository;
     @Mock private SegmentRepository segmentRepository;
     @Mock private CampaignRepository campaignRepository;
+    @Mock
+    private com.bayerwestphalian.campaign.campaign.CampaignProductRepository
+            campaignProductRepository;
     @Mock private AiRecommendationRepository aiRecommendationRepository;
     @Mock private UserRepository userRepository;
     @Mock private AuthorizationExpressions authorizationExpressions;
+    @Mock private com.bayerwestphalian.campaign.audit.AuditService auditService;
 
     private CampaignCopyService campaignCopyService;
 
@@ -98,9 +102,11 @@ class AiGeneratedCampaignCopyRequiresHumanApprovalTests {
                         productRepository,
                         segmentRepository,
                         campaignRepository,
+                        campaignProductRepository,
                         aiRecommendationRepository,
                         userRepository,
-                        authorizationExpressions);
+                        authorizationExpressions,
+                        auditService);
     }
 
     @Nested
@@ -264,12 +270,14 @@ class AiGeneratedCampaignCopyRequiresHumanApprovalTests {
             PreAuthorize preAuthorize = approve.getAnnotation(PreAuthorize.class);
             assertThat(preAuthorize).isNotNull();
             assertThat(preAuthorize.value()).contains("CAMPAIGN_MANAGER");
+            assertThat(preAuthorize.value()).contains("ADMIN");
 
             Method generate =
                     CampaignCopyService.class.getMethod(
                             "generateCopySuggestion", CampaignCopyRequest.class);
             assertThat(generate.getAnnotation(PreAuthorize.class).value())
-                    .contains("CAMPAIGN_MANAGER");
+                    .contains("CAMPAIGN_MANAGER")
+                    .contains("ADMIN");
         }
     }
 
@@ -310,7 +318,7 @@ class AiGeneratedCampaignCopyRequiresHumanApprovalTests {
                         "campaign",
                         CAMPAIGN_ID,
                         "objective",
-                        "Subject line",
+                        "Subject: Subject line\nBody: Draft body for human review\nCall to action: Request more information",
                         "Generated for human review only");
         ReflectionTestUtils.setField(recommendation, "id", RECOMMENDATION_ID);
         ReflectionTestUtils.setField(recommendation, "createdAt", Instant.now());

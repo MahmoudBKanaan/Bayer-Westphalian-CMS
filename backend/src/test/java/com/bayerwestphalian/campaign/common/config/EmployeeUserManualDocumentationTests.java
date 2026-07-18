@@ -15,7 +15,7 @@ class EmployeeUserManualDocumentationTests {
 
     @Test
     void manualCoversSharedUiAndEndToEndEmployeeWorkflows() throws Exception {
-        String manual = Files.readString(MANUAL, StandardCharsets.UTF_8);
+        String manual = DocumentationTestText.normalize(Files.readString(MANUAL, StandardCharsets.UTF_8));
 
         assertThat(manual)
                 .contains("Item 776")
@@ -32,7 +32,7 @@ class EmployeeUserManualDocumentationTests {
 
     @Test
     void manualPreservesAuthorizationConsentAiAndDataSafety() throws Exception {
-        String manual = Files.readString(MANUAL, StandardCharsets.UTF_8);
+        String manual = DocumentationTestText.normalize(Files.readString(MANUAL, StandardCharsets.UTF_8));
 
         assertThat(manual)
                 .contains("backend authorization remains decisive")

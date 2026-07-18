@@ -49,9 +49,9 @@ import org.springframework.test.web.servlet.MockMvc;
  * KB item 391 / E17 Follow-up management: follow-up task can be assigned via {@code PUT
  * /api/follow-up-tasks/{id}/assign}.
  *
- * <p>Authorized assign roles per KB role matrix and screen access: Admin, Customer Service Agent,
- * Sales Agent, and Campaign Manager. Assignment stores {@code assigned_to} for lead ownership and
- * assignee-based worklist filtering.
+ * <p>Only managers ({@code ADMIN}, {@code CAMPAIGN_MANAGER}) may assign tasks to Customer Service
+ * Agent accounts. Assignment stores {@code assigned_to} for lead ownership and assignee-based
+ * Assigned Worklist filtering.
  */
 @WebMvcTest(controllers = FollowUpController.class)
 @Import({
@@ -79,59 +79,40 @@ class FollowUpTaskCanBeAssignedTests {
     private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @Test
-    void salesAgentCanAssignFollowUpTaskViaPutApi() throws Exception {
+    void salesAgentCannotAssignFollowUpTask() throws Exception {
         when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
-        when(followUpService.assignTask(eq(TASK_ID), eq(ASSIGNEE_ID)))
-                .thenReturn(assignedTask(ASSIGNEE_ID, "Test Sales Agent"));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", TASK_ID)
                                 .header("Authorization", "Bearer sales-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(assignPayload(ASSIGNEE_ID)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Follow-up task assigned"))
-                .andExpect(jsonPath("$.data.id").value(TASK_ID.toString()))
-                .andExpect(jsonPath("$.data.customerId").value(CUSTOMER_ID.toString()))
-                .andExpect(jsonPath("$.data.assignedToUserId").value(ASSIGNEE_ID.toString()))
-                .andExpect(jsonPath("$.data.assignedToFullName").value("Test Sales Agent"))
-                .andExpect(jsonPath("$.data.title").value("Call interested prospect"))
-                .andExpect(jsonPath("$.data.status").value("OPEN"))
-                .andExpect(jsonPath("$.data.priority").value("HIGH"))
-                .andExpect(jsonPath("$.data.dueDate").value(DUE_DATE.toString()));
+                .andExpect(status().isForbidden());
 
-        ArgumentCaptor<UUID> taskIdCaptor = ArgumentCaptor.forClass(UUID.class);
-        ArgumentCaptor<UUID> assigneeCaptor = ArgumentCaptor.forClass(UUID.class);
-        verify(followUpService).assignTask(taskIdCaptor.capture(), assigneeCaptor.capture());
-        assertThat(taskIdCaptor.getValue()).isEqualTo(TASK_ID);
-        assertThat(assigneeCaptor.getValue()).isEqualTo(ASSIGNEE_ID);
+        verify(followUpService, never()).assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID));
     }
 
     @Test
-    void customerServiceAgentCanAssignFollowUpTask() throws Exception {
+    void customerServiceAgentCannotAssignFollowUpTask() throws Exception {
         when(jwtService.validateToken("csa-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.CUSTOMER_SERVICE_AGENT));
-        when(followUpService.assignTask(eq(TASK_ID), eq(ASSIGNEE_ID)))
-                .thenReturn(assignedTask(ASSIGNEE_ID, "Test Sales Agent"));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", TASK_ID)
                                 .header("Authorization", "Bearer csa-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(assignPayload(ASSIGNEE_ID)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("Follow-up task assigned"));
+                .andExpect(status().isForbidden());
 
-        verify(followUpService).assignTask(TASK_ID, ASSIGNEE_ID);
+        verify(followUpService, never()).assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID));
     }
 
     @Test
     void campaignManagerCanAssignFollowUpTask() throws Exception {
         when(jwtService.validateToken("cm-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
-        when(followUpService.assignTask(eq(TASK_ID), eq(ASSIGNEE_ID)))
+        when(followUpService.assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID)))
                 .thenReturn(assignedTask(ASSIGNEE_ID, "Test Sales Agent"));
 
         mockMvc.perform(
@@ -142,14 +123,14 @@ class FollowUpTaskCanBeAssignedTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Follow-up task assigned"));
 
-        verify(followUpService).assignTask(TASK_ID, ASSIGNEE_ID);
+        verify(followUpService).assignTaskView(TASK_ID, ASSIGNEE_ID);
     }
 
     @Test
     void adminCanAssignFollowUpTask() throws Exception {
         when(jwtService.validateToken("admin-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.ADMIN));
-        when(followUpService.assignTask(eq(TASK_ID), eq(ASSIGNEE_ID)))
+        when(followUpService.assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID)))
                 .thenReturn(assignedTask(ASSIGNEE_ID, "Test Sales Agent"));
 
         mockMvc.perform(
@@ -160,21 +141,21 @@ class FollowUpTaskCanBeAssignedTests {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.campaignId").value(CAMPAIGN_ID.toString()));
 
-        verify(followUpService).assignTask(TASK_ID, ASSIGNEE_ID);
+        verify(followUpService).assignTaskView(TASK_ID, ASSIGNEE_ID);
     }
 
     @Test
-    void followUpTaskCanBeReassignedToAnotherUser() throws Exception {
+    void followUpTaskCanBeReassignedToAnotherUserByManager() throws Exception {
         UUID otherAssigneeId = UUID.fromString("10000000-0000-0000-0000-000000000006");
 
-        when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
-                .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
-        when(followUpService.assignTask(eq(TASK_ID), eq(otherAssigneeId)))
+        when(jwtService.validateToken("cm-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
+        when(followUpService.assignTaskView(eq(TASK_ID), eq(otherAssigneeId)))
                 .thenReturn(assignedTask(otherAssigneeId, "Test Customer Service Agent"));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", TASK_ID)
-                                .header("Authorization", "Bearer sales-token")
+                                .header("Authorization", "Bearer cm-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(assignPayload(otherAssigneeId)))
                 .andExpect(status().isOk())
@@ -184,7 +165,7 @@ class FollowUpTaskCanBeAssignedTests {
                         jsonPath("$.data.assignedToFullName")
                                 .value("Test Customer Service Agent"));
 
-        verify(followUpService).assignTask(TASK_ID, otherAssigneeId);
+        verify(followUpService).assignTaskView(TASK_ID, otherAssigneeId);
     }
 
     @ParameterizedTest
@@ -201,7 +182,7 @@ class FollowUpTaskCanBeAssignedTests {
                 .andExpect(status().isForbidden())
                 .andExpect(content().string(not(containsString("Follow-up task assigned"))));
 
-        verify(followUpService, never()).assignTask(eq(TASK_ID), eq(ASSIGNEE_ID));
+        verify(followUpService, never()).assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID));
     }
 
     @Test
@@ -213,44 +194,45 @@ class FollowUpTaskCanBeAssignedTests {
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string(not(containsString("Follow-up task assigned"))));
 
-        verify(followUpService, never()).assignTask(eq(TASK_ID), eq(ASSIGNEE_ID));
+        verify(followUpService, never()).assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID));
     }
 
     @Test
     void assignRequestRequiresAssignedToBodyField() throws Exception {
-        when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
-                .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
+        when(jwtService.validateToken("cm-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", TASK_ID)
-                                .header("Authorization", "Bearer sales-token")
+                                .header("Authorization", "Bearer cm-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("{}"))
                 .andExpect(status().isBadRequest());
 
-        verify(followUpService, never()).assignTask(eq(TASK_ID), eq(ASSIGNEE_ID));
+        verify(followUpService, never()).assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID));
     }
 
     @Test
     void assignPropagatesServiceNotFoundAndValidationErrors() throws Exception {
-        when(jwtService.validateToken("sales-token", JwtTokenType.ACCESS))
-                .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
-        when(followUpService.assignTask(eq(TASK_ID), eq(ASSIGNEE_ID)))
+        // Must use a manager token — non-managers are denied at the authorization boundary (403).
+        when(jwtService.validateToken("cm-token", JwtTokenType.ACCESS))
+                .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
+        when(followUpService.assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID)))
                 .thenThrow(new ResourceNotFoundException("FollowUpTask", TASK_ID));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", TASK_ID)
-                                .header("Authorization", "Bearer sales-token")
+                                .header("Authorization", "Bearer cm-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(assignPayload(ASSIGNEE_ID)))
                 .andExpect(status().isNotFound());
 
-        when(followUpService.assignTask(eq(TASK_ID), eq(ASSIGNEE_ID)))
+        when(followUpService.assignTaskView(eq(TASK_ID), eq(ASSIGNEE_ID)))
                 .thenThrow(new ValidationException("assignedTo is required", List.of()));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/assign", TASK_ID)
-                                .header("Authorization", "Bearer sales-token")
+                                .header("Authorization", "Bearer cm-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(assignPayload(ASSIGNEE_ID)))
                 .andExpect(status().isBadRequest());
@@ -263,7 +245,9 @@ class FollowUpTaskCanBeAssignedTests {
                 SystemRoleName.COMPLIANCE_OFFICER,
                 SystemRoleName.MARKETING_ANALYST,
                 SystemRoleName.EXECUTIVE_VIEWER,
-                SystemRoleName.SYSTEM_AUDITOR);
+                SystemRoleName.SYSTEM_AUDITOR,
+                SystemRoleName.CUSTOMER_SERVICE_AGENT,
+                SystemRoleName.SALES_AGENT);
     }
 
     private static JwtTokenClaims roleClaims(SystemRoleName role) {
@@ -282,7 +266,7 @@ class FollowUpTaskCanBeAssignedTests {
                 .formatted(assignedTo);
     }
 
-    private static FollowUpTask assignedTask(UUID assigneeId, String assigneeName) {
+    private static FollowUpTaskView assignedTask(UUID assigneeId, String assigneeName) {
         Customer customer = Customer.create(CustomerType.PROSPECT, "Ada", "Prospect");
         ReflectionTestUtils.setField(customer, "id", CUSTOMER_ID);
 
@@ -302,6 +286,6 @@ class FollowUpTaskCanBeAssignedTests {
         task.setCampaign(campaign);
         task.setDescription("Prospect requested a callback");
         task.updatePriority(FollowUpTaskPriority.HIGH);
-        return task;
+        return FollowUpTaskView.from(task);
     }
 }

@@ -50,7 +50,7 @@ function New-RoleSession($Credential, [string]$RequiredRole) {
 }
 
 try {
-    $agent = New-RoleSession $AgentCredential "CUSTOMER_SERVICE_AGENT"
+    $agent = New-RoleSession -Credential $AgentCredential -RequiredRole "CUSTOMER_SERVICE_AGENT"
     $agentToken = $agent.Token
     $agentHeaders = @{ Authorization = "Bearer $agentToken" }
     $customerBody = @{
@@ -106,7 +106,7 @@ try {
         throw "Recorded contact event was not found in the customer timeline"
     }
 
-    $admin = New-RoleSession $AdminCleanupCredential "ADMIN"
+    $admin = New-RoleSession -Credential $AdminCleanupCredential -RequiredRole "ADMIN"
     $adminToken = $admin.Token
     $deleted = Invoke-RestMethod -Method Delete -Uri "$origin/api/customers/$customerId" `
         -Headers @{ Authorization = "Bearer $adminToken" } -TimeoutSec $TimeoutSeconds
@@ -125,7 +125,10 @@ try {
 finally {
     if ($customerId -and -not $customerDeleted) {
         try {
-            if (-not $adminToken) { $adminToken = (New-RoleSession $AdminCleanupCredential "ADMIN").Token }
+            if (-not $adminToken) {
+                $adminToken =
+                    (New-RoleSession -Credential $AdminCleanupCredential -RequiredRole "ADMIN").Token
+            }
             Invoke-RestMethod -Method Delete -Uri "$origin/api/customers/$customerId" `
                 -Headers @{ Authorization = "Bearer $adminToken" } -TimeoutSec $TimeoutSeconds |
                 Out-Null

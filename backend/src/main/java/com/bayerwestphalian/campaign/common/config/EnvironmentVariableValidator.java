@@ -91,7 +91,7 @@ public final class EnvironmentVariableValidator {
                         return "JWT_SECRET / app.security.jwt.secret must not use a known development placeholder";
                     }
                     if (value.length() < SecretPresenceValidator.MIN_JWT_SECRET_LENGTH) {
-                        return "JWT_SECRET / app.security.jwt.secret must be at least "
+                        return "JWT secret presence check failed: JWT_SECRET / app.security.jwt.secret must be at least "
                                 + SecretPresenceValidator.MIN_JWT_SECRET_LENGTH
                                 + " characters";
                     }
@@ -107,7 +107,7 @@ public final class EnvironmentVariableValidator {
                     try {
                         ProductionCorsOrigins.parseAndValidate(value);
                     } catch (IllegalStateException exception) {
-                        return exception.getMessage();
+                        return "CORS_ALLOWED_ORIGINS: " + exception.getMessage();
                     }
                     return null;
                 });

@@ -81,7 +81,8 @@ class FollowUpControllerTests {
     void customerServiceAgentCanCreateTask() throws Exception {
         when(jwtService.validateToken("csa-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.CUSTOMER_SERVICE_AGENT));
-        when(followUpService.createTask(any(CreateFollowUpTaskCommand.class))).thenReturn(task);
+        when(followUpService.createTaskView(any(CreateFollowUpTaskCommand.class)))
+                .thenReturn(FollowUpTaskView.from(task));
 
         String payload =
                 """
@@ -111,7 +112,7 @@ class FollowUpControllerTests {
                 .andExpect(jsonPath("$.data.priority").value("MEDIUM"));
 
         verify(followUpService)
-                .createTask(
+                .createTaskView(
                         argThat(
                                 command ->
                                         command.customerId().equals(CUSTOMER_ID)
@@ -129,7 +130,8 @@ class FollowUpControllerTests {
     void campaignManagerCanCreateTask() throws Exception {
         when(jwtService.validateToken("campaign-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.CAMPAIGN_MANAGER));
-        when(followUpService.createTask(any(CreateFollowUpTaskCommand.class))).thenReturn(task);
+        when(followUpService.createTaskView(any(CreateFollowUpTaskCommand.class)))
+                .thenReturn(FollowUpTaskView.from(task));
 
         String payload =
                 """
@@ -150,7 +152,7 @@ class FollowUpControllerTests {
                 .andExpect(jsonPath("$.data.id").value(TASK_ID.toString()));
 
         verify(followUpService)
-                .createTask(
+                .createTaskView(
                         argThat(
                                 command ->
                                         command.customerId().equals(CUSTOMER_ID)
@@ -164,17 +166,11 @@ class FollowUpControllerTests {
     }
 
     @Test
-    void salesAgentCanAssignTask() throws Exception {
+    void salesAgentCannotAssignTask() throws Exception {
         when(jwtService.validateToken("agent-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
 
-        User otherAgent = User.create("other@test.example", "{noop}password", "Other Agent");
         UUID otherAgentId = UUID.fromString("10000000-0000-0000-0000-000000000009");
-        ReflectionTestUtils.setField(otherAgent, "id", otherAgentId);
-
-        task.assignTo(otherAgent);
-        when(followUpService.assignTask(eq(TASK_ID), eq(otherAgentId))).thenReturn(task);
-
         String payload =
                 """
                 {
@@ -188,13 +184,7 @@ class FollowUpControllerTests {
                                 .header("Authorization", "Bearer agent-token")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(payload))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.success").value(true))
-                .andExpect(jsonPath("$.message").value("Follow-up task assigned"))
-                .andExpect(jsonPath("$.data.assignedToUserId").value(otherAgentId.toString()))
-                .andExpect(jsonPath("$.data.assignedToFullName").value("Other Agent"));
-
-        verify(followUpService).assignTask(TASK_ID, otherAgentId);
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -209,7 +199,8 @@ class FollowUpControllerTests {
         ReflectionTestUtils.setField(otherAgent, "id", otherAgentId);
 
         task.assignTo(otherAgent);
-        when(followUpService.assignTask(eq(TASK_ID), eq(otherAgentId))).thenReturn(task);
+        when(followUpService.assignTaskView(eq(TASK_ID), eq(otherAgentId)))
+                .thenReturn(FollowUpTaskView.from(task));
 
         String payload =
                 """
@@ -228,7 +219,7 @@ class FollowUpControllerTests {
                 .andExpect(jsonPath("$.message").value("Follow-up task assigned"))
                 .andExpect(jsonPath("$.data.assignedToUserId").value(otherAgentId.toString()));
 
-        verify(followUpService).assignTask(TASK_ID, otherAgentId);
+        verify(followUpService).assignTaskView(TASK_ID, otherAgentId);
     }
 
     @Test
@@ -237,7 +228,7 @@ class FollowUpControllerTests {
                 .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
 
         task.complete();
-        when(followUpService.completeTask(TASK_ID)).thenReturn(task);
+        when(followUpService.completeTaskView(TASK_ID)).thenReturn(FollowUpTaskView.from(task));
 
         mockMvc.perform(
                         put("/api/follow-up-tasks/{id}/complete", TASK_ID)
@@ -248,7 +239,7 @@ class FollowUpControllerTests {
                 .andExpect(jsonPath("$.data.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.data.completedAt").exists());
 
-        verify(followUpService).completeTask(TASK_ID);
+        verify(followUpService).completeTaskView(TASK_ID);
     }
 
     @Test
@@ -311,8 +302,8 @@ class FollowUpControllerTests {
     void salesAgentCanListAssignedTasks() throws Exception {
         when(jwtService.validateToken("agent-token", JwtTokenType.ACCESS))
                 .thenReturn(roleClaims(SystemRoleName.SALES_AGENT));
-        when(followUpService.searchTasks(any(FollowUpTaskSearchCriteria.class)))
-                .thenReturn(List.of(task));
+        when(followUpService.searchTaskViews(any(FollowUpTaskSearchCriteria.class)))
+                .thenReturn(List.of(FollowUpTaskView.from(task)));
 
         mockMvc.perform(
                         get("/api/follow-up-tasks")
@@ -330,7 +321,7 @@ class FollowUpControllerTests {
                 .andExpect(jsonPath("$.data[0].id").value(TASK_ID.toString()));
 
         verify(followUpService)
-                .searchTasks(
+                .searchTaskViews(
                         argThat(
                                 criteria ->
                                         criteria.customerId().equals(CUSTOMER_ID)

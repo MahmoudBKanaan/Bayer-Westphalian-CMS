@@ -9,10 +9,12 @@ import java.util.UUID;
  * Segment suggestion payload (KB AI-002 / item 471).
  *
  * <p>Human decision-support only — does not create a saved segment until a Campaign Manager acts.
+ * Includes structured criteria for the segment builder plus human-readable summaries.
  */
 public record SegmentSuggestionView(
         String suggestedName,
         String description,
+        List<SuggestedSegmentCriterion> suggestedCriteria,
         List<String> suggestedCriteriaSummary,
         String explanation,
         BigDecimal confidenceScore,
@@ -21,10 +23,14 @@ public record SegmentSuggestionView(
     public SegmentSuggestionView {
         Objects.requireNonNull(suggestedName, "suggestedName is required");
         Objects.requireNonNull(explanation, "explanation is required");
-        suggestedCriteriaSummary =
-                suggestedCriteriaSummary == null
-                        ? List.of()
-                        : List.copyOf(suggestedCriteriaSummary);
+        suggestedCriteria =
+                suggestedCriteria == null ? List.of() : List.copyOf(suggestedCriteria);
+        if (suggestedCriteriaSummary == null || suggestedCriteriaSummary.isEmpty()) {
+            suggestedCriteriaSummary =
+                    suggestedCriteria.stream().map(SuggestedSegmentCriterion::toSummary).toList();
+        } else {
+            suggestedCriteriaSummary = List.copyOf(suggestedCriteriaSummary);
+        }
     }
 
     public record ListResponse(List<SegmentSuggestionView> suggestions) {

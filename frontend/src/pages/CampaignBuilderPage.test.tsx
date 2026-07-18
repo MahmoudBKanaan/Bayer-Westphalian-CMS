@@ -364,7 +364,7 @@ describe("CampaignBuilderPage (item 592)", () => {
 
     expect(await screen.findByText("Human approved")).toBeInTheDocument();
     expect(screen.getByText(/APPROVED BY USER/i)).toBeInTheDocument();
-    expect(screen.getByText(/Compliance approval/i)).toBeInTheDocument();
+    expect(screen.getByText("Compliance approval", { selector: "dt" })).toBeInTheDocument();
     expect(screen.getByText(/Still required before launch/i)).toBeInTheDocument();
     expect(screen.getByLabelText("Message subject")).toHaveValue(copySuggestion.subject);
     expect(screen.getByLabelText("Campaign message body")).toHaveValue(

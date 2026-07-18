@@ -29,12 +29,30 @@ public interface FollowUpRepository
     }
 
     default List<FollowUpTask> search(FollowUpTaskSearchCriteria criteria) {
-        return findAll(
-                matchesCriteria(criteria),
-                Sort.by(
-                        Sort.Order.asc("dueDate").nullsLast(),
-                        Sort.Order.desc("priority"),
-                        Sort.Order.asc("createdAt")));
+        // Do not use Sort.Order.nullsLast() here: Spring Data JPA Criteria does not support
+        // null precedence (UnsupportedOperationException: Applying Null Precedence...).
+        // Null due dates are ordered last in-memory after fetch.
+        List<FollowUpTask> tasks =
+                findAll(
+                        matchesCriteria(criteria),
+                        Sort.by(
+                                Sort.Order.asc("dueDate"),
+                                Sort.Order.desc("priority"),
+                                Sort.Order.asc("createdAt")));
+        tasks.sort(
+                java.util.Comparator.comparing(
+                                FollowUpTask::getDueDate,
+                                java.util.Comparator.nullsLast(
+                                        java.util.Comparator.naturalOrder()))
+                        .thenComparing(
+                                FollowUpTask::getPriority,
+                                java.util.Comparator.nullsLast(
+                                        java.util.Comparator.reverseOrder()))
+                        .thenComparing(
+                                FollowUpTask::getCreatedAt,
+                                java.util.Comparator.nullsLast(
+                                        java.util.Comparator.naturalOrder())));
+        return tasks;
     }
 
     private static Specification<FollowUpTask> matchesCriteria(
