@@ -68,6 +68,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
     SegmentController.class,
     GlobalExceptionHandler.class,
     EligibilityService.class,
+    SystemSettingsService.class,
     AuditService.class
 })
 class SegmentControllerIntegrationTests {
@@ -86,8 +87,6 @@ class SegmentControllerIntegrationTests {
     @MockBean private AuthorizationExpressions authorizationExpressions;
 
     @MockBean private ConsentService consentService;
-
-    @MockBean private SystemSettingsService systemSettingsService;
 
     private User owner;
 

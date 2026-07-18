@@ -491,8 +491,9 @@ public class SegmentService {
 
     private void replaceCriteria(Segment segment, List<CreateSegmentCriteriaCommand> criteria) {
         List<SegmentCriteria> existingCriteria = new ArrayList<>(segment.getCriteria());
-        existingCriteria.forEach(segment::removeCriteria);
         segmentCriteriaRepository.deleteAll(existingCriteria);
+        segmentCriteriaRepository.flush();
+        existingCriteria.forEach(segment::removeCriteria);
 
         for (CreateSegmentCriteriaCommand command : normalizeCriteria(criteria)) {
             segment.addCriteria(

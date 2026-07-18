@@ -55,7 +55,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
         })
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @Testcontainers(disabledWithoutDocker = true)
-@Import({SegmentService.class, EligibilityService.class, AuditService.class})
+@Import({
+    SegmentService.class,
+    EligibilityService.class,
+    SystemSettingsService.class,
+    AuditService.class
+})
 class SegmentServiceIntegrationTests {
 
     @Container
@@ -78,8 +83,6 @@ class SegmentServiceIntegrationTests {
     @MockBean private AuthorizationExpressions authorizationExpressions;
 
     @MockBean private ConsentService consentService;
-
-    @MockBean private SystemSettingsService systemSettingsService;
 
     private User owner;
 
