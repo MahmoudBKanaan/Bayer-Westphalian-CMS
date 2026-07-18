@@ -14,7 +14,7 @@ public record UpdateSegmentRequest(
     UpdateSegmentCommand toCommand() {
         List<CreateSegmentCriteriaCommand> criteriaCommands =
                 criteria == null
-                        ? List.of()
+                        ? null
                         : criteria.stream().map(CreateSegmentCriteriaRequest::toCommand).toList();
         return new UpdateSegmentCommand(name, description, visibility, criteriaCommands);
     }

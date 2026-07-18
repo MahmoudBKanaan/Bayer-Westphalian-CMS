@@ -498,7 +498,9 @@ class SegmentControllerIntegrationTests {
     @Test
     void adminCanUpdateSegmentOwnedByAnotherUser() throws Exception {
         User otherOwner = persistUser("segment-other-owner");
-        when(authorizationExpressions.hasRole(SystemRoleName.ADMIN.name())).thenReturn(true);
+        when(authorizationExpressions.hasAnyRole(
+                        SystemRoleName.ADMIN.name(), SystemRoleName.CAMPAIGN_MANAGER.name()))
+                .thenReturn(true);
 
         MvcResult createResult =
                 mockMvc.perform(

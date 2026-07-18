@@ -106,6 +106,16 @@ class SegmentDtoTests {
     }
 
     @Test
+    void preservesOmittedUpdateCriteriaAsNull() {
+        UpdateSegmentCommand command =
+                new UpdateSegmentRequest(
+                                "Renewal audience", null, SegmentVisibility.PRIVATE, null)
+                        .toCommand();
+
+        assertThat(command.criteria()).isNull();
+    }
+
+    @Test
     void defaultsCriteriaJoinOperatorToAndWhenOmitted() {
         CreateSegmentCriteriaCommand command =
                 new CreateSegmentCriteriaRequest(
