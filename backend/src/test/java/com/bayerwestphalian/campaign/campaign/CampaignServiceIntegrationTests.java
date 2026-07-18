@@ -436,6 +436,9 @@ class CampaignServiceIntegrationTests {
         Customer customer = Customer.create(CustomerType.PROSPECT, "John", "Doe");
         entityManager.persistAndFlush(customer);
 
+        java.time.Instant occurredAt =
+                java.time.Instant.now().truncatedTo(java.time.temporal.ChronoUnit.MICROS);
+
         CampaignView created =
                 campaignService.createCampaign(
                         new CreateCampaignCommand(
@@ -456,21 +459,21 @@ class CampaignServiceIntegrationTests {
                         customer,
                         campaign,
                         CommunicationChannel.EMAIL,
-                        java.time.Instant.now().minusSeconds(60),
+                        occurredAt.minusSeconds(60),
                         owner);
         ContactEvent event2 =
                 ContactEvent.sent(
                         customer,
                         campaign,
                         CommunicationChannel.EMAIL,
-                        java.time.Instant.now(),
+                        occurredAt,
                         owner);
         ContactEvent event3 =
                 ContactEvent.sent(
                         customer,
                         campaign,
                         CommunicationChannel.EMAIL,
-                        java.time.Instant.now().minusSeconds(120),
+                        occurredAt.minusSeconds(120),
                         owner);
 
         entityManager.persist(event1);

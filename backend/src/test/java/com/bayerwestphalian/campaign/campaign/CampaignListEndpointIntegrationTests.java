@@ -234,7 +234,7 @@ class CampaignListEndpointIntegrationTests {
                 campaignService.createCampaign(
                         new CreateCampaignCommand(
                                 "Auto submitted only",
-                                "Not life",
+                                "Unrelated auto offer",
                                 null,
                                 CampaignChannel.SMS,
                                 null,

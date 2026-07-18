@@ -13,6 +13,7 @@ import com.bayerwestphalian.campaign.campaign.EligibilityService;
 import com.bayerwestphalian.campaign.common.exception.ForbiddenException;
 import com.bayerwestphalian.campaign.consent.ConsentRecord;
 import com.bayerwestphalian.campaign.consent.ConsentService;
+import com.bayerwestphalian.campaign.settings.SystemSettingsService;
 import com.bayerwestphalian.campaign.consent.ConsentStatus;
 import com.bayerwestphalian.campaign.consent.ConsentType;
 import com.bayerwestphalian.campaign.customer.Customer;
@@ -77,6 +78,8 @@ class SegmentServiceIntegrationTests {
     @MockBean private AuthorizationExpressions authorizationExpressions;
 
     @MockBean private ConsentService consentService;
+
+    @MockBean private SystemSettingsService systemSettingsService;
 
     private User owner;
 
