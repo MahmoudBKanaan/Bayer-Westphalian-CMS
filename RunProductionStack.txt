@@ -1,0 +1,36 @@
+# Full production Compose stack (for Sprint 18 deployment screenshots)
+# From project root / VS Code terminal:
+
+cd D:\Documents\IU\AgileApp
+
+# 1) TLS PEMs + absolute paths in .env.production
+powershell -ExecutionPolicy Bypass -File .\scripts\Ensure-LocalProductionTls.ps1
+
+# 2) Start all services (includes reverse-proxy HTTPS on :443)
+#    Builds backend then frontend sequentially (avoids OOM exit 137), then up -d --no-build
+powershell -ExecutionPolicy Bypass -File .\scripts\Start-ProductionStack.ps1 -EvidenceLocal
+
+# If you already built images and only need restart:
+# docker compose --env-file .env.production -f docker-compose.prod.yml up -d --no-build
+
+
+# 3) Guided evidence commands (status, health, logs, doc paths)
+powershell -ExecutionPolicy Bypass -File .\scripts\Capture-Sprint18DeploymentEvidence.ps1
+
+# Or boot + wait inside the helper:
+# powershell -ExecutionPolicy Bypass -File .\scripts\Capture-Sprint18DeploymentEvidence.ps1 -StartStack -WaitSeconds 180
+
+# Screenshot checklist:
+# - docker compose ... ps                    → deployment running
+# - curl.exe -k -i https://localhost/readyz  → health
+# - curl.exe -k -I https://localhost/        → HTTPS / reverse proxy
+# - docker compose ... logs --tail=60 backend
+# - docker compose ... logs backend | Select-String schedulerEvent=
+# - docker compose ... logs --tail=30 database-backup
+# - docs/deployment/production-smoke-test-checklist.md
+# - docs/deployment/rollback-plan.md
+# - docs/releases/v1.0-draft.md
+# - docker-compose.prod.yml                  → compose model
+
+# Stop:
+# docker compose --env-file .env.production -f docker-compose.prod.yml down

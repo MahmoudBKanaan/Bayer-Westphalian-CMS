@@ -1,5 +1,7 @@
 # Final Demo Script
 
+This is the final demonstration-script deliverable for KB items **782** and **859**.
+
 **Item 782** provides the final demonstration runbook for the Bayer-Westphalian Campaign Management
 Platform. It uses the synthetic item 781 dataset and demonstrates the KB journey:
 

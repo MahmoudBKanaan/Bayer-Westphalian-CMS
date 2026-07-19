@@ -5,7 +5,7 @@ Management Platform. The deployment is a Docker Compose modular monolith: Nginx 
 serves the React frontend, and proxies `/api`; Spring Boot runs with the `prod` profile; PostgreSQL
 and consent evidence use persistent volumes.
 
-**Item 775** finalizes this document as the project deployment guide. Local development setup is
+**Items 775 and 854** finalize this document as the project deployment guide. Local development setup is
 documented separately; commands here are for an approved production or production-like host.
 
 This guide does not prove that production is deployed. Record every deployment and its evidence;

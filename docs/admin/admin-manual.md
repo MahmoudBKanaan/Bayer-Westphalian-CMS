@@ -1,5 +1,7 @@
 # Administrator Manual
 
+This manual is the final administrator-documentation deliverable for KB items **777** and **856**.
+
 **Item 777** is the administrator manual for the Bayer-Westphalian Campaign Management Platform.
 It covers in-application administration by employees with the `ADMIN` role. Host, database,
 deployment, backup, provider, and incident operations are separate privileged responsibilities and

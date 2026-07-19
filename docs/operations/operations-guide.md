@@ -1,5 +1,7 @@
 # Production Operations Manual
 
+This manual is the final operations-documentation deliverable for KB items **778** and **857**.
+
 **Sprint 18 item 765** defines day-to-day production operation of the Bayer-Westphalian Campaign
 Management Platform. It supports KB **NFR-004 (availability)**, **NFR-013 (backup/recovery)**, and
 **NFR-014 (observability)**. Detailed deployment, security, recovery, and incident runbooks remain

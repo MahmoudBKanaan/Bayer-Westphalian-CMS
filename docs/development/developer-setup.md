@@ -1,6 +1,6 @@
 # Local Setup Guide
 
-**Item 774** prepares a local development environment for the Bayer-Westphalian Campaign Management
+**Items 774 and 853** prepare a local development environment for the Bayer-Westphalian Campaign Management
 Platform. It is for development and test use only; production uses the separate
 [production deployment guide](../deployment/production-deployment-guide.md).
 

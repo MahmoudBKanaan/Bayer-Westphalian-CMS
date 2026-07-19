@@ -115,6 +115,7 @@ LOG_MAX_SIZE=10m
 LOG_MAX_FILES=5
 
 # Required by full prod compose reverse-proxy; unused when only postgres+backend start.
+# Prefer absolute paths; run scripts/Ensure-LocalProductionTls.ps1 after first generate.
 TLS_CERTIFICATE_PATH=./docker/tls/fullchain.pem
 TLS_PRIVATE_KEY_PATH=./docker/tls/privkey.pem
 HTTP_PORT=80
@@ -123,6 +124,7 @@ HTTPS_PORT=443
 
     Set-Content -LiteralPath $Path -Value $content -Encoding UTF8
     Write-Host "Wrote $Path"
+    Write-Host "For full stack (proxy/HTTPS), run: .\scripts\Ensure-LocalProductionTls.ps1"
 }
 
 function Assert-DockerAvailable {

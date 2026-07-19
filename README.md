@@ -122,12 +122,12 @@ the [Developer Setup Guide](docs/development/developer-setup.md),
 Run from the indicated package directory:
 
 ```powershell
-# Frontend
+### Frontend
 Set-Location frontend
 npm install
 npm run verify
 
-# Backend
+### Backend
 Set-Location ../backend
 mvn verify
 ```
@@ -214,6 +214,8 @@ project metadata until live hosted URLs are recorded.
 
 - [Complete documentation index](docs/README.md)
 - [Developer setup](docs/development/developer-setup.md)
+- [Documentation readiness map](docs/documentation-readiness.md)
+- [Maintainer guide](docs/maintenance/maintainer-guide.md)
 - [User guides](docs/README.md#user-guides) and [admin guides](docs/README.md#admin)
 - [API documentation](docs/api/openapi.md)
 - [Production deployment guide](docs/deployment/production-deployment-guide.md)
@@ -225,6 +227,7 @@ project metadata until live hosted URLs are recorded.
 - [v1.0 release notes](docs/releases/v1.0-draft.md) (**draft, not released**)
 - [Final demo dataset](docs/demo/final-demo-dataset.md) and
   [20-minute demo script](docs/demo/final-demo-script.md)
+- [Final delivery package checklist](docs/handover/final-delivery-package-checklist.md)
 
 ## Security And Data Handling
 

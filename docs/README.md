@@ -1,5 +1,22 @@
 # Documentation
 
+## Final Project Package
+
+- [Final university project report](report/final-university-project-report.md) (item **860**)
+- [Final report appendices](report/appendices/README.md)
+- [Final submission checklist](report/final-submission-checklist.md)
+- [Documentation deliverables 852-859](report/items-852-859-completion-matrix.md)
+- [Production-readiness audit 866-969](report/final-production-readiness-audit-866-969.md)
+- [Final handover checklist](handover/final-handover-checklist.md)
+- [Final delivery package checklist](handover/final-delivery-package-checklist.md) (item **861**)
+- [Documentation readiness and audience map](documentation-readiness.md) (item **864**)
+- [Maintainer guide](maintenance/maintainer-guide.md)
+- [Release plan evidence](agile/release-plan-evidence.md)
+- [Product backlog evidence](agile/product-backlog-evidence.md)
+- [User-story map evidence](agile/user-story-map-evidence.md)
+- [Risk register](agile/risk-register.md)
+- [Decision log](agile/decision-log.md)
+
 Project documentation for Agile planning, architecture, APIs, database design, testing,
 deployment, and university report evidence.
 
@@ -132,6 +149,7 @@ deployment, and university report evidence.
 - [PostgreSQL Production Volume](deployment/postgres-production-volume.md) (item **720**)
 - [Production Reverse Proxy](deployment/reverse-proxy.md) (item **721**)
 - [Production HTTPS](deployment/https.md) (item **722**)
+- [Reverse Proxy and HTTPS Configuration Note](deployment/reverse-proxy-https.md) (DEP-02 config note for local/no-public-CA evidence)
 - [Production CORS](deployment/production-cors.md) (item **723**)
 - [Production JWT Secret](deployment/jwt-secret.md) (item **724**)
 - [Production Database Credentials](deployment/database-credentials.md) (item **725**)
@@ -148,7 +166,7 @@ deployment, and university report evidence.
 - [Production Rollback Plan](deployment/rollback-plan.md) (items **739** / **764**)
 - [Production Incident Response Notes](deployment/incident-response-notes.md) (items **740** / **766**)
 - [Production Operational Monitoring Notes](deployment/operational-monitoring-notes.md) (item **741**, NFR-004/NFR-014)
-- [Production Deployment Screenshot Evidence](deployment/deployment-screenshot-evidence.md) (item **743**, blocked until deployment)
+- [Production Deployment Screenshot Evidence](deployment/deployment-screenshot-evidence.md) (item **743**; local stack: `scripts/Start-ProductionStack.ps1`)
 - [Production Admin Login Verification](deployment/admin-login-verification.md) (item **745**, blocked until deployment)
 - [Production Admin Create-User Verification](deployment/admin-create-user-verification.md) (item **746**, blocked until deployment)
 - [Production Agent Create-Customer Verification](deployment/agent-create-customer-verification.md) (item **747**, blocked until deployment)

@@ -4,6 +4,28 @@ Project helper scripts for local setup, verification, packaging, and deployment 
 
 Scripts added here must be safe to run locally and documented before use.
 
+## Production stack and Sprint 18 screenshot evidence
+
+Run from the project root on Windows PowerShell. Requires Docker Desktop and
+`.env.production` (gitignored). Local TLS PEMs are self-signed only.
+
+```powershell
+# Create docker/tls/*.pem and set absolute TLS_* in .env.production
+.\scripts\Ensure-LocalProductionTls.ps1
+
+# Full stack: postgres, database-backup, backend, frontend, reverse-proxy
+.\scripts\Start-ProductionStack.ps1 -EvidenceLocal
+
+# Guided terminal capture steps for DEP-01..09 + docs screenshots
+.\scripts\Capture-Sprint18DeploymentEvidence.ps1
+.\scripts\Capture-Sprint18DeploymentEvidence.ps1 -StartStack -WaitSeconds 180
+
+# Backend + postgres only (no proxy/frontend) — not full DEP-01 evidence
+.\scripts\Start-ProductionBackend.ps1
+```
+
+Detail: [deployment-screenshot-evidence.md](../docs/deployment/deployment-screenshot-evidence.md).
+
 ## Verification Scripts
 
 Run from the project root on Windows PowerShell:

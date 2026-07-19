@@ -1,0 +1,23 @@
+# Local-only overlay for Sprint 18 deployment screenshot / evidence capture.
+# Speeds backup + reminder scheduler so operators can capture logs without long waits.
+# Do NOT use for real production deployments.
+#
+# Example:
+#   docker compose --env-file .env.production \
+#     -f docker-compose.prod.yml \
+#     -f docker-compose.prod.evidence-local.yml \
+#     up -d --build
+
+services:
+  backend:
+    environment:
+      # Spring 6-field cron (seconds first): every minute for scheduler log evidence
+      REMINDER_PROCESSING_CRON: ${EVIDENCE_REMINDER_CRON:-0 * * * * *}
+      REMINDER_PROCESSING_ZONE: UTC
+      LOG_LEVEL_SCHEDULER: INFO
+
+  database-backup:
+    environment:
+      # First backup runs immediately; then every 2 minutes for local evidence
+      BACKUP_INTERVAL_SECONDS: ${EVIDENCE_BACKUP_INTERVAL_SECONDS:-120}
+      BACKUP_HEALTH_MAX_AGE_MINUTES: ${EVIDENCE_BACKUP_HEALTH_MAX_AGE_MINUTES:-30}

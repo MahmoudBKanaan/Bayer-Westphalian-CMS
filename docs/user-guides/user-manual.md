@@ -1,5 +1,7 @@
 # Employee User Manual
 
+This manual is the final user-documentation deliverable for KB items **776** and **855**.
+
 **Item 776** is the shared user manual for the Bayer-Westphalian Campaign Management Platform. The
 application is an internal employee system, not a public customer portal. Your assigned roles
 determine which pages, records, and actions are available; backend authorization remains decisive.

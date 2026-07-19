@@ -19,14 +19,23 @@ RUN mvn -B -DskipTests package
 FROM eclipse-temurin:21-jre-alpine AS runtime
 WORKDIR /app
 
-# Non-root user for container runtime.
-RUN addgroup -S spring && adduser -S spring -G spring
+# Non-root user for container runtime. su-exec drops privileges after volume chown.
+RUN apk add --no-cache su-exec \
+    && addgroup -S spring \
+    && adduser -S spring -G spring \
+    && mkdir -p /app/data/consent-evidence \
+    && chown -R spring:spring /app
 
 # finalName from pom.xml: bayer-westphalian-campaign-platform.jar
 COPY --from=build /workspace/target/bayer-westphalian-campaign-platform.jar /app/app.jar
+COPY docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod 755 /app/docker-entrypoint.sh \
+    && chown spring:spring /app/app.jar /app/docker-entrypoint.sh
 
-USER spring:spring
+# Entrypoint runs as root only long enough to fix consent-evidence volume ownership,
+# then permanently drops to spring via su-exec (see docker-entrypoint.sh).
+USER root
 EXPOSE 8080
 
 # Profile and secrets supplied at runtime (SPRING_PROFILES_ACTIVE, JWT_SECRET, DB_*, etc.).
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]

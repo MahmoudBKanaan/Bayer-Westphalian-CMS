@@ -1,5 +1,8 @@
 # REST API and OpenAPI Guide
 
+This guide and `openapi.json` are the final API-documentation deliverables for KB items **779**,
+**780**, and **858**.
+
 **Item 779** documents the internal REST API for the Bayer-Westphalian Campaign Management
 Platform. The generated OpenAPI document is the schema-level reference; this guide explains shared
 conventions, authorization, endpoint families, and business workflow constraints.
