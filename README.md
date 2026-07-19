@@ -237,3 +237,5 @@ environment files. Report suspected exposure through the
 
 No public open-source license is declared. Treat the project and its data as internal/university
 work unless the owner provides separate license and usage terms.
+
+[![CI](https://github.com/MahmoudBKanaan/Bayer-Westphalian-CMS/actions/workflows/ci.yml/badge.svg)](https://github.com/MahmoudBKanaan/Bayer-Westphalian-CMS/actions/workflows/ci.yml)
